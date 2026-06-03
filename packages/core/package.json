@@ -1,0 +1,25 @@
+{
+  "name": "@motojouya/kniw-core",
+  "version": "0.1.0",
+  "description": "kniw core",
+  "directories": {
+    "test": "test"
+  },
+  "exports": {
+    "./*": "./dist/*.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc"
+  },
+  "author": "Takuya Sugiyama @motojouya",
+  "license": "MIT",
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "zod": "^3.24.1"
+  }
+}

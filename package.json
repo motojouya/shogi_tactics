@@ -1,0 +1,43 @@
+{
+  "name": "@motojouya/kniw",
+  "version": "0.1.0",
+  "description": "kniw board game",
+  "main": "index.js",
+  "type": "module",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "preinstall": "npx only-allow npm",
+    "format": "npx prettier --write 'packages/**/*.ts'",
+    "lint": "eslint --fix",
+    "format_check": "npx prettier --check 'packages/**/*.ts'",
+    "lint_check": "eslint --max-warnings=0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/motojouya/kniw.git"
+  },
+  "author": "Takuya Sugiyama @motojouya",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/motojouya/kniw/issues"
+  },
+  "homepage": "https://github.com/motojouya/kniw#readme",
+  "private": true,
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "eslint": "^9.18.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.18",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.21.0"
+  },
+  "workspaces": [
+    "packages/core",
+    "packages/command",
+    "packages/web"
+  ]
+}

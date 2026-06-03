@@ -1,0 +1,45 @@
+{
+  "name": "@motojouya/kniw-web",
+  "version": "0.1.0",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "@types/wicg-file-system-access": "^2023.10.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tslib": "^2.8.1",
+    "typescript": "^5.7.3",
+    "vite-plugin-pwa": "^0.21.1",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.0.5"
+  },
+  "scripts": {
+    "test": "vitest run --root=.",
+    "preview": "vite preview",
+    "dev": "vite",
+    "build": "tsc -b && vite build"
+  },
+  "author": "Takuya Sugiyama @motojouya",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@fontsource/roboto": "^5.2.5",
+    "@hookform/resolvers": "^3.10.0",
+    "@motojouya/kniw-core": "^0.1.0",
+    "@mui/icons-material": "^6.4.8",
+    "@mui/material": "^6.4.8",
+    "dexie": "^4.0.11",
+    "dexie-react-hooks": "^1.1.7",
+    "next-themes": "^0.4.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
+    "react-icons": "^5.5.0",
+    "zod": "^3.24.1"
+  }
+}
