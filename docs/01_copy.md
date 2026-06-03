@@ -12,6 +12,8 @@
 - CLAUDE.md作成
 - git repository登録
 
+作業済み
+
 ## 2. ライブラリ導入  
 web,core,ルートにライブラリを入れていく  
 基本的に現時点の最新をライブラリのガイダンスに従って導入する  
@@ -21,7 +23,6 @@ web,core,ルートにライブラリを入れていく
 - mui
 - react
 - vite
-  npm create vite@latest
 - vitest
 - eslint
 - prettier
