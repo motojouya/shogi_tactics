@@ -23,7 +23,8 @@ visitor,homeをfirst,secondに変更する。またプレイヤー名を入力�
 party登録の際は、second->firstの順で交互にコマを登録していくので、その順序で
 version管理したい。pathごとにversionを定義する感じ。一覧はversionなしで、battle自体がversionをもって、特定のpathに行くイメージ。なので一覧のpathは別にして、versionごとのpathを切る。そこでversionの変数を定義してアプリケーションにわたすイメージ
 dependabotの導入
-github actions(workflow)の見直し。単一パッケージ化に伴い、`check.yml`の`-w @motojouya/kniw-command`/`-w @motojouya/kniw-core`参照や、`gh-pages.yml`、`package.json`のname/repository/homepage、README/LICENSE/description配下のkniw表記を棚卸し・修正する。あわせてworkflowのtrigger(workflow_dispatch)を本来の形に戻す。
+github actions(workflow)の見直し。単一パッケージ化に伴い、`check.yml`の`-w @motojouya/kniw-command`/`-w @motojouya/kniw-core`参照や、`gh-pages.yml`、`package.json`のname/repository/homepage、README/LICENSE/description配下のkniw表記を棚卸し・修正する。あわせてworkflowのtrigger(workflow_dispatch)を本来の形に戻す。  
+また、`.npmrc`の`min-release-age`を効かせるためCIでnpmを11.10.0以上に更新する（node 22同梱のnpmは10.x系）。ローカル環境でも同様にnpmを更新しておく。
 
 ## 3.ドキュメント整備
 未検討

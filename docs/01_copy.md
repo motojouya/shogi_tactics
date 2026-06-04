@@ -32,11 +32,19 @@ web,core,ルートにライブラリを入れていく
 - react-hook-form
 - zod
 
-`.npmrc`を用意
+### サプライチェーン対策（A1）
+npmネイティブの機能で対応する。`.npmrc`を用意する。
 ```
 ignore-scripts=true
 min-release-age=7
+save-exact=true
 ```
+- `min-release-age=7`: 公開後7日未満のバージョンを入れない（smash-and-grab型の汚染版を回避）。**これはpnpm専用ではなく、npm 11.10.0以降でネイティブサポートされる**。node 22の同梱npmは10.x系なので、利用前に`npm install -g npm@latest`等で**npmを11.10.0以上に上げる必要がある**。CIでも同様にnpmを上げるステップが要る（00_planのworkflow見直しに含める）。
+  - 緊急のセキュリティ修正を入れたい場合、npm版には除外機構が無いため、一時的にこの設定を外して対応する想定。
+- `ignore-scripts=true`: 依存のinstall時スクリプト（postinstall等）の実行を止める。ただしesbuild等はこれで壊れるため、A2で個別対応する。
+- `save-exact=true`: バージョンを完全固定し、想定外の版が混入しないようにする（prettierの`--save-exact`と整合）。
+- 追加で、install後に`npm audit signatures`でレジストリ署名/provenanceを検証する運用も入れておくとよい。
+- 自動更新は別途dependabotのcooldown設定で`min-release-age`と揃える（00_planの2.機能実装に記載済み）。
 
 package.jsonの依存関係は消してinstall
 ```
@@ -44,6 +52,20 @@ npm install -D vite vitest eslint vite-plugin-pwa
 npm install --save-dev --save-exact prettier
 npm install react react-dom dexie dexie-react-hooks date-fns react-hook-form zod @mui/material @emotion/react @emotion/styled @mui/icons-material @fontsource/roboto
 ```
+
+### postinstallの扱い（A2）
+`ignore-scripts=true`にすると、postinstallでネイティブバイナリを用意するライブラリが壊れる。  
+このリストで該当するのは実質**esbuild**のみ（vite/vitestがesbuildに依存。rollupのネイティブ部分はoptionalDependenciesで配布されるためscript無効でも問題なし、その他のmui/emotion/dexie/date-fns/react系/zod/eslint/prettier/vite-plugin-pwaはpostinstall不要）。  
+対応として、esbuildを使うviteのinstallだけ`--ignore-scripts`を外して単独で実行する。  
+ただしnpmは「新規にインストールされたパッケージ」しかscriptを実行しないため、先に他をignore-scriptsで入れてしまうと後からviteを入れてもesbuildのpostinstallが走らないことがある。確実を期すなら、最後に`npm rebuild esbuild`を明示的に実行してバイナリ/binを整える。
+
+### バージョン移行（A4）
+「現時点の最新を導入」した結果、メジャー跳ね上がりによる破壊的変更の対応が必要になる。  
+特に**zod 3 -> 4 のmigrationは独立した作業**として発生する（`store_schema`配下が`z.object`/`z.infer`/`z.number().int()`等を多用しており、zod4で型推論・APIに破壊的変更がある）。  
+「最新ライブラリの導入」と「zod migration（およびmui等のメジャー移行）」は別作業として扱い、ビルドを通す工程に組み込む。
+
+### 導入場所と順序（A5）
+web/core/rootの3箇所に入れるのは、3・4の統廃合でcore->web->rootへマージ・移動する都合上の一時的な重複であり、各ステップでビルドを確認しながら進めるため許容する（最終的にrootへ集約される）。
 
 ## 3. core移動
 coreの内容をwebに移動する。  
@@ -71,6 +93,7 @@ npm workspaceを使っているので、node_modulesはroot配下にあるはず
 こちらも、build,testはすべてのディレクトリを移動し終えたら確認する。  
 あわせて、root`package.json`の`workspaces`配列と`name`(`@motojouya/kniw`系)、tsconfig（web側の`tsconfig.app.json`/`tsconfig.node.json`とcore側tsconfig）の統合を行う。  
 3と同様、importの書き換えはディレクトリごとに行い、その都度ビルドを確認する。  
+root集約後、全ソースが揃った状態でzod migration（3 -> 4。step2のA4参照）を独立した作業として実施し、ビルド・テストを通す。  
 
 - model
 - store
