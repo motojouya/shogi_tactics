@@ -48,10 +48,22 @@ save-exact=true
 
 package.jsonの依存関係は消してinstall
 ```
-npm install -D vite vitest eslint vite-plugin-pwa
+npm install -D vite vitest eslint vite-plugin-pwa typescript @types/react @types/react-dom @types/wicg-file-system-access @vitejs/plugin-react typescript-eslint @eslint/js globals eslint-plugin-react-hooks eslint-plugin-react-refresh
 npm install --save-dev --save-exact prettier
-npm install react react-dom dexie dexie-react-hooks date-fns react-hook-form zod @mui/material @emotion/react @emotion/styled @mui/icons-material @fontsource/roboto
+npm install react react-dom dexie dexie-react-hooks date-fns react-hook-form @hookform/resolvers zod @mui/material @emotion/react @emotion/styled @mui/icons-material @fontsource/roboto
 ```
+
+### 依存の取りこぼし対応（A3）
+当初リストから漏れていた以下を追加済み（現コード・lint・ビルドで実際に使用しているため）。
+- 実行時: `@hookform/resolvers`（react-hook-form + zod のバリデーションリゾルバ。`components/battle.tsx`,`party.tsx`で使用）
+- 型/ビルド: `typescript`、`@types/react`、`@types/react-dom`、`@types/wicg-file-system-access`（`showSaveFilePicker`等の型。`io/indexed_database.ts`で使用）、`@vitejs/plugin-react`（vite.config.tsで使用）
+- lint: `typescript-eslint`、`@eslint/js`、`globals`、`eslint-plugin-react-hooks`、`eslint-plugin-react-refresh`（いずれも`eslint.config.js`が読み込む。無いとlintが起動不可）
+
+入れないもの（現コードで未使用 or 不要）。
+- `tslib`（tsconfigに`importHelpers`設定が無く未使用）
+- `react-icons` / `next-themes`（使用箇所なし）
+- `@motojouya/kniw-core`（ワークスペース内部参照。統合後は不要）
+- `vite-tsconfig-paths`（相対パスに寄せる方針のため不要。tsconfigに`paths`/`baseUrl`も無く実質no-op。**あわせて`vite.config.ts`から`import tsconfigPaths from "vite-tsconfig-paths"`と`plugins`内の`tsconfigPaths()`を削除する**こと）
 
 ### postinstallの扱い（A2）
 `ignore-scripts=true`にすると、postinstallでネイティブバイナリを用意するライブラリが壊れる。  
