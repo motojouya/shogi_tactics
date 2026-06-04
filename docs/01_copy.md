@@ -52,6 +52,11 @@ src,test配下をmergeしていくイメージで、src,test配下に同名の�
 build,testは最後に通れば問題ないが、作業はディレクトリごとに行う。  
 ライブラリは、coreのライブラリはすべてwebに入っているはずなので、特に調整不要なはず
 
+移動の際は、import指定子の書き換えも同時に行う。  
+webからcoreを参照していた`@motojouya/kniw-core`の参照を相対パス（or エイリアス）に書き換え、core内の相対パスも移動先に合わせて修正する。  
+移動完了後に`web/package.json`から`@motojouya/kniw-core`依存を削除する。  
+ディレクトリを一つ移動するごとにimportを修正し、その都度ビルドが通るか確認する。作業量は多いが、確認しながら正確に行うことに価値がある。
+
 - io
 - model
 - store
@@ -64,6 +69,8 @@ webの内容をrootに移動する。
 単純にsrc,testをroot配下に持って来る。publicは不要なので削除。  
 npm workspaceを使っているので、node_modulesはroot配下にあるはずで、package.jsonだけ書き換えれば問題なさそうだが、npmコマンドで移行できればそうする。  
 こちらも、build,testはすべてのディレクトリを移動し終えたら確認する。  
+あわせて、root`package.json`の`workspaces`配列と`name`(`@motojouya/kniw`系)、tsconfig（web側の`tsconfig.app.json`/`tsconfig.node.json`とcore側tsconfig）の統合を行う。  
+3と同様、importの書き換えはディレクトリごとに行い、その都度ビルドを確認する。  
 
 - model
 - store
@@ -80,6 +87,10 @@ npm workspaceを使っているので、node_modulesはroot配下にあるはず
 ## 5. model削除
 modelの構造体や項目を削除していく。削除対象のファイルごとに、buildとtestを確認していく。
 したがって、削除に伴って、他のロジックなども修正していく感じになる。
+
+modelファイルの削除は、それを参照する`store_data`配下（acquirement/ability/status等のデータ定義群）、`store`、`store_schema`、および対応するtestを連鎖的に削除/修正する必要がある。  
+連鎖して消すべきものは事前にすべて列挙するのではなく、一つ削除するごとにビルドエラーを手がかりに調査しながら、連鎖対象を特定して削除していく。  
+ビルドが通る状態をキープしながら検証することがこのステップの目的なので、作業量は多いが一つ一つ確認しながら正確に行う。
 
 ファイルごと削除
 - ability.ts
@@ -134,7 +145,7 @@ modelの構造体や項目を削除していく。削除対象のファイルご
 - model -> 何もしない
 - store -> repositoryに命名変更
 - store_data -> dataに命名変更
-- store_schema -> 何もしない
+- store_schema -> 何もしない（step10でmodelの同名ファイルへ吸収して消える前提。このステップでは温存する）
 - store_utility -> ファイルをrepositoryに移動
 - components -> 何もしない
 - form -> 何もしない
@@ -144,21 +155,29 @@ modelの構造体や項目を削除していく。削除対象のファイルご
 - subpage -> featureに命名変更
 
 ## 7. testコロケーション
-testファイルはすべて`.unit.test.ts`という拡張子とし、src配下のテストファイル対象と同じディレクトリに配置する。
+testファイルはすべて`.unit.test.ts`という拡張子とし、src配下のテストファイル対象と同じディレクトリに配置する。  
+あわせて、vitestのinclude設定が`*.unit.test.ts`を拾うように修正し、tsconfigのexcludeで`*.unit.test.ts`がビルド出力に含まれないようにする。  
+（CLAUDE.mdの方針どおり、単体テストはコロケーション、`test/`配下は統合テストとする。）
 
 ## 8. party.tsの削除
 partyの内容はbattleに統合するので、character[]をbattleに埋め込んだうえで、party.tsを削除する。  
 partyを作る画面があるが、これはbattleのstepとしてpartyを作る段階を用意するので、battleの画面で出し分ける感じになる。  
-partyを作る段階とは、battleのturn[]のlengthが0の状態で、partyを作り終えたのであれば、turnに1つ追加する。これを条件としてparty作成画面を出し分ける。  
+partyを作る段階とは、battleのturn[]のlengthが0の状態で、partyを作り終えたのであれば、turnに1つ追加する。これを条件としてparty作成画面を出し分ける。
+
+> TODO(pending): battleがcharactor[]（両陣営分）をどのデータ構造で持つか（2配列 or isVisitor付き1配列など）を、全体のデータ構造とあわせて後で追記する。  
 
 ## 9. skillの参照
 skillはcharacterに埋め込まれた形で参照されるが、character上はkeyのみを持ち、controllerでskill実態を参照する。  
 各ロジックには、選択したskillを渡す感じにしていく。  
-character上のskillの埋め込みを削除したうえで、ロジックを成り立たせるように修正する。  
+character上のskillの埋め込みを削除したうえで、ロジックを成り立たせるように修正する。
+
+> TODO(pending): step5でskillの供給源（acquirement）を削除した後、駒種ごとの固定skill（通常行動/反動行動/技能）をdata層でどう定義し、characterがどのkeyで参照するか。全体のデータ構造とあわせて後で追記する。  
 
 ## 10. store_schema削除
 store_schemaの実装内容は、modelの同名ファイルに移動する。  
-また、modelの型情報をzodの型情報から導出できるように修正する。  
+また、modelの型情報をzodの型情報から導出できるように修正する。
+
+> NOTE: schemaをmodelに取り込むと、model -> store(repository) -> model のような循環依存が生じる可能性がある（現状はstore_schemaが中間層として循環を断っている）。step5・9でacquirement等のrepository参照が消えていれば回避できる見込みだが、当該タスク着手時に改めて依存関係を調査し、循環が残らないか確認してから進め方を決める。  
 
 ## 11. 時間経過ロジックの変更
 kniwでは時間経過は仮想的な時間の経過を持って表現していた。  
@@ -172,4 +191,6 @@ kniwでは時間経過は仮想的な時間の経過を持って表現してい�
 
 turnの持つ項目が、行動済みのcharacterと未行動のcharacterに別れて、移動していく。
 未行動がなくなったら、行動済みを未行動に移して、その繰り返し。
+
+> TODO(pending): 行動順アルゴリズムの正確な記載は後で追記する（note.mdのコスト基準の並び替えルールと整合させる）。
 
