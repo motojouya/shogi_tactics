@@ -71,6 +71,8 @@ npm install react react-dom dexie dexie-react-hooks date-fns react-hook-form @ho
 対応として、esbuildを使うviteのinstallだけ`--ignore-scripts`を外して単独で実行する。  
 ただしnpmは「新規にインストールされたパッケージ」しかscriptを実行しないため、先に他をignore-scriptsで入れてしまうと後からviteを入れてもesbuildのpostinstallが走らないことがある。確実を期すなら、最後に`npm rebuild esbuild`を明示的に実行してバイナリ/binを整える。
 
+これは問題なさそう。esbuildはbuildされたバイナリが入るらしい。とりあえずvite単独で最初にやってみて、必要なら最後に`npm rebuild esbuild`を入れる感じで。
+
 ### バージョン移行（A4）
 「現時点の最新を導入」した結果、メジャー跳ね上がりによる破壊的変更の対応が必要になる。  
 特に**zod 3 -> 4 のmigrationは独立した作業**として発生する（`store_schema`配下が`z.object`/`z.infer`/`z.number().int()`等を多用しており、zod4で型推論・APIに破壊的変更がある）。  
@@ -199,14 +201,84 @@ partyの内容はbattleに統合するので、character[]をbattleに埋め込�
 partyを作る画面があるが、これはbattleのstepとしてpartyを作る段階を用意するので、battleの画面で出し分ける感じになる。  
 partyを作る段階とは、battleのturn[]のlengthが0の状態で、partyを作り終えたのであれば、turnに1つ追加する。これを条件としてparty作成画面を出し分ける。
 
-> TODO(pending): battleがcharactor[]（両陣営分）をどのデータ構造で持つか（2配列 or isVisitor付き1配列など）を、全体のデータ構造とあわせて後で追記する。  
+### Battle / Turn のデータ型（F/G）
+kniwの `home`/`visitor`(PartyBattling) を、battle直下の2陣営 roster に統合する。陣営は `visitor/home` を `first/second`(先攻/後攻) に改名し、プレイヤー名を持たせる。  
+型は確定後にzodスキーマから導出する（step10）。以下は設計ドラフト。
+
+```ts
+// 陣営
+type Side = "FIRST" | "SECOND";        // kniwの isVisitor(boolean) を置換
+// モード
+type Mode = "NORMAL" | "TURBULENCE";   // 通常 / 戦乱
+
+// 盤外・登録時の素の駒
+type Charactor = {
+  name: string;   // プレイヤーが付ける一意名（同一roster内で重複不可。validateで担保）
+  kind: string;   // 駒種キー(王将/金将/…)。data層で 体力/移動/通常行動/反動行動/技能/画像 を引く(step9)
+};
+
+// 対戦中の駒（point方式: step11）
+type CharactorBattling = Charactor & {
+  side: Side;
+  hp: number;
+  point: number;  // 順番ポイント(初期0)。小さいほど先に行動
+  order: number;  // 初期順インデックス(同point時のタイブレーク)
+};
+
+// 陣営の登録内容（旧 Party）
+type Roster = {
+  player: string;        // プレイヤー名(旧 party.name)
+  charactors: Charactor[];
+};
+
+// 駒の参照(actor/receiversをsnapshotから軽く指すため)
+type CharactorReference = { side: Side; name: string };
+
+// 行動(TimePassing廃止 / actorはturnへ移動 / skillはkey参照: step9)
+type DoSkill = { type: "DO_SKILL"; skillKey: string; receivers: CharactorReference[] };
+type DoNothing = { type: "DO_NOTHING" };
+type Surrender = { type: "SURRENDER" };
+type Action = DoSkill | DoNothing | Surrender;
+
+type Turn = {
+  datetime: Date;                  // そのTurnを記録した実時刻(履歴用。仮想時間ではない)
+  actor: CharactorReference | null; // 行動主体。初期Turn(配置直後)はnull
+  action: Action | null;           // 初期Turnはnull
+  charactors: CharactorBattling[]; // 行動適用・死亡除外後の全生存駒。point昇順=次の行動順
+};
+
+type GameResult = "ONGOING" | "FIRST" | "SECOND" | "DRAW";
+
+type Battle = {
+  title: string;
+  mode: Mode;
+  first: Roster;     // 先攻
+  second: Roster;    // 後攻
+  base: number;      // 順番ポイントのBASE(=開始時の総駒数。定数。step11)
+  turns: Turn[];     // length===0 はparty作成段階(画面出し分けの条件)
+  result: GameResult;
+};
+```
+
+設計上の決定事項。
+- **2配列 vs 1配列**：roster(登録内容)は陣営別の2つ(`first`/`second`)で持つが、**行動順は両陣営を混ぜた1リスト**(`Turn.charactors`)で `point` 昇順に並べる(kniwの sortedCharactors と同じ発想)。`side` で陣営を区別。
+- `actor`/`receivers` は `Turn.charactors` のsnapshotを指す軽い参照(`{side,name}`)とし、駒の実体重複を避ける。
+- `base`(BASE) は battle直下に定数で保持(step11)。開始時の `first.charactors.length + second.charactors.length`。
+- 初期Turn(turns[0])は配置直後の状態で `actor:null, action:null`。以降は1Turn=1駒の行動。
+- version管理(00_planの2.機能実装)は別途 `Battle.version` 等で扱う想定。ここでは未対応。
 
 ## 9. skillの参照
 skillはcharacterに埋め込まれた形で参照されるが、character上はkeyのみを持ち、controllerでskill実態を参照する。  
 各ロジックには、選択したskillを渡す感じにしていく。  
 character上のskillの埋め込みを削除したうえで、ロジックを成り立たせるように修正する。
 
-> TODO(pending): step5でskillの供給源（acquirement）を削除した後、駒種ごとの固定skill（通常行動/反動行動/技能）をdata層でどう定義し、characterがどのkeyで参照するか。全体のデータ構造とあわせて後で追記する。  
+### 駒種とskillの対応（F/Gと連動）
+- 駒は `Charactor.kind`（駒種キー: 王将/金将/…）のみを持つ（step8の型定義参照）。
+- data層で駒種 -> { 通常行動skill, 反動行動skill, 技能skill, 体力, 移動, 画像 } を定義する（note.mdの駒一覧が元データ）。
+- 行動時は `Action.DoSkill.skillKey` で使った技を記録し、controllerがdata層からskill実体を解決してロジックに渡す。
+- これにより `Charactor` からskill実体の埋め込みが消え、kindベースの参照に一本化される。
+
+> 補足: 「通常行動/反動行動」はstep11のcost(2/7)と対応。kindごとの固定技なので、kniwのacquirement(装備でskillが変わる仕組み)とは異なり、駒種で一意に決まる。
 
 ## 10. store_schema削除
 store_schemaの実装内容は、modelの同名ファイルに移動する。  
