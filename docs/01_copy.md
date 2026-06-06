@@ -134,7 +134,6 @@ modelファイルの削除は、それを参照する`store_data`配下（acquir
 - acquirement.ts
 - field.ts
 - random.ts
-- status.ts
 
 項目削除
 - character.ts
@@ -171,6 +170,8 @@ modelファイルの削除は、それを参照する`store_data`配下（acquir
   - magicType
   - mpConsumption
   - getAccuracy
+- status.ts
+  - wt: number;
 - turn.ts
   - field
   - randoms
