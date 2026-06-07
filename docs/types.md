@@ -5,9 +5,9 @@
 type Side = "FIRST" | "SECOND";
 
 type Charactor = {
+  side: Side;
   piece: string;  // 駒種キー
   hp: number;    // 体力
-  side: Side;
   steps: number; // 順番ポイント(初期0)。小さいほど先に行動
   statuses: string[]; // 状態異常キーの配列
 };
@@ -18,24 +18,29 @@ type CharactorReference = {
   piece: string;
 };
 
+type Origin = { // 駒の初期配置を表す。ゲーム開始前の状態を定義するために必要
+  type: "ORIGIN";
+};
 type DoSkill = {
   type: "DO_SKILL";
   skillKey: string;
   receivers: CharactorReference[]
+  actor: CharactorReference;
 };
 type DoNothing = {
   type: "DO_NOTHING";
+  actor: CharactorReference;
 };
 type Surrender = {
   type: "SURRENDER";
+  actor: CharactorReference;
 };
 type Action = DoSkill | DoNothing | Surrender;
 
 type Turn = {
   datetime: Date;
-  actor: CharactorReference;
-  action: Action | null;
-  charactors: CharactorBattling[]; // 行動適用・死亡除外後の全生存駒。point昇順=次の行動順
+  action: Action;
+  charactors: Charactor[]; // 行動適用・死亡除外後の全生存駒。point昇順=次の行動順
 };
 
 type GameResult = "ONGOING" | "FIRST" | "SECOND" | "DRAW";
@@ -59,7 +64,7 @@ export type Status = {
 };
 
 // 技の効果を定義する関数
-export type Action = (
+export type Act = (
   self: Skill, // TODO
   actor: CharactorReference,
   receiver: CharactorReference[],
@@ -77,17 +82,17 @@ export type Skill = {
   key: string;
   name: string;
   description: string;
-  act: Action;
+  act: Act;
   filter: Filter;
   baseDamage: number;
   receiverCount: number;
-  additionalWt: number;
+  cost: number;
   effectLength: number;
   reachLength: number;
 };
 
 export type Piece = {
-  key string;
+  key: string;
   name: string;
   description: string;
   MaxHP: number;
