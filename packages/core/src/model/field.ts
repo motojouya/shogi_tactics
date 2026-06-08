@@ -21,7 +21,6 @@ export type ChangeClimate = (randoms: Randoms) => Climate;
 export const changeClimate: ChangeClimate = (randoms) => {
   const validateResult = validateRandoms(randoms);
   if (validateResult instanceof RandomRangeError) {
-    console.debug(validateResult);
     throw new Error(validateResult.message);
   }
 

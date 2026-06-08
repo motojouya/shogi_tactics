@@ -39,7 +39,7 @@ type CreateList = (namespace: string) => (database: Database) => List;
 const createList: CreateList = (namespace) => (database) => async () => database.list(namespace);
 
 const createGet =
-  <S extends z.ZodTypeAny, M extends Record<string, unknown>, J extends Record<string, unknown>, E>(
+  <S extends z.ZodType<J>, M extends Record<string, unknown>, J extends Record<string, unknown>, E>(
     namespace: string,
     schema: S,
     toModel: ToModel<M, J, E>,
@@ -64,7 +64,7 @@ const createRemove: CreateRemove = (namespace: string) => (database) => async (n
   database.remove(namespace, name);
 
 const createImportJson =
-  <S extends z.ZodTypeAny, M extends Record<string, unknown>, J extends Record<string, unknown>, E>(
+  <S extends z.ZodType<J>, M extends Record<string, unknown>, J extends Record<string, unknown>, E>(
     schema: S,
     toModel: ToModel<M, J, E>,
   ) =>
@@ -90,7 +90,7 @@ const createExportJson =
     database.exportJson(toJson(obj), fileName);
 
 export const createRepository =
-  <S extends z.ZodTypeAny, M extends Record<string, unknown>, J extends Record<string, unknown>, E>(
+  <S extends z.ZodType<J>, M extends Record<string, unknown>, J extends Record<string, unknown>, E>(
     namespace: string,
     schema: S,
     toModel: ToModel<M, J, E>,
