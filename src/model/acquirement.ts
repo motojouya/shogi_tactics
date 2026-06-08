@@ -25,11 +25,14 @@ export type Clothing = Acquirement;
 export type Blessing = Acquirement;
 
 export class NotWearableErorr {
-  constructor(
-    readonly acquirement: Acquirement,
-    readonly cause: Acquirement,
-    readonly message: string,
-  ) {}
+  readonly acquirement: Acquirement;
+  readonly cause: Acquirement;
+  readonly message: string;
+  constructor(acquirement: Acquirement, cause: Acquirement, message: string) {
+    this.acquirement = acquirement;
+    this.cause = cause;
+    this.message = message;
+  }
 }
 
 export type CreateValidateWearable = (

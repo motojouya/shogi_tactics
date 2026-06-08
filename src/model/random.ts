@@ -5,11 +5,14 @@ export type Randoms = {
 };
 
 export class RandomRangeError {
-  constructor(
-    readonly prop: string,
-    readonly value: number,
-    readonly message: string,
-  ) {}
+  readonly prop: string;
+  readonly value: number;
+  readonly message: string;
+  constructor(prop: string, value: number, message: string) {
+    this.prop = prop;
+    this.value = value;
+    this.message = message;
+  }
 }
 
 export type ValidateRandoms = (randoms: Randoms) => null | RandomRangeError;

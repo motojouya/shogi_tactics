@@ -12,10 +12,12 @@ export type PartyBattling = {
 };
 
 export class CharactorDuplicationError {
-  constructor(
-    readonly name: string,
-    readonly message: string,
-  ) {}
+  readonly name: string;
+  readonly message: string;
+  constructor(name: string, message: string) {
+    this.name = name;
+    this.message = message;
+  }
 }
 
 export type CopyParty = (party: Party) => Party;

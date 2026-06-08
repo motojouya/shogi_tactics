@@ -13,7 +13,10 @@ import { ACTION_DO_NOTHING } from "../model/turn";
 export const DO_NOTHING = "NOTHING";
 
 export class ReceiverDuplicationError {
-  constructor(readonly message: string) {}
+  readonly message: string;
+  constructor(message: string) {
+    this.message = message;
+  }
 }
 
 export const doSkillFormSchema = z.object({

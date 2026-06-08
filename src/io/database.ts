@@ -1,10 +1,18 @@
 export class CopyFailError {
+  readonly fileName: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly exception: any;
+  readonly message: string;
   constructor(
-    readonly fileName: string,
+    fileName: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    readonly exception: any,
-    readonly message: string,
-  ) {}
+    exception: any,
+    message: string,
+  ) {
+    this.fileName = fileName;
+    this.exception = exception;
+    this.message = message;
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

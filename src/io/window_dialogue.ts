@@ -14,12 +14,17 @@ export const dialogue: Dialogue = {
 };
 
 export class UserCancel {
-  constructor(readonly message: string) {}
+  readonly message: string;
+  constructor(message: string) {
+    this.message = message;
+  }
 }
 
 export class EmptyParameter {
-  constructor(
-    readonly name: string,
-    readonly message: string,
-  ) {}
+  readonly name: string;
+  readonly message: string;
+  constructor(name: string, message: string) {
+    this.name = name;
+    this.message = message;
+  }
 }
