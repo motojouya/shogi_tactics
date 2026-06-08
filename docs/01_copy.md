@@ -49,7 +49,7 @@ save-exact=true
 package.jsonの依存関係は消してinstall
 ```
 npm install -D vite -ws
-npm install -D vitest -ws
+npm install -D vitest@latest -ws
 npm install -D eslint vite-plugin-pwa typescript @types/react @types/react-dom @types/wicg-file-system-access @vitejs/plugin-react typescript-eslint @eslint/js globals eslint-plugin-react-hooks eslint-plugin-react-refresh -ws
 npm install --save-dev --save-exact prettier -ws
 npm install react react-dom dexie dexie-react-hooks date-fns react-hook-form @hookform/resolvers zod @mui/material @emotion/react @emotion/styled @mui/icons-material @fontsource/roboto -ws
