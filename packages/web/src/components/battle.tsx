@@ -6,7 +6,7 @@ import type { Turn } from '@motojouya/kniw-core/model/turn';
 import type { DoSkillForm } from '../form/battle';
 import type { SelectChangeEvent } from '@mui/material';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   useForm,
@@ -236,13 +236,7 @@ const BattlingImage: FC<{ actionStatus: ACTION_STATUSES, skill: Skill | null }> 
 
 export const BattleContainer: FC<{ battle: Battle }> = ({ battle }) => {
 
-  const [lastTurn, setLastTurn] = useState<Turn | null>(null);
-
-  useEffect(() => {
-    if (!lastTurn) {
-      setLastTurn(getLastTurn(battle));
-    }
-  }, [lastTurn, battle]);
+  const [lastTurn, setLastTurn] = useState<Turn | null>(() => getLastTurn(battle));
 
   const reloadTurn = useCallback(() => {
     setLastTurn(getLastTurn(battle));

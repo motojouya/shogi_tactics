@@ -162,7 +162,7 @@ export const toTurn: ToModel<Turn, TurnJson, NotWearableErorr | DataNotFoundErro
   turnJson,
 ) => {
   // TODO date parse不要では？JsonSchemaUnmatchErrorも
-  let datetime = null;
+  let datetime;
   try {
     datetime = parse(turnJson.datetime, "yyyy-MM-dd'T'HH:mm:ss", new Date());
   } catch (e) {

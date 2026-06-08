@@ -3,7 +3,7 @@ import type { Acquirement } from '@motojouya/kniw-core/model/acquirement';
 import type { Charactor } from '@motojouya/kniw-core/model/charactor';
 import type { PartyForm } from '../form/party';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Control,
   Controller,
@@ -205,7 +205,17 @@ export const CharactorCard: FC<{
 }> = ({ register, getValues, remove, errors, index, control }) => {
 
   const nameError = getCharactorError(errors, index, 'name');
-  const [charactor, setCharactor] = useState<Charactor | string>('入力してください');
+  const [charactor, setCharactor] = useState<Charactor | string>(() => {
+    const hiredCharactor = toCharactor(getValues(`charactors.${index}` as const));
+
+    if (hiredCharactor instanceof DataNotFoundError || hiredCharactor instanceof EmptyParameter) {
+      return '入力してください';
+    }
+    if (hiredCharactor instanceof NotWearableErorr) {
+      return '選択できない組み合わせです';
+    }
+    return hiredCharactor;
+  });
 
   const calculateCharactor = useCallback(() => {
     const hiredCharactor = toCharactor(getValues(`charactors.${index}` as const));
@@ -220,8 +230,6 @@ export const CharactorCard: FC<{
     }
     setCharactor(hiredCharactor);
   }, [getValues, index, setCharactor]);
-
-  useEffect(calculateCharactor, [calculateCharactor]);
 
   return (
     <Stack direction="column" border='1px solid royalblue' borderRadius="5px" sx={{ px: 1, py: 2, mb: 1, justifyContent: "flex-start" }}>
