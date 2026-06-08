@@ -2,12 +2,11 @@ import type { Weapon } from "../../../model/acquirement";
 import { createValidateWearable } from "../../../model/acquirement";
 import { windEdge } from "../../skill/windEdge";
 import { danceLeaves } from "../../skill/danceLeaves";
-import { clearCloud } from "../../skill/clearCloud";
 
 export const emeraldStick: Weapon = {
   name: "emeraldStick",
   label: "エメラルドステッキ",
-  skills: [windEdge, danceLeaves, clearCloud],
+  skills: [windEdge, danceLeaves],
   abilities: [],
   additionalPhysical: {
     MaxHP: 0,

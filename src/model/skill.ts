@@ -1,4 +1,3 @@
-import type { Field } from "./field";
 import type { Randoms } from "./random";
 import type { CharactorBattling } from "./charactor";
 import type { Status } from "./status";
@@ -36,12 +35,10 @@ export type ActionToCharactor = (
   self: Skill,
   actor: CharactorBattling,
   randoms: Randoms,
-  field: Field,
   receiver: CharactorBattling,
 ) => CharactorBattling;
-export type ActionToField = (self: Skill, actor: CharactorBattling, randoms: Randoms, field: Field) => Field;
 
-export type GetAccuracy = (self: Skill, actor: CharactorBattling, field: Field, receiver: CharactorBattling) => number;
+export type GetAccuracy = (self: Skill, actor: CharactorBattling, receiver: CharactorBattling) => number;
 
 export type SkillToCharactor = {
   name: string;
@@ -59,22 +56,7 @@ export type SkillToCharactor = {
   description: string;
 };
 
-export type SkillToField = {
-  name: string;
-  label: string;
-  type: "SKILL_TO_FIELD";
-  action: ActionToField;
-  directType: DirectType;
-  magicType: MagicType;
-  mpConsumption: number;
-  receiverCount: 0;
-  additionalWt: number;
-  effectLength: number;
-  getAccuracy: GetAccuracy;
-  description: string;
-};
-
-export type Skill = SkillToCharactor | SkillToField;
+export type Skill = SkillToCharactor;
 
 type CalcMagicRate = (skill: Skill, charactor: CharactorBattling) => number;
 const calcMagicRate: CalcMagicRate = (skill, charactor) => {
@@ -157,14 +139,7 @@ const calcDirectDefence: CalcDirectDefence = (skill, defencer) => {
   );
 };
 
-export const calcOrdinaryDirectDamage: ActionToCharactor = (self, actor, randoms, field, receiver) => {
-  if (self.type === "SKILL_TO_FIELD") {
-    return {
-      ...receiver,
-      statuses: [...receiver.statuses.map((attachedStatus) => ({ ...attachedStatus }))],
-    };
-  }
-
+export const calcOrdinaryDirectDamage: ActionToCharactor = (self, actor, randoms, receiver) => {
   let damage = self.baseDamage + calcDirectAttack(self, actor) - calcDirectDefence(self, receiver);
   damage += Math.ceil(randoms.damage * 10) - 5;
   if (damage < 1) {
@@ -206,14 +181,7 @@ const calcMagicalDefence: CalcMagicalDefence = (skill, defencer) => {
   return ((physical.VIT + physical.MND) * directRegistance * magicRegistance * upRate * downRate) / 100 / 100;
 };
 
-export const calcOrdinaryMagicalDamage: ActionToCharactor = (self, actor, randoms, field, receiver) => {
-  if (self.type === "SKILL_TO_FIELD") {
-    return {
-      ...receiver,
-      statuses: [...receiver.statuses.map((attachedStatus) => ({ ...attachedStatus }))],
-    };
-  }
-
+export const calcOrdinaryMagicalDamage: ActionToCharactor = (self, actor, randoms, receiver) => {
   let damage = self.baseDamage + calcMagicalAttack(self, actor) - calcMagicalDefence(self, receiver);
   damage += Math.ceil(randoms.damage * 10) - 5;
   if (damage < 1) {
@@ -233,7 +201,7 @@ export const calcOrdinaryMagicalDamage: ActionToCharactor = (self, actor, random
 };
 
 export type AddStatus = (status: Status) => ActionToCharactor;
-export const addStatus: AddStatus = (status) => (self, actor, randoms, field, receiver) => {
+export const addStatus: AddStatus = (status) => (self, actor, randoms, receiver) => {
   const newReceiver = {
     ...receiver,
     statuses: [...receiver.statuses.map((attachedStatus) => ({ ...attachedStatus }))],
@@ -269,5 +237,5 @@ const calcDefenceAccuracy: CalcDefenceAccuracy = (skill, defencer) => {
   return (physical.DEX + physical.AVD) / 2;
 };
 
-export const calcOrdinaryAccuracy: GetAccuracy = (self, actor, field, receiver) =>
+export const calcOrdinaryAccuracy: GetAccuracy = (self, actor, receiver) =>
   (100 + calcAttackAccuracy(self, actor) - calcDefenceAccuracy(self, receiver)) / 100;

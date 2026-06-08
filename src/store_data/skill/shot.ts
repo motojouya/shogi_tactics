@@ -3,7 +3,7 @@ import type { Skill, ActionToCharactor } from "../../model/skill";
 import { calcOrdinaryDirectDamage, calcOrdinaryAccuracy, DIRECT_TYPE_STAB, MAGIC_TYPE_NONE } from "../../model/skill";
 import { shootingGuard } from "../ability/shootingGuard";
 
-export const shotAction: ActionToCharactor = (self, actor, randoms, field, receiver) => {
+export const shotAction: ActionToCharactor = (self, actor, randoms,receiver) => {
   const abilities = getAbilities(receiver);
   if (abilities.find((ability) => ability.name === shootingGuard.name)) {
     return {
@@ -12,7 +12,7 @@ export const shotAction: ActionToCharactor = (self, actor, randoms, field, recei
     };
   }
 
-  return calcOrdinaryDirectDamage(self, actor, randoms, field, receiver);
+  return calcOrdinaryDirectDamage(self, actor, randoms,receiver);
 };
 
 export const shot: Skill = {

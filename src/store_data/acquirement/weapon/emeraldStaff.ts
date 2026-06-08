@@ -1,13 +1,12 @@
 import type { Weapon } from "../../../model/acquirement";
 import { createValidateWearable } from "../../../model/acquirement";
 import { windEdge } from "../../skill/windEdge";
-import { clearCloud } from "../../skill/clearCloud";
 import { tornade } from "../../skill/tornade";
 
 export const emeraldStaff: Weapon = {
   name: "emeraldStaff",
   label: "エメラルドスタッフ",
-  skills: [windEdge, clearCloud, tornade],
+  skills: [windEdge, tornade],
   abilities: [],
   additionalPhysical: {
     MaxHP: 0,

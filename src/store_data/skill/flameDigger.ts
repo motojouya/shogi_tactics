@@ -6,8 +6,8 @@ export const flameDigger: Skill = {
   name: "flameDigger",
   label: "炎で穿つ",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms, field, receiver) =>
-    addStatus(magicDiffenceDown)(skill, actor, randoms, field, receiver),
+  action: (skill, actor, randoms,receiver) =>
+    addStatus(magicDiffenceDown)(skill, actor, randoms,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_FIRE,
   baseDamage: 0,

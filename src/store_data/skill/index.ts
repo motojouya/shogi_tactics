@@ -1,12 +1,10 @@
 export { blindBull } from "./blindBull";
 export { blow } from "./blow";
 export { chop } from "./chop";
-export { clearCloud } from "./clearCloud";
 export { coldFeet } from "./coldFeet";
 export { concentration } from "./concentration";
 export { copperBlue } from "./copperBlue";
 export { crossFire } from "./crossFire";
-export { cumulonimbus } from "./cumulonimbus";
 export { danceLeaves } from "./danceLeaves";
 export { dazzle } from "./dazzle";
 export { downRushing } from "./downRushing";

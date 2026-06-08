@@ -1,5 +1,4 @@
 import type { Turn, Action } from "../model/turn";
-import type { Climate } from "../model/field";
 import type { CharactorBattling } from "../model/charactor";
 import type { ToModel, ToJson } from "../store_utility/schema";
 
@@ -52,9 +51,6 @@ export const turnSchema = z.object({
   datetime: z.string().datetime({ local: true }),
   action: actionSchema,
   sortedCharactors: z.array(charactorBattlingSchema),
-  field: z.object({
-    climate: z.string(),
-  }),
   randoms: randomsSchema,
 });
 export type TurnSchema = typeof turnSchema;
@@ -97,7 +93,6 @@ export const toTurnJson: ToJson<Turn, TurnJson> = (turn) => ({
   datetime: formatDate(turn.datetime),
   action: toActionJson(turn.action),
   sortedCharactors: turn.sortedCharactors.map(toCharactorBattlingJson),
-  field: turn.field,
   randoms: toRandomsJson(turn.randoms),
 });
 
@@ -183,17 +178,12 @@ export const toTurn: ToModel<Turn, TurnJson, NotWearableErorr | DataNotFoundErro
     sortedCharactors.push(charactor);
   }
 
-  const field = {
-    climate: turnJson.field.climate as Climate,
-  };
-
   const randoms = toRandoms(turnJson.randoms);
 
   return {
     datetime,
     action,
     sortedCharactors,
-    field,
     randoms,
   };
 };

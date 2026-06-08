@@ -1,4 +1,3 @@
-import type { Field } from "./field";
 import type { CharactorBattling } from "./charactor";
 import type { Skill } from "./skill";
 import type { Randoms } from "./random";
@@ -36,7 +35,6 @@ export type Turn = {
   datetime: Date;
   action: Action;
   sortedCharactors: CharactorBattling[];
-  field: Field;
   randoms: Randoms;
 };
 
@@ -73,6 +71,5 @@ export const copyTurn: CopyTurn = (turn) => ({
   datetime: new Date(turn.datetime.getTime()),
   action: copyAction(turn.action),
   sortedCharactors: turn.sortedCharactors.map(copyCharactorBattling),
-  field: turn.field,
   randoms: copyRandoms(turn.randoms),
 });

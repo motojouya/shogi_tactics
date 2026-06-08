@@ -8,9 +8,9 @@ import {
 } from "../../model/skill";
 import { paralysis } from "../status/paralysis";
 
-export const paralysisAction: ActionToCharactor = (self, actor, randoms, field, receiver) => {
-  const newReceiver = calcOrdinaryDirectDamage(self, actor, randoms, field, receiver);
-  return addStatus(paralysis)(self, actor, randoms, field, newReceiver);
+export const paralysisAction: ActionToCharactor = (self, actor, randoms,receiver) => {
+  const newReceiver = calcOrdinaryDirectDamage(self, actor, randoms,receiver);
+  return addStatus(paralysis)(self, actor, randoms,newReceiver);
 };
 
 export const paralysisScratch: Skill = {

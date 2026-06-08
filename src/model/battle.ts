@@ -7,7 +7,6 @@ import type { Turn } from "./turn";
 import { MAGIC_TYPE_NONE } from "./skill";
 import { copyPartyBattling } from "./party";
 import { getPhysical, getAbilities, toBattleCharactor, copyCharactorBattling } from "./charactor";
-import { changeClimate } from "./field";
 import { copyTurn } from "./turn";
 
 import { acid, paralysis, quick, silent, sleep, slow } from "../store_data/status/index";
@@ -112,9 +111,6 @@ export const start: Start = (battle, datetime, randoms) => ({
     ...battle.home.charactors.map(copyCharactorBattling),
     ...battle.visitor.charactors.map(copyCharactorBattling),
   ]),
-  field: {
-    climate: changeClimate(randoms),
-  },
   randoms,
 });
 
@@ -128,7 +124,6 @@ export const stay: Stay = (battle, actor, datetime, randoms) => {
       actor,
     },
     sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    field: lastTurn.field,
     randoms,
   };
 
@@ -165,10 +160,6 @@ export type ActToCharactor = (
   randoms: Randoms,
 ) => Turn;
 export const actToCharactor: ActToCharactor = (battle, actor, skill, receivers, datetime, randoms) => {
-  if (skill.type === "SKILL_TO_FIELD") {
-    throw new Error("invalid skill type");
-  }
-
   if (skill.mpConsumption > actor.mp) {
     throw new Error("mp shortage");
   }
@@ -196,75 +187,13 @@ export const actToCharactor: ActToCharactor = (battle, actor, skill, receivers, 
       receivers,
     },
     sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    field: lastTurn.field,
     randoms,
   };
 
-  const resultReceivers = receivers.map((receiver) => skill.action(skill, actor, randoms, lastTurn.field, receiver));
+  const resultReceivers = receivers.map((receiver) => skill.action(skill, actor, randoms, receiver));
   newTurn.sortedCharactors = newTurn.sortedCharactors
     .map(updateCharactor(resultReceivers))
     .filter((charactor) => charactor.hp > 0);
-
-  newTurn.sortedCharactors = newTurn.sortedCharactors.map((charactor) => {
-    const newCharactor = {
-      ...charactor,
-      statuses: [...charactor.statuses.map((attachedStatus) => ({ ...attachedStatus }))],
-    };
-    if (actor.isVisitor === charactor.isVisitor && actor.name === charactor.name) {
-      newCharactor.restWt = getPhysical(charactor).WT + skill.additionalWt;
-      newCharactor.mp -= skill.mpConsumption;
-    }
-    return newCharactor;
-  });
-  newTurn.sortedCharactors = sortByWT(newTurn.sortedCharactors);
-
-  return newTurn;
-};
-
-export type ActToField = (
-  battle: Battle,
-  actor: CharactorBattling,
-  skill: Skill,
-  datetime: Date,
-  randoms: Randoms,
-) => Turn;
-export const actToField: ActToField = (battle, actor, skill, datetime, randoms) => {
-  if (skill.type === "SKILL_TO_CHARACTOR") {
-    throw new Error("invalid skill type");
-  }
-
-  if (skill.mpConsumption > actor.mp) {
-    throw new Error("mp shortage");
-  }
-
-  if (underStatus(silent, actor) && skill.magicType !== MAGIC_TYPE_NONE) {
-    throw new Error("silent cannot do magic");
-  }
-
-  if (underStatus(sleep, actor)) {
-    return stay(battle, actor, datetime, randoms);
-  }
-
-  // FIXME 動けなかった際に麻痺が理由とかそういうのわかるとよい
-  if (underStatus(paralysis, actor) && randoms.accuracy > 0.5) {
-    return stay(battle, actor, datetime, randoms);
-  }
-
-  const lastTurn = arrayLast(battle.turns);
-  const newTurn: Turn = {
-    datetime,
-    action: {
-      type: "DO_SKILL",
-      actor,
-      skill,
-      receivers: [],
-    },
-    sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    field: lastTurn.field,
-    randoms,
-  };
-
-  newTurn.field = skill.action(skill, actor, randoms, lastTurn.field);
 
   newTurn.sortedCharactors = newTurn.sortedCharactors.map((charactor) => {
     const newCharactor = {
@@ -292,7 +221,6 @@ export const surrender: Surrender = (battle, actor, datetime, randoms) => {
       actor,
     },
     sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    field: lastTurn.field,
     randoms,
   };
 };
@@ -343,9 +271,6 @@ export const wait: Wait = (battle, wt, datetime, randoms) => {
       wt,
     },
     sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    field: {
-      climate: changeClimate(randoms),
-    },
     randoms,
   };
   newTurn.sortedCharactors = newTurn.sortedCharactors.map((charactor) => waitCharactor(charactor, wt, randoms));
@@ -400,10 +325,7 @@ export const spendTurn: SpendTurn = (battle, actor, action, getDatetime, getRand
     newBattle.turns.push(stay(newBattle, actor, getDatetime(), getRandoms()));
   } else {
     const selectedSkill = action.skill;
-    const newTurn =
-      selectedSkill.type === "SKILL_TO_FIELD"
-        ? actToField(newBattle, actor, selectedSkill, getDatetime(), getRandoms())
-        : actToCharactor(newBattle, actor, selectedSkill, action.receivers, getDatetime(), getRandoms());
+    const newTurn = actToCharactor(newBattle, actor, selectedSkill, action.receivers, getDatetime(), getRandoms());
     newBattle.turns.push(newTurn);
   }
 

@@ -8,9 +8,9 @@ import {
 } from "../../model/skill";
 import { silent } from "../status/silent";
 
-export const silentAction: ActionToCharactor = (self, actor, randoms, field, receiver) => {
-  const newReceiver = calcOrdinaryDirectDamage(self, actor, randoms, field, receiver);
-  return addStatus(silent)(self, actor, randoms, field, newReceiver);
+export const silentAction: ActionToCharactor = (self, actor, randoms,receiver) => {
+  const newReceiver = calcOrdinaryDirectDamage(self, actor, randoms,receiver);
+  return addStatus(silent)(self, actor, randoms,newReceiver);
 };
 
 export const silentShot: Skill = {

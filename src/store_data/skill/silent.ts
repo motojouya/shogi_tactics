@@ -6,7 +6,7 @@ export const silent: Skill = {
   name: "silent",
   label: "音食う雪",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms, field, receiver) => addStatus(silentStatus)(skill, actor, randoms, field, receiver),
+  action: (skill, actor, randoms,receiver) => addStatus(silentStatus)(skill, actor, randoms,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_ICE,
   baseDamage: 0,

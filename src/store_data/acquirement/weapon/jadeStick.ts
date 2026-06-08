@@ -2,12 +2,11 @@ import type { Weapon } from "../../../model/acquirement";
 import { createValidateWearable } from "../../../model/acquirement";
 import { hailstone } from "../../skill/hailstone";
 import { iceSandwich } from "../../skill/iceSandwich";
-import { cumulonimbus } from "../../skill/cumulonimbus";
 
 export const jadeStick: Weapon = {
   name: "jadeStick",
   label: "ヒスイステッキ",
-  skills: [hailstone, iceSandwich, cumulonimbus],
+  skills: [hailstone, iceSandwich],
   abilities: [],
   additionalPhysical: {
     MaxHP: 0,
