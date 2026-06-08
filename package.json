@@ -26,8 +26,6 @@
   "homepage": "https://github.com/motojouya/shogi_tactics#readme",
   "private": true,
   "workspaces": [
-    "packages/core",
-    "packages/command",
     "packages/web"
   ]
 }
