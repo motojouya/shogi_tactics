@@ -5,12 +5,7 @@ import { z } from "zod";
 import { NotWearableErorr } from "../model/acquirement";
 import { DataNotFoundError } from "../store_utility/schema";
 import { createCharactor } from "../model/charactor";
-import {
-  raceRepository,
-  weaponRepository,
-  clothingRepository,
-  blessingRepository,
-} from "../store/acquirement";
+import { raceRepository, weaponRepository, clothingRepository, blessingRepository } from "../store/acquirement";
 import { EmptyParameter } from "../io/window_dialogue";
 
 export const charactorFormSchema = z.object({
