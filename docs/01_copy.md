@@ -181,6 +181,8 @@ modelファイルの削除は、それを参照する`store_data`配下（acquir
 - physical.tsの残りの項目はcharacter.tsに移動
 
 ## 6. ディレクトリ統廃合
+命名や移動をするごとにbuid,testなどのチェックを行う。
+
 - model -> 何もしない
 - store -> repositoryに命名変更
 - store_data -> dataに命名変更
