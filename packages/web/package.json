@@ -16,6 +16,7 @@
   "description": "",
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@types/node": "25.9.1",
     "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
     "@types/wicg-file-system-access": "2023.10.7",
