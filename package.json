@@ -5,13 +5,18 @@
   "main": "index.js",
   "type": "module",
   "directories": {
-    "doc": "docs"
+    "doc": "docs",
+    "test": "test"
   },
   "scripts": {
     "preinstall": "npx only-allow npm",
-    "format": "npx prettier --write 'packages/**/*.ts'",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run --root=.",
+    "format": "npx prettier --write 'src/**/*.ts' 'test/**/*.ts'",
     "lint": "eslint --fix",
-    "format_check": "npx prettier --check 'packages/**/*.ts'",
+    "format_check": "npx prettier --check 'src/**/*.ts' 'test/**/*.ts'",
     "lint_check": "eslint --max-warnings=0"
   },
   "repository": {
@@ -25,7 +30,37 @@
   },
   "homepage": "https://github.com/motojouya/shogi_tactics#readme",
   "private": true,
-  "workspaces": [
-    "packages/web"
-  ]
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "@types/react-dom": "19.2.3",
+    "@types/wicg-file-system-access": "2023.10.7",
+    "@vitejs/plugin-react": "6.0.2",
+    "eslint": "10.4.1",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.2",
+    "globals": "17.6.0",
+    "prettier": "3.8.3",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.60.0",
+    "vite": "8.0.14",
+    "vite-plugin-pwa": "1.3.0",
+    "vitest": "4.1.8"
+  },
+  "dependencies": {
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1",
+    "@fontsource/roboto": "5.2.10",
+    "@hookform/resolvers": "5.4.0",
+    "@mui/icons-material": "9.0.1",
+    "@mui/material": "9.0.1",
+    "date-fns": "4.4.0",
+    "dexie": "4.4.3",
+    "dexie-react-hooks": "4.4.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "react-hook-form": "7.77.0",
+    "zod": "4.4.3"
+  }
 }

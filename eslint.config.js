@@ -8,7 +8,7 @@ export default tseslint.config(
   {
     ignores: [
       '**/dist',
-      'packages/web/src/components/ui',
+      'src/components/ui',
     ]
   },
   {
