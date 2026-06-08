@@ -2,8 +2,8 @@ import type { Save, List, Get, Remove, ExportJson, ImportJson, Database } from "
 
 import Dexie from "dexie";
 
-import { PartyJson } from "../store_schema/party";
-import { BattleJson } from "../store_schema/battle";
+import type { PartyJson } from "../store_schema/party";
+import type { BattleJson } from "../store_schema/battle";
 
 class KniwDB extends Dexie {
   party!: Dexie.Table<PartyJson, string>;

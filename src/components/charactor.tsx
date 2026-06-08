@@ -5,14 +5,14 @@ import type { PartyForm } from '../form/party';
 
 import { useState, useCallback } from 'react';
 import {
-  Control,
+  type Control,
   Controller,
-  FieldError,
-  FieldErrors,
-  Merge,
-  FieldErrorsImpl,
-  UseFormRegister,
-  UseFormGetValues,
+  type FieldError,
+  type FieldErrors,
+  type Merge,
+  type FieldErrorsImpl,
+  type UseFormRegister,
+  type UseFormGetValues,
 } from 'react-hook-form';
 import {
   FormControl,

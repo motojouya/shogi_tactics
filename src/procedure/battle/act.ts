@@ -4,7 +4,7 @@ import type { CharactorBattling } from "../../model/charactor";
 import type { BattleRepository } from "../../store/battle";
 import type { DoSkillForm } from "../../form/battle";
 import type { Dialogue } from "../../io/window_dialogue";
-import { Randoms } from "../../model/random";
+import type { Randoms } from "../../model/random";
 
 import { spendTurn } from "../../model/battle";
 import { toAction, ReceiverDuplicationError } from "../../form/battle";

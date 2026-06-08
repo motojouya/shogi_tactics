@@ -11,13 +11,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   useForm,
   useFieldArray,
-  FieldError,
-  FieldErrors,
-  UseFieldArrayReplace,
+  type FieldError,
+  type FieldErrors,
+  type UseFieldArrayReplace,
   Controller,
-  Control,
-  Merge,
-  FieldErrorsImpl,
+  type Control,
+  type Merge,
+  type FieldErrorsImpl,
 } from 'react-hook-form';
 import {
   FormControl,
