@@ -133,14 +133,14 @@ export const CharactorStatus: FC<{ charactor: Charactor }> = ({ charactor }) => 
 
   return (
     <>
-      <Stack direction="row" borderBottom='1px dotted royalblue' sx={{ justifyContent: "flex-start", flexWrap: 'wrap' }}>
-        <Box sx={{ pr: 1 }} flex="1 1 auto"><Typography display="inline-block" sx={{ pr: 1 }}>名前: {`${charactor.name}`}</Typography>{isVisitorTag}</Box>
+      <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
+        <Box sx={{ pr: 1, flex: "1 1 auto" }}><Typography sx={{ display: "inline-block", pr: 1 }}>名前: {`${charactor.name}`}</Typography>{isVisitorTag}</Box>
       </Stack>
-      <Stack direction="row" borderBottom='1px dotted royalblue' sx={{ justifyContent: "flex-start", flexWrap: 'wrap' }}>
-        <Box sx={{ pr: 1 }} flex="0 0 110px"><Typography>HP: {hpText}</Typography></Box>
-        <Box sx={{ pr: 1 }} flex="0 0 110px"><Typography>MP: {mpText}</Typography></Box>
-        <Box sx={{ pr: 1 }} flex="0 0 110px"><Typography>WT: {wtText}</Typography></Box>
-        <Box sx={{ pr: 1 }} flex="1 1 auto"><Typography>ステータス: {statusesText}</Typography></Box>
+      <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
+        <Box sx={{ pr: 1, flex: "0 0 110px" }}><Typography>HP: {hpText}</Typography></Box>
+        <Box sx={{ pr: 1, flex: "0 0 110px" }}><Typography>MP: {mpText}</Typography></Box>
+        <Box sx={{ pr: 1, flex: "0 0 110px" }}><Typography>WT: {wtText}</Typography></Box>
+        <Box sx={{ pr: 1, flex: "1 1 auto" }}><Typography>ステータス: {statusesText}</Typography></Box>
       </Stack>
     </>
   );
@@ -158,17 +158,17 @@ export const CharactorDetail: FC<{ charactor: Charactor }> = ({ charactor }) => 
   return (
     <Stack>
       <CharactorStatus charactor={charactor} />
-      <Stack direction="row" borderBottom='1px dotted royalblue' sx={{ justifyContent: "flex-start", flexWrap: 'wrap' }}>
+      <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
         <Box sx={{ pr: 2 }}><Typography>種族: {charactor.race.label}    </Typography></Box>
         <Box sx={{ pr: 2 }}><Typography>祝福: {charactor.blessing.label}</Typography></Box>
         <Box sx={{ pr: 2 }}><Typography>装備: {charactor.clothing.label}</Typography></Box>
         <Box sx={{ pr: 2 }}><Typography>武器: {charactor.weapon.label}  </Typography></Box>
       </Stack>
-      <Stack direction="row" borderBottom='1px dotted royalblue' sx={{ justifyContent: "flex-start", flexWrap: 'wrap' }}>
+      <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
         <Box sx={{ pr: 2 }}><Typography>アビリティ: {abilitiesText}</Typography></Box>
         <Box sx={{ pr: 2 }}><Typography>スキル: {skillsText}       </Typography></Box>
       </Stack>
-      <Stack direction="row" borderBottom='1px dotted royalblue' sx={{ justifyContent: "flex-start", flexWrap: 'wrap' }}>
+      <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
         <Box sx={{ pr: 2 }}><Typography>STR: {physical.STR}  </Typography></Box>
         <Box sx={{ pr: 2 }}><Typography>VIT: {physical.VIT}  </Typography></Box>
         <Box sx={{ pr: 2 }}><Typography>DEX: {physical.DEX}  </Typography></Box>
@@ -180,7 +180,7 @@ export const CharactorDetail: FC<{ charactor: Charactor }> = ({ charactor }) => 
         <Box sx={{ pr: 2 }}><Typography>MOVE: {physical.move}</Typography></Box>
         <Box sx={{ pr: 2 }}><Typography>JUMP: {physical.jump}</Typography></Box>
       </Stack>
-      <Stack direction="row" borderBottom='1px dotted royalblue' sx={{ justifyContent: "flex-start", flexWrap: 'wrap' }}>
+      <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
         <Box sx={{ pr: 2 }}><Typography>火属性: {physical.FireSuitable}     </Typography></Box>
         <Box sx={{ pr: 2 }}><Typography>岩属性: {physical.RockSuitable}     </Typography></Box>
         <Box sx={{ pr: 2 }}><Typography>水属性: {physical.WaterSuitable}    </Typography></Box>
@@ -232,7 +232,7 @@ export const CharactorCard: FC<{
   }, [getValues, index, setCharactor]);
 
   return (
-    <Stack direction="column" border='1px solid royalblue' borderRadius="5px" sx={{ px: 1, py: 2, mb: 1, justifyContent: "flex-start" }}>
+    <Stack direction="column" sx={{ border: '1px solid royalblue', borderRadius: "5px", px: 1, py: 2, mb: 1, justifyContent: "flex-start" }}>
       <Stack direction="column" sx={{ justifyContent: "flex-start" }}>
         <TextField
           error={!!nameError}

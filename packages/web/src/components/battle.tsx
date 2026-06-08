@@ -386,20 +386,20 @@ export const BattleTurn: FC<{
       <Stack>
         <Stack sx={{ pb: 1 }}>
           <Stack direction="row" sx={{ justifyContent: "space-between", width: '100%', pb: 1 }}>
-            <Stack flex="0 0 70px" sx={{ justifyContent: "center" }}><Typography>Battle!</Typography></Stack>
-            <Stack flex="1 0 110px" sx={{ justifyContent: "center" }}><Typography>{battle.title}</Typography></Stack>
-            <Box flex="1 1 auto">{battle.result !== GameOngoing && <Button type="button" variant='outlined' onClick={() => battleRepository.exportJson(battle, '')} >Export</Button>}</Box>
+            <Stack sx={{ flex: "0 0 70px", justifyContent: "center" }}><Typography>Battle!</Typography></Stack>
+            <Stack sx={{ flex: "1 0 110px", justifyContent: "center" }}><Typography>{battle.title}</Typography></Stack>
+            <Box sx={{ flex: "1 1 auto" }}>{battle.result !== GameOngoing && <Button type="button" variant='outlined' onClick={() => battleRepository.exportJson(battle, '')} >Export</Button>}</Box>
           </Stack>
           <Box>
             <GameStatus battle={battle} />
           </Box>
         </Stack>
         {battle.result === GameOngoing && actor && (
-          <Stack borderTop='1px solid royalblue'>
+          <Stack sx={{ borderTop: '1px solid royalblue' }}>
             <form onSubmit={handleSubmit(actSkill)}>
               {message && (<Typography>{message}</Typography>)}
               <Box sx={{ py: 1 }}>
-                <Typography display="inline-block" sx={{ pr: 1 }}>{`${actor.name}のターン`}</Typography>
+                <Typography sx={{ display: "inline-block", pr: 1 }}>{`${actor.name}のターン`}</Typography>
                 <Chip variant="outlined" color='primary' label={actor.isVisitor ? 'VISITOR' : 'HOME'} />
               </Box>
               <Stack>
@@ -444,8 +444,8 @@ export const BattleTurn: FC<{
                 ))}
                 {!receivers.some(receiver => receiver !== null) && (
                   <Stack sx={{ pl: 2 }}>
-                    <Stack direction="row" borderBottom='1px dotted royalblue' sx={{ justifyContent: "flex-start", flexWrap: 'wrap' }}>
-                      <Box sx={{ pr: 1 }} flex="1 1 auto"><Typography display="inline-block" sx={{ pr: 1 }}>名前: ?????</Typography></Box>
+                    <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
+                      <Box sx={{ pr: 1, flex: "1 1 auto" }}><Typography sx={{ display: "inline-block", pr: 1 }}>名前: ?????</Typography></Box>
                     </Stack>
                   </Stack>
                 )}
@@ -466,14 +466,14 @@ export const BattleTurn: FC<{
                 )}
               </Stack>
             </form>
-            <Box borderTop='1px solid royalblue' sx={{ py: 1 }}>
+            <Box sx={{ borderTop: '1px solid royalblue', py: 1 }}>
               <Box>
                 <Typography variant='h5'>Action Orders</Typography>
               </Box>
               <Stack sx={{ justifyContent: "flex-start", p: 1, width: '100%' }}>
                 {lastTurn.sortedCharactors.map((charactor, index) => (
                   <Box key={`CharactorDetail-${charactor.name}-${isVisitorString(charactor.isVisitor)}`} sx={{ pb: 2 }}>
-                    <Box borderBottom='1px dotted royalblue'>
+                    <Box sx={{ borderBottom: '1px dotted royalblue' }}>
                       <Typography variant="h6">{index === 0 ? 'Now Actor' : `Action Order ${index}`}</Typography>
                     </Box>
                     <CharactorDetail charactor={charactor} />

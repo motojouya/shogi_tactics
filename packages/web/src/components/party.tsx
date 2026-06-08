@@ -143,7 +143,7 @@ export const PartyEditor: FC<{
           )}
           {exist ? (
             <Stack direction="row" sx={{ p: 1, width: '100%', alignItems: 'center' }}>
-              <Box flex="0 0 100px"><Typography>Party Name</Typography></Box>
+              <Box sx={{ flex: "0 0 100px" }}><Typography>Party Name</Typography></Box>
               <Box><Typography variant="h4">{partyForm.name}</Typography></Box>
             </Stack>
           ) : (
