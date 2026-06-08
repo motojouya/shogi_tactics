@@ -2,7 +2,6 @@
 import { resolve } from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { VitePWA } from "vite-plugin-pwa";
 
 const path = process.env.VITE_URL_PREFIX ? "/" + process.env.VITE_URL_PREFIX + "/" : "/";
@@ -12,7 +11,6 @@ export default defineConfig({
   root: "src/pages",
   plugins: [
     react(),
-    tsconfigPaths(),
     VitePWA({
       registerType: "autoUpdate",
       workbox: {
