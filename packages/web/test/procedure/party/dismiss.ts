@@ -1,5 +1,5 @@
 import type { Dialogue } from "../../../src/io/window_dialogue";
-import type { PartyRepository } from "@motojouya/kniw-core/store/party";
+import type { PartyRepository } from "../../../src/store/party";
 
 import { describe, it, expect } from "vitest";
 import { dismissParty } from "../../../src/procedure/party/dismiss";

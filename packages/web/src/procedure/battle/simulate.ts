@@ -1,12 +1,12 @@
-import type { CharactorBattling } from "@motojouya/kniw-core/model/charactor";
-import type { Battle } from "@motojouya/kniw-core/model/battle";
-import type { Turn } from "@motojouya/kniw-core/model/turn";
-import type { Skill } from "@motojouya/kniw-core/model/skill";
+import type { CharactorBattling } from "../../model/charactor";
+import type { Battle } from "../../model/battle";
+import type { Turn } from "../../model/turn";
+import type { Skill } from "../../model/skill";
 
-import { actToCharactor } from "@motojouya/kniw-core/model/battle";
+import { actToCharactor } from "../../model/battle";
 import { toReceiver } from "../../form/battle";
-import { createAbsolute } from "@motojouya/kniw-core/model/random";
-import { DataNotFoundError } from "@motojouya/kniw-core/store_utility/schema";
+import { createAbsolute } from "../../model/random";
+import { DataNotFoundError } from "../../store_utility/schema";
 
 export type Simulated = { survive: boolean; receiver: CharactorBattling };
 

@@ -1,14 +1,14 @@
-import type { CharactorBattling } from "@motojouya/kniw-core/model/charactor";
-import type { Action } from "@motojouya/kniw-core/model/battle";
-import type { SelectOption } from "@motojouya/kniw-core/io/dialogue";
-import type { Skill } from "@motojouya/kniw-core/model/skill";
+import type { CharactorBattling } from "../model/charactor";
+import type { Action } from "../model/battle";
+import type { SelectOption } from "../io/dialogue";
+import type { Skill } from "../model/skill";
 
 import { z } from "zod";
 
-import { DataNotFoundError } from "@motojouya/kniw-core/store_utility/schema";
-import { isVisitorString } from "@motojouya/kniw-core/model/charactor";
-import { skillRepository } from "@motojouya/kniw-core/store/skill";
-import { ACTION_DO_NOTHING } from "@motojouya/kniw-core/model/turn";
+import { DataNotFoundError } from "../store_utility/schema";
+import { isVisitorString } from "../model/charactor";
+import { skillRepository } from "../store/skill";
+import { ACTION_DO_NOTHING } from "../model/turn";
 
 export const DO_NOTHING = "NOTHING";
 

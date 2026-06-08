@@ -1,10 +1,10 @@
-import type { Battle } from "@motojouya/kniw-core/model/battle";
-import type { CharactorBattling } from "@motojouya/kniw-core/model/charactor";
-import type { BattleRepository } from "@motojouya/kniw-core/store/battle";
+import type { Battle } from "../../model/battle";
+import type { CharactorBattling } from "../../model/charactor";
+import type { BattleRepository } from "../../store/battle";
 import type { Dialogue } from "../../io/window_dialogue";
-import type { Randoms } from "@motojouya/kniw-core/model/random";
+import type { Randoms } from "../../model/random";
 
-import { GameHome, GameVisitor, surrender as modelSurrender } from "@motojouya/kniw-core/model/battle";
+import { GameHome, GameVisitor, surrender as modelSurrender } from "../../model/battle";
 import { UserCancel } from "../../io/window_dialogue";
 
 export type Surrender = (

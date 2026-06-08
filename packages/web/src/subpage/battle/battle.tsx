@@ -4,9 +4,9 @@ import { Typography } from '@mui/material';
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { BattleContainer } from '../../components/battle';
-import { CharactorDuplicationError } from '@motojouya/kniw-core/model/party';
-import { NotWearableErorr } from '@motojouya/kniw-core/model/acquirement';
-import { JsonSchemaUnmatchError, DataNotFoundError } from '@motojouya/kniw-core/store_utility/schema';
+import { CharactorDuplicationError } from '../../model/party';
+import { NotWearableErorr } from '../../model/acquirement';
+import { JsonSchemaUnmatchError, DataNotFoundError } from '../../store_utility/schema';
 import { useIO } from '../../components/context';
 import { Container } from '../../components/utility';
 

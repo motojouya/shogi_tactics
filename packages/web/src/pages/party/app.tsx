@@ -1,6 +1,6 @@
 import type { FC } from 'react';
-import type { PartyRepository } from '@motojouya/kniw-core/store/party';
-import type { BattleRepository } from '@motojouya/kniw-core/store/battle';
+import type { PartyRepository } from '../../store/party';
+import type { BattleRepository } from '../../store/battle';
 
 import { useState, useEffect } from 'react';
 import {
@@ -8,8 +8,8 @@ import {
   Typography,
 } from '@mui/material';
 
-import { createRepository as createPartyRepository } from '@motojouya/kniw-core/store/party';
-import { createRepository as createBattleRepository } from '@motojouya/kniw-core/store/battle';
+import { createRepository as createPartyRepository } from '../../store/party';
+import { createRepository as createBattleRepository } from '../../store/battle';
 import { createDatabase } from '../../io/indexed_database';
 import { dialogue } from '../../io/window_dialogue';
 import { PartyList } from '../../subpage/party/list';

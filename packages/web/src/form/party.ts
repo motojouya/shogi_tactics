@@ -1,12 +1,12 @@
-import type { Party } from "@motojouya/kniw-core/model/party";
-import type { Charactor } from "@motojouya/kniw-core/model/charactor";
+import type { Party } from "../model/party";
+import type { Charactor } from "../model/charactor";
 
 import { z } from "zod";
 
-import { DataNotFoundError } from "@motojouya/kniw-core/store_utility/schema";
-import { NotWearableErorr } from "@motojouya/kniw-core/model/acquirement";
+import { DataNotFoundError } from "../store_utility/schema";
+import { NotWearableErorr } from "../model/acquirement";
 import { charactorFormSchema, toCharactor, toCharactorForm } from "./charactor";
-import { validate, CharactorDuplicationError } from "@motojouya/kniw-core/model/party";
+import { validate, CharactorDuplicationError } from "../model/party";
 import { EmptyParameter } from "../io/window_dialogue";
 
 export const partyFormSchema = z.object({

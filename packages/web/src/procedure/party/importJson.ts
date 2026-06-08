@@ -1,10 +1,10 @@
-import type { Party } from "@motojouya/kniw-core/model/party";
+import type { Party } from "../../model/party";
 import type { Dialogue } from "../../io/window_dialogue";
-import type { PartyRepository } from "@motojouya/kniw-core/store/party";
+import type { PartyRepository } from "../../store/party";
 
-import { CharactorDuplicationError } from "@motojouya/kniw-core/model/party";
-import { NotWearableErorr } from "@motojouya/kniw-core/model/acquirement";
-import { JsonSchemaUnmatchError, DataNotFoundError } from "@motojouya/kniw-core/store_utility/schema";
+import { CharactorDuplicationError } from "../../model/party";
+import { NotWearableErorr } from "../../model/acquirement";
+import { JsonSchemaUnmatchError, DataNotFoundError } from "../../store_utility/schema";
 import { UserCancel, EmptyParameter } from "../../io/window_dialogue";
 
 export type ImportParty = (

@@ -2,8 +2,8 @@
 import type { ReactNode } from "react";
 
 import type { Dialogue } from '../io/window_dialogue';
-import type { PartyRepository } from '@motojouya/kniw-core/store/party';
-import type { BattleRepository } from '@motojouya/kniw-core/store/battle';
+import type { PartyRepository } from '../store/party';
+import type { BattleRepository } from '../store/battle';
 
 import { createContext, useContext } from "react";
 

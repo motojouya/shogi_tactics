@@ -8,10 +8,10 @@ import {
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { PartyEditor } from '../../components/party';
-import { CharactorDuplicationError } from '@motojouya/kniw-core/model/party';
+import { CharactorDuplicationError } from '../../model/party';
 import { useIO } from '../../components/context';
-import { NotWearableErorr } from '@motojouya/kniw-core/model/acquirement';
-import { JsonSchemaUnmatchError, DataNotFoundError } from '@motojouya/kniw-core/store_utility/schema';
+import { NotWearableErorr } from '../../model/acquirement';
+import { JsonSchemaUnmatchError, DataNotFoundError } from '../../store_utility/schema';
 import { Container } from '../../components/utility';
 
 export const PartyExsiting: FC<{ partyName: string }> = ({ partyName }) => {

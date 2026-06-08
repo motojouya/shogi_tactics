@@ -1,11 +1,11 @@
-import type { BattleRepository } from "@motojouya/kniw-core/store/battle";
+import type { BattleRepository } from "../../../src/store/battle";
 
 import { describe, it, expect } from "vitest";
 
-import { toBattle } from "@motojouya/kniw-core/store_schema/battle";
-import { toParty } from "@motojouya/kniw-core/store_schema/party";
+import { toBattle } from "../../../src/store_schema/battle";
+import { toParty } from "../../../src/store_schema/party";
 import { startBattle } from "../../../src/procedure/battle/start";
-import { GameOngoing } from "@motojouya/kniw-core/model/battle";
+import { GameOngoing } from "../../../src/model/battle";
 
 const battleData = {
   title: "first-title",

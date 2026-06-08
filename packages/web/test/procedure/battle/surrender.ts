@@ -1,13 +1,13 @@
-import type { BattleRepository } from "@motojouya/kniw-core/store/battle";
+import type { BattleRepository } from "../../../src/store/battle";
 import type { Dialogue } from "../../../src/io/window_dialogue";
 
 import { describe, it, expect } from "vitest";
 
-import { GameOngoing, GameHome, GameVisitor } from "@motojouya/kniw-core/model/battle";
-import { toBattle } from "@motojouya/kniw-core/store_schema/battle";
+import { GameOngoing, GameHome, GameVisitor } from "../../../src/model/battle";
+import { toBattle } from "../../../src/store_schema/battle";
 import { UserCancel } from "../../../src/io/window_dialogue";
 import { surrender } from "../../../src/procedure/battle/surrender";
-import { createAbsolute } from "@motojouya/kniw-core/model/random";
+import { createAbsolute } from "../../../src/model/random";
 
 const testData = {
   title: "first-title",

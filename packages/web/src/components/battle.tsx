@@ -1,8 +1,8 @@
 import type { FC } from 'react';
-import type { Battle } from '@motojouya/kniw-core/model/battle';
-import type { CharactorBattling } from '@motojouya/kniw-core/model/charactor';
-import type { Skill } from '@motojouya/kniw-core/model/skill';
-import type { Turn } from '@motojouya/kniw-core/model/turn';
+import type { Battle } from '../model/battle';
+import type { CharactorBattling } from '../model/charactor';
+import type { Skill } from '../model/skill';
+import type { Turn } from '../model/turn';
 import type { DoSkillForm } from '../form/battle';
 import type { SelectChangeEvent } from '@mui/material';
 
@@ -39,8 +39,8 @@ import {
   GameDraw,
   turnActor,
   getLastTurn,
-} from '@motojouya/kniw-core/model/battle';
-import { createRandoms } from "@motojouya/kniw-core/model/random";
+} from '../model/battle';
+import { createRandoms } from "../model/random";
 import { CharactorDetail, CharactorStatus } from './charactor';
 import {
   doSkillFormSchema,
@@ -48,14 +48,14 @@ import {
   receiverSelectOption,
   ReceiverDuplicationError,
 } from '../form/battle';
-import { ACTION_DO_NOTHING } from '@motojouya/kniw-core/model/turn';
-import { getSkills, isVisitorString } from '@motojouya/kniw-core/model/charactor';
-import { skillRepository } from '@motojouya/kniw-core/store/skill';
-import { MAGIC_TYPE_NONE } from '@motojouya/kniw-core/model/skill';
+import { ACTION_DO_NOTHING } from '../model/turn';
+import { getSkills, isVisitorString } from '../model/charactor';
+import { skillRepository } from '../store/skill';
+import { MAGIC_TYPE_NONE } from '../model/skill';
 
-import { underStatus } from '@motojouya/kniw-core/model/status';
-import { silent } from '@motojouya/kniw-core/store_data/status/index';
-import { DataNotFoundError } from '@motojouya/kniw-core/store_utility/schema';
+import { underStatus } from '../model/status';
+import { silent } from '../store_data/status/index';
+import { DataNotFoundError } from '../store_utility/schema';
 import { act } from '../procedure/battle/act';
 import { surrender } from '../procedure/battle/surrender';
 import { simulate } from '../procedure/battle/simulate';

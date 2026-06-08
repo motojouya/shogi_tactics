@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import type { Party } from '@motojouya/kniw-core/model/party';
+import type { Party } from '../../model/party';
 
 import { useState } from 'react';
 import {
@@ -10,9 +10,9 @@ import {
 import { PartyEditor } from '../../components/party';
 import { importParty } from '../../procedure/party/importJson';
 import { useIO } from '../../components/context';
-import { CharactorDuplicationError } from '@motojouya/kniw-core/model/party';
-import { NotWearableErorr } from '@motojouya/kniw-core/model/acquirement';
-import { JsonSchemaUnmatchError, DataNotFoundError } from '@motojouya/kniw-core/store_utility/schema';
+import { CharactorDuplicationError } from '../../model/party';
+import { NotWearableErorr } from '../../model/acquirement';
+import { JsonSchemaUnmatchError, DataNotFoundError } from '../../store_utility/schema';
 import { UserCancel, EmptyParameter } from '../../io/window_dialogue';
 
 export const PartyNew: FC = () => {

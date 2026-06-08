@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import type { Party } from '@motojouya/kniw-core/model/party';
+import type { Party } from '../../model/party';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';

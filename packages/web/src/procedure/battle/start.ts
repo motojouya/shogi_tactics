@@ -1,9 +1,9 @@
-import type { Battle } from "@motojouya/kniw-core/model/battle";
-import type { Party } from "@motojouya/kniw-core/model/party";
-import type { BattleRepository } from "@motojouya/kniw-core/store/battle";
+import type { Battle } from "../../model/battle";
+import type { Party } from "../../model/party";
+import type { BattleRepository } from "../../store/battle";
 
-import { wait, turnActor, createBattle, start } from "@motojouya/kniw-core/model/battle";
-import { createRandoms } from "@motojouya/kniw-core/model/random";
+import { wait, turnActor, createBattle, start } from "../../model/battle";
+import { createRandoms } from "../../model/random";
 
 export type StartBattle = (
   battleRepository: BattleRepository,

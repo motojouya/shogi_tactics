@@ -1,9 +1,9 @@
 import type { PartyForm } from "../../form/party";
-import type { PartyRepository } from "@motojouya/kniw-core/store/party";
+import type { PartyRepository } from "../../store/party";
 
-import { DataExistError, DataNotFoundError } from "@motojouya/kniw-core/store_utility/schema";
-import { NotWearableErorr } from "@motojouya/kniw-core/model/acquirement";
-import { CharactorDuplicationError } from "@motojouya/kniw-core/model/party";
+import { DataExistError, DataNotFoundError } from "../../store_utility/schema";
+import { NotWearableErorr } from "../../model/acquirement";
+import { CharactorDuplicationError } from "../../model/party";
 import { toParty } from "../../form/party";
 
 export type SaveParty = (

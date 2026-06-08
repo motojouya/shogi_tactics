@@ -1,5 +1,5 @@
 import type { FC, ReactNode } from 'react';
-import type { Party } from '@motojouya/kniw-core/model/party';
+import type { Party } from '../model/party';
 import type { PartyForm } from '../form/party';
 
 import { useState } from 'react';
@@ -17,9 +17,9 @@ import { CharactorCard } from './charactor';
 import { partyFormSchema, toPartyForm } from '../form/party';
 import { saveParty } from '../procedure/party/save';
 import { dismissParty } from '../procedure/party/dismiss';
-import { CharactorDuplicationError } from '@motojouya/kniw-core/model/party';
-import { NotWearableErorr } from '@motojouya/kniw-core/model/acquirement';
-import { JsonSchemaUnmatchError, DataNotFoundError, DataExistError } from '@motojouya/kniw-core/store_utility/schema';
+import { CharactorDuplicationError } from '../model/party';
+import { NotWearableErorr } from '../model/acquirement';
+import { JsonSchemaUnmatchError, DataNotFoundError, DataExistError } from '../store_utility/schema';
 import { useIO } from './context';
 import { importParty } from '../procedure/party/importJson';
 import { UserCancel, EmptyParameter } from '../io/window_dialogue';

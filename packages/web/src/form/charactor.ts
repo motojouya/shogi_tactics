@@ -1,16 +1,16 @@
-import type { Charactor } from "@motojouya/kniw-core/model/charactor";
+import type { Charactor } from "../model/charactor";
 
 import { z } from "zod";
 
-import { NotWearableErorr } from "@motojouya/kniw-core/model/acquirement";
-import { DataNotFoundError } from "@motojouya/kniw-core/store_utility/schema";
-import { createCharactor } from "@motojouya/kniw-core/model/charactor";
+import { NotWearableErorr } from "../model/acquirement";
+import { DataNotFoundError } from "../store_utility/schema";
+import { createCharactor } from "../model/charactor";
 import {
   raceRepository,
   weaponRepository,
   clothingRepository,
   blessingRepository,
-} from "@motojouya/kniw-core/store/acquirement";
+} from "../store/acquirement";
 import { EmptyParameter } from "../io/window_dialogue";
 
 export const charactorFormSchema = z.object({

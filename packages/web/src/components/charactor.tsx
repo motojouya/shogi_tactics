@@ -1,6 +1,6 @@
 import type { FC } from 'react';
-import type { Acquirement } from '@motojouya/kniw-core/model/acquirement';
-import type { Charactor } from '@motojouya/kniw-core/model/charactor';
+import type { Acquirement } from '../model/acquirement';
+import type { Charactor } from '../model/charactor';
 import type { PartyForm } from '../form/party';
 
 import { useState, useCallback } from 'react';
@@ -28,20 +28,20 @@ import {
   Typography,
 } from '@mui/material';
 
-import { NotWearableErorr } from '@motojouya/kniw-core/model/acquirement';
-import { DataNotFoundError } from '@motojouya/kniw-core/store_utility/schema';
+import { NotWearableErorr } from '../model/acquirement';
+import { DataNotFoundError } from '../store_utility/schema';
 import {
   raceRepository,
   blessingRepository,
   clothingRepository,
   weaponRepository,
-} from '@motojouya/kniw-core/store/acquirement';
+} from '../store/acquirement';
 import {
   isBattling,
   getPhysical,
   getAbilities,
   getSkills,
-} from '@motojouya/kniw-core/model/charactor';
+} from '../model/charactor';
 import { toCharactor } from '../form/charactor';
 import { EmptyParameter } from '../io/window_dialogue';
 

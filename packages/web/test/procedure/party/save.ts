@@ -1,7 +1,7 @@
-import type { PartyRepository } from "@motojouya/kniw-core/store/party";
+import type { PartyRepository } from "../../../src/store/party";
 
-import { DataExistError } from "@motojouya/kniw-core/store_utility/schema";
-import { CharactorDuplicationError } from "@motojouya/kniw-core/model/party";
+import { DataExistError } from "../../../src/store_utility/schema";
+import { CharactorDuplicationError } from "../../../src/model/party";
 
 import { describe, it, expect } from "vitest";
 import { saveParty } from "../../../src/procedure/party/save";

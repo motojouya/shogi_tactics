@@ -1,14 +1,14 @@
-import type { Battle } from "@motojouya/kniw-core/model/battle";
-import type { Turn } from "@motojouya/kniw-core/model/turn";
-import type { CharactorBattling } from "@motojouya/kniw-core/model/charactor";
-import type { BattleRepository } from "@motojouya/kniw-core/store/battle";
+import type { Battle } from "../../model/battle";
+import type { Turn } from "../../model/turn";
+import type { CharactorBattling } from "../../model/charactor";
+import type { BattleRepository } from "../../store/battle";
 import type { DoSkillForm } from "../../form/battle";
 import type { Dialogue } from "../../io/window_dialogue";
-import { Randoms } from "@motojouya/kniw-core/model/random";
+import { Randoms } from "../../model/random";
 
-import { spendTurn } from "@motojouya/kniw-core/model/battle";
+import { spendTurn } from "../../model/battle";
 import { toAction, ReceiverDuplicationError } from "../../form/battle";
-import { DataNotFoundError } from "@motojouya/kniw-core/store_utility/schema";
+import { DataNotFoundError } from "../../store_utility/schema";
 import { UserCancel } from "../../io/window_dialogue";
 
 export type Act = (

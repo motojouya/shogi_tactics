@@ -1,14 +1,14 @@
-import type { BattleRepository } from "@motojouya/kniw-core/store/battle";
+import type { BattleRepository } from "../../../src/store/battle";
 import type { Dialogue } from "../../../src/io/window_dialogue";
 
 import { describe, it, expect } from "vitest";
 
-import { toBattle } from "@motojouya/kniw-core/store_schema/battle";
-import { GameOngoing } from "@motojouya/kniw-core/model/battle";
+import { toBattle } from "../../../src/store_schema/battle";
+import { GameOngoing } from "../../../src/model/battle";
 import { act } from "../../../src/procedure/battle/act";
-import { DataNotFoundError } from "@motojouya/kniw-core/store_utility/schema";
+import { DataNotFoundError } from "../../../src/store_utility/schema";
 import { UserCancel } from "../../../src/io/window_dialogue";
-import { createAbsolute } from "@motojouya/kniw-core/model/random";
+import { createAbsolute } from "../../../src/model/random";
 
 const skillForm = {
   skillName: "chop",
