@@ -166,7 +166,6 @@ modelファイルの削除は、それを参照する`store_data`配下（acquir
   - jump
 - skill.ts
   - type
-  - action
   - directType
   - magicType
   - mpConsumption
