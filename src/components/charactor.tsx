@@ -1,12 +1,9 @@
 import type { FC } from 'react';
-import type { Acquirement } from '../model/acquirement';
 import type { Charactor } from '../model/charactor';
 import type { PartyForm } from '../form/party';
 
 import { useState, useCallback } from 'react';
 import {
-  type Control,
-  Controller,
   type FieldError,
   type FieldErrors,
   type Merge,
@@ -15,11 +12,6 @@ import {
   type UseFormGetValues,
 } from 'react-hook-form';
 import {
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormHelperText,
   Chip,
   Button,
   TextField,
@@ -28,19 +20,11 @@ import {
   Typography,
 } from '@mui/material';
 
-import { NotWearableErorr } from '../model/acquirement';
-import { DataNotFoundError } from '../store_utility/schema';
-import {
-  raceRepository,
-  blessingRepository,
-  clothingRepository,
-  weaponRepository,
-} from '../store/acquirement';
 import {
   isBattling,
   getPhysical,
-  getSkills,
 } from '../model/charactor';
+import { getSkills } from '../store/skill';
 import { toCharactor } from '../form/charactor';
 import { EmptyParameter } from '../io/window_dialogue';
 
@@ -65,45 +49,6 @@ const getCharactorError: GetCharactorError = (errors, i, property) => {
 
   return error as FieldError;
 };
-
-type AcquirementName = "name" | "charactors" | `charactors.${number}` | `charactors.${number}.name` | `charactors.${number}.race` | `charactors.${number}.blessing` | `charactors.${number}.clothing` | `charactors.${number}.weapon`;
-
-const SelectAcquirement: FC<{
-  acquirementName: AcquirementName,
-  acquirementType: string,
-  allAcquirements: Acquirement[],
-  onBlur: () => void,
-  error: FieldError | undefined,
-  control: Control<PartyForm>,
-}> = ({ acquirementName, acquirementType, allAcquirements, onBlur, error, control }) => {
-  return (
-    <Controller
-      name={acquirementName}
-      control={control}
-      render={({ field }) => (
-        <FormControl error={!!error}>
-          <InputLabel id={`${acquirementName}.select_label`}>{acquirementType}</InputLabel>
-          <Select
-            labelId={`${acquirementName}.select_label`}
-            id={`${acquirementName}.select`}
-            name={field.name}
-            value={field.value}
-            label={acquirementType}
-            onChange={field.onChange}
-            onBlur={onBlur}
-          >
-            {allAcquirements.map(acquirement => (
-              <MenuItem key={`${acquirementName}.${acquirement.name}`} value={acquirement.name}>
-                {acquirement.label}
-              </MenuItem>
-            ))}
-          </Select>
-          <FormHelperText>{!!error && error.message}</FormHelperText>
-        </FormControl>
-      )}
-    />
-  );
-}
 
 export const CharactorStatus: FC<{ charactor: Charactor }> = ({ charactor }) => {
 
@@ -148,18 +93,12 @@ export const CharactorStatus: FC<{ charactor: Charactor }> = ({ charactor }) => 
 export const CharactorDetail: FC<{ charactor: Charactor }> = ({ charactor }) => {
   const physical = getPhysical(charactor);
 
-  const skills = getSkills(charactor);
+  const skills = getSkills();
   const skillsText = skills.map(skill => skill.label).join(', ');
 
   return (
     <Stack>
       <CharactorStatus charactor={charactor} />
-      <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
-        <Box sx={{ pr: 2 }}><Typography>種族: {charactor.race.label}    </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>祝福: {charactor.blessing.label}</Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>装備: {charactor.clothing.label}</Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>武器: {charactor.weapon.label}  </Typography></Box>
-      </Stack>
       <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
         <Box sx={{ pr: 2 }}><Typography>スキル: {skillsText}       </Typography></Box>
       </Stack>
@@ -196,18 +135,14 @@ export const CharactorCard: FC<{
   remove: (index?: number | number[]) => void,
   errors: FieldErrors<PartyForm>,
   index: number,
-  control: Control<PartyForm>,
-}> = ({ register, getValues, remove, errors, index, control }) => {
+}> = ({ register, getValues, remove, errors, index }) => {
 
   const nameError = getCharactorError(errors, index, 'name');
   const [charactor, setCharactor] = useState<Charactor | string>(() => {
     const hiredCharactor = toCharactor(getValues(`charactors.${index}` as const));
 
-    if (hiredCharactor instanceof DataNotFoundError || hiredCharactor instanceof EmptyParameter) {
+    if (hiredCharactor instanceof EmptyParameter) {
       return '入力してください';
-    }
-    if (hiredCharactor instanceof NotWearableErorr) {
-      return '選択できない組み合わせです';
     }
     return hiredCharactor;
   });
@@ -215,12 +150,8 @@ export const CharactorCard: FC<{
   const calculateCharactor = useCallback(() => {
     const hiredCharactor = toCharactor(getValues(`charactors.${index}` as const));
 
-    if (hiredCharactor instanceof DataNotFoundError || hiredCharactor instanceof EmptyParameter) {
+    if (hiredCharactor instanceof EmptyParameter) {
       setCharactor('入力してください');
-      return;
-    }
-    if (hiredCharactor instanceof NotWearableErorr) {
-      setCharactor('選択できない組み合わせです');
       return;
     }
     setCharactor(hiredCharactor);
@@ -237,38 +168,6 @@ export const CharactorCard: FC<{
           {...register(`charactors.${index}.name` as const, { onBlur: calculateCharactor })}
           helperText={!!nameError && nameError.message}
           sx={{ pb: 1 }}
-        />
-        <SelectAcquirement
-          acquirementType='race'
-          acquirementName={`charactors.${index}.race`}
-          allAcquirements={raceRepository.all}
-          error={getCharactorError(errors, index, 'race')}
-          onBlur={calculateCharactor}
-          control={control}
-        />
-        <SelectAcquirement
-          acquirementType='blessing'
-          acquirementName={`charactors.${index}.blessing`}
-          allAcquirements={blessingRepository.all}
-          error={getCharactorError(errors, index, 'blessing')}
-          onBlur={calculateCharactor}
-          control={control}
-        />
-        <SelectAcquirement
-          acquirementType='clothing'
-          acquirementName={`charactors.${index}.clothing`}
-          allAcquirements={clothingRepository.all}
-          error={getCharactorError(errors, index, 'clothing')}
-          onBlur={calculateCharactor}
-          control={control}
-        />
-        <SelectAcquirement
-          acquirementType='weapon'
-          acquirementName={`charactors.${index}.weapon`}
-          allAcquirements={weaponRepository.all}
-          error={getCharactorError(errors, index, 'weapon')}
-          onBlur={calculateCharactor}
-          control={control}
         />
       </Stack>
       <Box>

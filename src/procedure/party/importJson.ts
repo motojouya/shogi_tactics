@@ -3,7 +3,6 @@ import type { Dialogue } from "../../io/window_dialogue";
 import type { PartyRepository } from "../../store/party";
 
 import { CharactorDuplicationError } from "../../model/party";
-import { NotWearableErorr } from "../../model/acquirement";
 import { JsonSchemaUnmatchError, DataNotFoundError } from "../../store_utility/schema";
 import { UserCancel, EmptyParameter } from "../../io/window_dialogue";
 
@@ -16,7 +15,6 @@ export type ImportParty = (
   | Party
   | DataNotFoundError
   | JsonSchemaUnmatchError
-  | NotWearableErorr
   | CharactorDuplicationError
   | EmptyParameter
   | UserCancel
@@ -34,7 +32,6 @@ export const importParty: ImportParty = (dialogue, repository) => async (comfirm
 
   if (
     party instanceof JsonSchemaUnmatchError ||
-    party instanceof NotWearableErorr ||
     party instanceof DataNotFoundError ||
     party instanceof CharactorDuplicationError
   ) {

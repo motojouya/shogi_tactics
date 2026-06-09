@@ -23,7 +23,6 @@ import { toParty } from "../../src/store_schema/party";
 import { format } from "date-fns";
 
 import { toCharactorBattling } from "../../src/store_schema/charactor";
-import { NotWearableErorr } from "../../src/model/acquirement";
 import { CharactorDuplicationError } from "../../src/model/party";
 import { JsonSchemaUnmatchError, DataNotFoundError } from "../../src/store_utility/schema";
 import { skillRepository } from "../../src/store/skill";
@@ -158,7 +157,6 @@ describe("Battle#toBattle", function () {
     const battle = toBattle(testData);
 
     if (
-      battle instanceof NotWearableErorr ||
       battle instanceof DataNotFoundError ||
       battle instanceof CharactorDuplicationError ||
       battle instanceof JsonSchemaUnmatchError
@@ -244,13 +242,13 @@ describe("Battle#start", function () {
       expect.unreachable("type should be TIME_PASSING");
     }
     expect(turn.sortedCharactors.length).toBe(4);
-    expect(turn.sortedCharactors[0].name).toBe("chang");
-    expect(turn.sortedCharactors[0].isVisitor).toBe(true);
+    expect(turn.sortedCharactors[0].name).toBe("sam");
+    expect(turn.sortedCharactors[0].isVisitor).toBe(false);
     expect(turn.sortedCharactors[1].name).toBe("john");
     expect(turn.sortedCharactors[1].isVisitor).toBe(false);
-    expect(turn.sortedCharactors[2].name).toBe("sam");
-    expect(turn.sortedCharactors[2].isVisitor).toBe(false);
-    expect(turn.sortedCharactors[3].name).toBe("tom");
+    expect(turn.sortedCharactors[2].name).toBe("tom");
+    expect(turn.sortedCharactors[2].isVisitor).toBe(true);
+    expect(turn.sortedCharactors[3].name).toBe("chang");
     expect(turn.sortedCharactors[3].isVisitor).toBe(true);
   });
 });
@@ -278,12 +276,12 @@ describe("Battle#act", function () {
     expect(turn.sortedCharactors[1].name).toBe("sara");
 
     expect(turn.sortedCharactors[2].name).toBe("john");
-    expect(turn.sortedCharactors[2].hp).toBe(50);
+    expect(turn.sortedCharactors[2].hp).toBe(10);
     expect(turn.sortedCharactors[2].restWt).toBe(130);
 
     expect(turn.sortedCharactors[3].name).toBe("sam");
     expect(turn.sortedCharactors[3].hp).toBe(100);
-    expect(turn.sortedCharactors[3].restWt).toBe(240);
+    expect(turn.sortedCharactors[3].restWt).toBe(200);
   });
 });
 
@@ -301,10 +299,10 @@ describe("Battle#stay", function () {
       expect.unreachable("type should be DO_NOTHING");
     }
     expect(turn.sortedCharactors.length).toBe(4);
-    expect(turn.sortedCharactors[0].name).toBe("noa");
-    expect(turn.sortedCharactors[1].name).toBe("sara");
-    expect(turn.sortedCharactors[2].name).toBe("john");
-    expect(turn.sortedCharactors[3].name).toBe("sam");
+    expect(turn.sortedCharactors[0].name).toBe("sam");
+    expect(turn.sortedCharactors[1].name).toBe("noa");
+    expect(turn.sortedCharactors[2].name).toBe("sara");
+    expect(turn.sortedCharactors[3].name).toBe("john");
   });
 });
 

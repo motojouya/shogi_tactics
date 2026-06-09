@@ -115,15 +115,7 @@ describe("Party#createRepository", function () {
       const charactors = typedParty.charactors;
       expect(charactors.length).toBe(2);
       expect(charactors[0].name).toBe("sam");
-      expect(charactors[0].race.name).toBe("human");
-      expect(charactors[0].blessing.name).toBe("earth");
-      expect(charactors[0].clothing.name).toBe("steelArmor");
-      expect(charactors[0].weapon.name).toBe("swordAndShield");
       expect(charactors[1].name).toBe("john");
-      expect(charactors[1].race.name).toBe("human");
-      expect(charactors[1].blessing.name).toBe("earth");
-      expect(charactors[1].clothing.name).toBe("redRobe");
-      expect(charactors[1].weapon.name).toBe("rubyRod");
     } else {
       expect.unreachable("party shoud be exist");
     }

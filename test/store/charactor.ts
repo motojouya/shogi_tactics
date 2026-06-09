@@ -64,10 +64,6 @@ describe("Charctor#createRepository", function () {
     const typedCharactor = charactor as Charactor;
     if (typedCharactor) {
       expect(typedCharactor.name).toBe("sam");
-      expect(typedCharactor.race.name).toBe("human");
-      expect(typedCharactor.blessing.name).toBe("earth");
-      expect(typedCharactor.clothing.name).toBe("redRobe");
-      expect(typedCharactor.weapon.name).toBe("rubyRod");
     } else {
       expect.unreachable("charactor shoud be exist");
     }

@@ -11,7 +11,6 @@ import { PartyEditor } from '../../components/party';
 import { importParty } from '../../procedure/party/importJson';
 import { useIO } from '../../components/context';
 import { CharactorDuplicationError } from '../../model/party';
-import { NotWearableErorr } from '../../model/acquirement';
 import { JsonSchemaUnmatchError, DataNotFoundError } from '../../store_utility/schema';
 import { UserCancel, EmptyParameter } from '../../io/window_dialogue';
 
@@ -26,7 +25,6 @@ export const PartyNew: FC = () => {
       partyObj instanceof UserCancel ||
       partyObj instanceof EmptyParameter ||
       partyObj instanceof JsonSchemaUnmatchError ||
-      partyObj instanceof NotWearableErorr ||
       partyObj instanceof DataNotFoundError ||
       partyObj instanceof CharactorDuplicationError
     )) {

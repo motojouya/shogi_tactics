@@ -48,8 +48,8 @@ import {
   ReceiverDuplicationError,
 } from '../form/battle';
 import { ACTION_DO_NOTHING } from '../model/turn';
-import { getSkills, isVisitorString } from '../model/charactor';
-import { skillRepository } from '../store/skill';
+import { isVisitorString } from '../model/charactor';
+import { skillRepository, getSkills } from '../store/skill';
 import { MAGIC_TYPE_NONE } from '../model/skill';
 
 import { underStatus } from '../model/status';
@@ -161,7 +161,7 @@ const SkillSelect: FC<{
   control: Control<DoSkillForm>,
 }> = ({ actor, replace, errors, control }) => {
 
-  const skills = getSkills(actor);
+  const skills = getSkills();
   const skillOptions = skills
     .filter(skill => skill.mpConsumption <= actor.mp)
     .filter(skill => !underStatus(silent, actor) || skill.magicType === MAGIC_TYPE_NONE)

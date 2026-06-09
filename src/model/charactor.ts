@@ -1,11 +1,6 @@
 import type { Status } from "./status";
 import type { SelectOption } from "../io/dialogue";
 import type { Physical } from "./physical";
-import type { Race, Weapon, Clothing, Blessing } from "./acquirement";
-import type { Skill } from "./skill";
-
-import { addPhysicals } from "./physical";
-import { NotWearableErorr } from "./acquirement";
 
 const basePhysical: Physical = {
   MaxHP: 300,
@@ -39,10 +34,6 @@ export type AttachedStatus = {
 
 export type Charactor = {
   name: string;
-  weapon: Weapon;
-  clothing: Clothing;
-  blessing: Blessing;
-  race: Race;
 };
 
 export type CharactorBattling = Charactor & {
@@ -81,54 +72,9 @@ export type SelectCharactor = (candidates: CharactorBattling[], values: string[]
 export const selectCharactor: SelectCharactor = (candidates, values) =>
   candidates.filter((candidate) => values.includes(`${candidate.isVisitor ? "V" : "H"}:${candidate.name}`));
 
-export type GetSkills = (charactor: Charactor) => Skill[];
-export const getSkills: GetSkills = (charactor) => [
-  ...charactor.race.skills,
-  ...charactor.blessing.skills,
-  ...charactor.clothing.skills,
-  ...charactor.weapon.skills,
-];
-
+// FIXME acquirement削除に伴う応急処置。装備による補正がなくなったため、基礎値をそのまま返す
 export type GetPhysical = (charactor: Charactor) => Physical;
-export const getPhysical: GetPhysical = (charactor) =>
-  addPhysicals([
-    basePhysical,
-    charactor.race.additionalPhysical,
-    charactor.blessing.additionalPhysical,
-    charactor.clothing.additionalPhysical,
-    charactor.weapon.additionalPhysical,
-  ]);
-
-export type Validate = (
-  name: string,
-  race: Race,
-  blessing: Blessing,
-  clothing: Clothing,
-  weapon: Weapon,
-) => NotWearableErorr | null;
-export const validate: Validate = (name, race, blessing, clothing, weapon) => {
-  const raceResult = race.validateWearable(race, blessing, clothing, weapon);
-  if (raceResult instanceof NotWearableErorr) {
-    return raceResult;
-  }
-
-  const blessingResult = blessing.validateWearable(race, blessing, clothing, weapon);
-  if (blessingResult instanceof NotWearableErorr) {
-    return blessingResult;
-  }
-
-  const clothingResult = clothing.validateWearable(race, blessing, clothing, weapon);
-  if (clothingResult instanceof NotWearableErorr) {
-    return clothingResult;
-  }
-
-  const weaponResult = weapon.validateWearable(race, blessing, clothing, weapon);
-  if (weaponResult instanceof NotWearableErorr) {
-    return weaponResult;
-  }
-
-  return null;
-};
+export const getPhysical: GetPhysical = (_charactor) => basePhysical;
 
 export type toBattleCharactor = (charactor: Charactor, isVisitor: boolean) => CharactorBattling;
 export const toBattleCharactor: toBattleCharactor = (charactor, isVisitor) => {
@@ -143,27 +89,8 @@ export const toBattleCharactor: toBattleCharactor = (charactor, isVisitor) => {
   };
 };
 
-export type CreateCharactor = (
-  name: string,
-  race: Race,
-  blessing: Blessing,
-  clothing: Clothing,
-  weapon: Weapon,
-) => Charactor | NotWearableErorr;
-export const createCharactor: CreateCharactor = (name, race, blessing, clothing, weapon) => {
-  const validateResult = validate(name, race, blessing, clothing, weapon);
-  if (validateResult instanceof NotWearableErorr) {
-    return validateResult;
-  }
-
-  return {
-    name,
-    race,
-    blessing,
-    clothing,
-    weapon,
-  };
-};
+export type CreateCharactor = (name: string) => Charactor;
+export const createCharactor: CreateCharactor = (name) => ({ name });
 
 export type IsVisitorString = (isVisitor: boolean) => string;
 export const isVisitorString: IsVisitorString = (isVisitor) => (isVisitor ? "VISITOR" : "HOME");

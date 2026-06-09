@@ -7,7 +7,6 @@ import { z } from "zod";
 import { toTurn, toTurnJson, turnSchema } from "./turn";
 import { toPartyBattling, toPartyBattlingJson, partyBattlingSchema } from "./party";
 
-import { NotWearableErorr } from "../model/acquirement";
 import { JsonSchemaUnmatchError, DataNotFoundError } from "../store_utility/schema";
 import { GameDraw, GameHome, GameOngoing, GameVisitor } from "../model/battle";
 import { CharactorDuplicationError } from "../model/party";
@@ -33,14 +32,13 @@ export const toBattleJson: ToJson<Battle, BattleJson> = (battle) => ({
 export type ToBattle = ToModel<
   Battle,
   BattleJson,
-  NotWearableErorr | DataNotFoundError | CharactorDuplicationError | JsonSchemaUnmatchError
+  DataNotFoundError | CharactorDuplicationError | JsonSchemaUnmatchError
 >;
 export const toBattle: ToBattle = (battleJson) => {
   const { title } = battleJson;
 
   const home = toPartyBattling(battleJson.home);
   if (
-    home instanceof NotWearableErorr ||
     home instanceof DataNotFoundError ||
     home instanceof CharactorDuplicationError
   ) {
@@ -49,7 +47,6 @@ export const toBattle: ToBattle = (battleJson) => {
 
   const visitor = toPartyBattling(battleJson.visitor);
   if (
-    visitor instanceof NotWearableErorr ||
     visitor instanceof DataNotFoundError ||
     visitor instanceof CharactorDuplicationError
   ) {
@@ -60,7 +57,6 @@ export const toBattle: ToBattle = (battleJson) => {
   for (const turnJson of battleJson.turns) {
     const turn = toTurn(turnJson);
     if (
-      turn instanceof NotWearableErorr ||
       turn instanceof DataNotFoundError ||
       turn instanceof JsonSchemaUnmatchError
     ) {

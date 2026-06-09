@@ -4,7 +4,6 @@ import type { Charactor } from "../model/charactor";
 import { z } from "zod";
 
 import { DataNotFoundError } from "../store_utility/schema";
-import { NotWearableErorr } from "../model/acquirement";
 import { charactorFormSchema, toCharactor, toCharactorForm } from "./charactor";
 import { validate, CharactorDuplicationError } from "../model/party";
 import { EmptyParameter } from "../io/window_dialogue";
@@ -23,7 +22,7 @@ export const toPartyForm: ToPartyForm = (party) => ({
 
 export type ToParty = (
   partyForm: PartyForm,
-) => Party | NotWearableErorr | DataNotFoundError | CharactorDuplicationError;
+) => Party | DataNotFoundError | CharactorDuplicationError;
 export const toParty: ToParty = (partyForm) => {
   const { name } = partyForm;
 
@@ -32,7 +31,6 @@ export const toParty: ToParty = (partyForm) => {
     const charactorObj = toCharactor(charactor);
     if (
       charactorObj instanceof DataNotFoundError ||
-      charactorObj instanceof NotWearableErorr ||
       charactorObj instanceof EmptyParameter
     ) {
       return charactorObj;

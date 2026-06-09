@@ -18,7 +18,6 @@ import { partyFormSchema, toPartyForm } from '../form/party';
 import { saveParty } from '../procedure/party/save';
 import { dismissParty } from '../procedure/party/dismiss';
 import { CharactorDuplicationError } from '../model/party';
-import { NotWearableErorr } from '../model/acquirement';
 import { JsonSchemaUnmatchError, DataNotFoundError, DataExistError } from '../store_utility/schema';
 import { useIO } from './context';
 import { importParty } from '../procedure/party/importJson';
@@ -40,7 +39,6 @@ export const ImportParty: FC<{
       partyObj instanceof UserCancel ||
       partyObj instanceof EmptyParameter ||
       partyObj instanceof JsonSchemaUnmatchError ||
-      partyObj instanceof NotWearableErorr ||
       partyObj instanceof DataNotFoundError ||
       partyObj instanceof CharactorDuplicationError
     )) {
@@ -87,7 +85,6 @@ export const PartyEditor: FC<{
     const error = await saveParty(partyRepository, !exist)(partyInput);
     if (
       error instanceof DataNotFoundError ||
-      error instanceof NotWearableErorr ||
       error instanceof JsonSchemaUnmatchError ||
       error instanceof CharactorDuplicationError ||
       error instanceof DataExistError
@@ -162,10 +159,10 @@ export const PartyEditor: FC<{
           )}
           <Stack direction="column" sx={{ justifyContent: "flex-start", p: 1, width: '100%' }}>
             <Box sx={{ pb: 1, width: '100%' }}>
-              <Button variant="contained" type="button" sx={{ width: '100%' }} onClick={() => append({ name: '', race: '', blessing: '', clothing: '', weapon: '' })}>Hire Charactor</Button>
+              <Button variant="contained" type="button" sx={{ width: '100%' }} onClick={() => append({ name: '' })}>Hire Charactor</Button>
             </Box>
             {fields.map((item, index) => (
-              <CharactorCard key={`party_charactor_${item.id}`} register={register} getValues={getValues} remove={remove} errors={errors} index={index} control={control} />
+              <CharactorCard key={`party_charactor_${item.id}`} register={register} getValues={getValues} remove={remove} errors={errors} index={index} />
             ))}
           </Stack>
         </Stack>

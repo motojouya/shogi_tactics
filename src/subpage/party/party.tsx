@@ -10,7 +10,6 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { PartyEditor } from '../../components/party';
 import { CharactorDuplicationError } from '../../model/party';
 import { useIO } from '../../components/context';
-import { NotWearableErorr } from '../../model/acquirement';
 import { JsonSchemaUnmatchError, DataNotFoundError } from '../../store_utility/schema';
 import { Container } from '../../components/utility';
 
@@ -19,7 +18,6 @@ export const PartyExsiting: FC<{ partyName: string }> = ({ partyName }) => {
   const party = useLiveQuery(() => partyRepository.get(partyName), [partyName]);
 
   if (
-    party instanceof NotWearableErorr ||
     party instanceof DataNotFoundError ||
     party instanceof CharactorDuplicationError ||
     party instanceof JsonSchemaUnmatchError

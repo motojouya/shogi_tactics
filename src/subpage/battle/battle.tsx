@@ -5,7 +5,6 @@ import { useLiveQuery } from "dexie-react-hooks";
 
 import { BattleContainer } from '../../components/battle';
 import { CharactorDuplicationError } from '../../model/party';
-import { NotWearableErorr } from '../../model/acquirement';
 import { JsonSchemaUnmatchError, DataNotFoundError } from '../../store_utility/schema';
 import { useIO } from '../../components/context';
 import { Container } from '../../components/utility';
@@ -15,7 +14,6 @@ export const BattleExsiting: FC<{ battleTitle: string }> = ({ battleTitle }) => 
   const battle = useLiveQuery(() => battleRepository.get(battleTitle), [battleTitle]);
 
   if (
-    battle instanceof NotWearableErorr ||
     battle instanceof DataNotFoundError ||
     battle instanceof CharactorDuplicationError ||
     battle instanceof JsonSchemaUnmatchError
