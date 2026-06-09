@@ -50,10 +50,7 @@ import {
 import { ACTION_DO_NOTHING } from '../model/turn';
 import { isVisitorString } from '../model/charactor';
 import { skillRepository, getSkills } from '../store/skill';
-import { MAGIC_TYPE_NONE } from '../model/skill';
 
-import { underStatus } from '../model/status';
-import { silent } from '../store_data/status/index';
 import { DataNotFoundError } from '../store_utility/schema';
 import { act } from '../procedure/battle/act';
 import { surrender } from '../procedure/battle/surrender';
@@ -163,8 +160,6 @@ const SkillSelect: FC<{
 
   const skills = getSkills();
   const skillOptions = skills
-    .filter(skill => skill.mpConsumption <= actor.mp)
-    .filter(skill => !underStatus(silent, actor) || skill.magicType === MAGIC_TYPE_NONE)
     .map(skill => ({ value: skill.name, label: skill.label }));
   skillOptions.push({ value: ACTION_DO_NOTHING, label: '何もしない' });
 
@@ -430,7 +425,7 @@ export const BattleTurn: FC<{
                   {skill && (
                     <Box sx={{ pt: 1 }}>
                       <Typography>
-                        {`Skill: ${skill.label} MP-${skill.mpConsumption} WT+${skill.additionalWt} 距離${skill.effectLength}`}
+                        {`Skill: ${skill.label} WT+${skill.additionalWt} 距離${skill.effectLength}`}
                       </Typography>
                     </Box>
                   )}

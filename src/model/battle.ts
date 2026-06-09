@@ -3,12 +3,11 @@ import type { CharactorBattling } from "./charactor";
 import type { Skill } from "./skill";
 import type { Turn } from "./turn";
 
-import { MAGIC_TYPE_NONE } from "./skill";
 import { copyPartyBattling } from "./party";
 import { getPhysical, toBattleCharactor, copyCharactorBattling } from "./charactor";
 import { copyTurn } from "./turn";
 
-import { acid, quick, silent, sleep, slow } from "../store_data/status/index";
+import { acid, quick, sleep, slow } from "../store_data/status/index";
 import { underStatus } from "./status";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
@@ -156,14 +155,6 @@ export type ActToCharactor = (
   datetime: Date,
 ) => Turn;
 export const actToCharactor: ActToCharactor = (battle, actor, skill, receivers, datetime) => {
-  if (skill.mpConsumption > actor.mp) {
-    throw new Error("mp shortage");
-  }
-
-  if (underStatus(silent, actor) && skill.magicType !== MAGIC_TYPE_NONE) {
-    throw new Error("silent cannot do magic");
-  }
-
   if (underStatus(sleep, actor)) {
     return stay(battle, actor, datetime);
   }
@@ -192,7 +183,6 @@ export const actToCharactor: ActToCharactor = (battle, actor, skill, receivers, 
     };
     if (actor.isVisitor === charactor.isVisitor && actor.name === charactor.name) {
       newCharactor.restWt = getPhysical(charactor).WT + skill.additionalWt;
-      newCharactor.mp -= skill.mpConsumption;
     }
     return newCharactor;
   });
