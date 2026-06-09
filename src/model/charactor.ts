@@ -39,7 +39,6 @@ export type Charactor = {
 export type CharactorBattling = Charactor & {
   statuses: AttachedStatus[];
   hp: number;
-  mp: number;
   restWt: number;
   isVisitor: boolean;
 };
@@ -58,7 +57,7 @@ export const copyCharactorBattling: CopyCharactorBattling = (charactor) => ({
 
 export function isBattling(charctor: Charactor): charctor is CharactorBattling {
   return (
-    "statuses" in charctor && "hp" in charctor && "mp" in charctor && "restWt" in charctor && "isVisitor" in charctor
+    "statuses" in charctor && "hp" in charctor && "restWt" in charctor && "isVisitor" in charctor
   );
 }
 
@@ -83,7 +82,6 @@ export const toBattleCharactor: toBattleCharactor = (charactor, isVisitor) => {
     ...copyCharactor(charactor),
     statuses: [],
     hp: physical.MaxHP,
-    mp: 0,
     restWt: physical.WT,
     isVisitor: isVisitor,
   };

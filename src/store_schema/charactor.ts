@@ -22,7 +22,6 @@ export type CharactorJson = z.infer<CharactorSchema>;
 export const charactorBattlingSchema = charactorSchema.extend({
   statuses: z.array(attachedStatusSchema),
   hp: z.number().int(),
-  mp: z.number().int(),
   restWt: z.number().int(),
   isVisitor: z.boolean(),
 });
@@ -42,7 +41,6 @@ export const toCharactorBattlingJson: ToJson<CharactorBattling, CharactorBattlin
   name: charactor.name,
   statuses: charactor.statuses.map(toAttachedStatusJson),
   hp: charactor.hp,
-  mp: charactor.mp,
   restWt: charactor.restWt,
   isVisitor: charactor.isVisitor,
 });
@@ -74,7 +72,6 @@ export const toCharactorBattling: ToModel<CharactorBattling, CharactorBattlingJs
     ...charactor,
     statuses,
     hp: 0 + charactorJson.hp,
-    mp: 0 + charactorJson.mp,
     restWt: 0 + charactorJson.restWt,
     isVisitor: charactorJson.isVisitor,
   };

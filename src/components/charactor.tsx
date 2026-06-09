@@ -55,21 +55,18 @@ export const CharactorStatus: FC<{ charactor: Charactor }> = ({ charactor }) => 
   const physical = getPhysical(charactor);
 
   let hpText: string;
-  let mpText: string;
   let wtText: string;
   let statusesText: string;
   let isVisitorTag;
 
   if (isBattling(charactor)) {
     hpText = `${charactor.hp}/${physical.MaxHP}`;
-    mpText = `${charactor.mp}/${physical.MaxMP}`;
     wtText = `${charactor.restWt}(${physical.WT})`;
     statusesText = charactor.statuses.map(attachedStatus => `${attachedStatus.status.label}(${attachedStatus.restWt})`).join(', ');
     isVisitorTag = <Chip label={charactor.isVisitor ? 'VISITOR' : 'HOME'} variant="outlined" color='primary' />;
 
   } else {
     hpText = `${physical.MaxHP}/${physical.MaxHP}`;
-    mpText = `${physical.MaxMP}/${physical.MaxMP}`;
     wtText = `${physical.WT}(${physical.WT})`;
     statusesText = '-';
     isVisitorTag = null;
@@ -82,7 +79,6 @@ export const CharactorStatus: FC<{ charactor: Charactor }> = ({ charactor }) => 
       </Stack>
       <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
         <Box sx={{ pr: 1, flex: "0 0 110px" }}><Typography>HP: {hpText}</Typography></Box>
-        <Box sx={{ pr: 1, flex: "0 0 110px" }}><Typography>MP: {mpText}</Typography></Box>
         <Box sx={{ pr: 1, flex: "0 0 110px" }}><Typography>WT: {wtText}</Typography></Box>
         <Box sx={{ pr: 1, flex: "1 1 auto" }}><Typography>ステータス: {statusesText}</Typography></Box>
       </Stack>

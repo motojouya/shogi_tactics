@@ -66,10 +66,6 @@ const sortByWT: SortByWT = (charactors) =>
       if (hpDiff !== 0) {
         return hpDiff;
       }
-      const mpDiff = left.mp - right.mp;
-      if (mpDiff !== 0) {
-        return mpDiff;
-      }
       const statusDiff = left.statuses.length - right.statuses.length;
       if (statusDiff !== 0) {
         return statusDiff;
@@ -231,9 +227,6 @@ const waitCharactor: WaitCharactor = (charactor, wt) => {
       };
     })
     .filter((attachedStatus) => attachedStatus.restWt > 0);
-
-  const physical = getPhysical(newCharactor);
-  newCharactor.mp = Math.min(newCharactor.mp + Math.floor(wt / 10), physical.MaxMP);
 
   return newCharactor;
 };
