@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 import type { Charactor } from "../../src/model/charactor";
 import type { CharactorJson } from "../../src/store_schema/charactor";
 
-import { getAbilities, getSkills, getPhysical } from "../../src/model/charactor";
+import { getSkills, getPhysical } from "../../src/model/charactor";
 import { toCharactor } from "../../src/store_schema/charactor";
 import { NotWearableErorr } from "../../src/model/acquirement";
 import { DataNotFoundError } from "../../src/store_utility/schema";
@@ -68,10 +68,6 @@ describe("Charctor#toCharactor", function () {
     expect(charactor.blessing.name).toBe("earth");
     expect(charactor.clothing.name).toBe("redRobe");
     expect(charactor.weapon.name).toBe("rubyRod");
-
-    const abilities = getAbilities(charactor);
-    expect(abilities.length).toBe(1);
-    expect(abilities[0].name).toBe("mpGainPlus");
 
     const skills = getSkills(charactor);
     expect(skills.length).toBe(4);

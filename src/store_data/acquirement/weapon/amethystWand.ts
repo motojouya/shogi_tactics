@@ -8,7 +8,6 @@ export const amethystWand: Weapon = {
   name: "amethystWand",
   label: "アメジストワンド",
   skills: [higherBolt, electricShock, eleciWave],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

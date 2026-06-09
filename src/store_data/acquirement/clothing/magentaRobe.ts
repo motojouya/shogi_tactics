@@ -1,13 +1,11 @@
 import type { Clothing } from "../../../model/acquirement";
 import { createValidateWearable } from "../../../model/acquirement";
-import { mpGainPlus } from "../../ability/mpGainPlus";
 import { slow } from "../../skill/slow";
 
 export const magentaRobe: Clothing = {
   name: "magentaRobe",
   label: "桃色の衣",
   skills: [slow],
-  abilities: [mpGainPlus],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

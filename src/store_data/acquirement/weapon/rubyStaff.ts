@@ -8,7 +8,6 @@ export const rubyStaff: Weapon = {
   name: "rubyStaff",
   label: "ルビースタッフ",
   skills: [flameFall, smallHeat, flameDigger],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

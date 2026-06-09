@@ -8,7 +8,6 @@ export const diamondStaff: Weapon = {
   name: "diamondStaff",
   label: "ダイヤモンドスタッフ",
   skills: [gunStone, mountFall, stoneWeather],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

@@ -5,7 +5,6 @@ export const owlRainWear: Clothing = {
   name: "owlRainWear",
   label: "フクロウの蓑笠",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

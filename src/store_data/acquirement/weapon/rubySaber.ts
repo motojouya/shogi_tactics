@@ -3,13 +3,11 @@ import { createValidateWearable } from "../../../model/acquirement";
 import { chop } from "../../skill/chop";
 import { flameFall } from "../../skill/flameFall";
 import { dazzle } from "../../skill/dazzle";
-import { rampartForce } from "../../ability/rampartForce";
 
 export const rubySaber: Weapon = {
   name: "rubySaber",
   label: "ルビーサーベル",
   skills: [chop, flameFall, dazzle],
-  abilities: [rampartForce],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

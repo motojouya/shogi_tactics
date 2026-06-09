@@ -6,7 +6,6 @@ export const furAironArmor: Clothing = {
   name: "furAironArmor",
   label: "革と鉄の鎧",
   skills: [concentration],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

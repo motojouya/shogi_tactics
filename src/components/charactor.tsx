@@ -39,7 +39,6 @@ import {
 import {
   isBattling,
   getPhysical,
-  getAbilities,
   getSkills,
 } from '../model/charactor';
 import { toCharactor } from '../form/charactor';
@@ -149,9 +148,6 @@ export const CharactorStatus: FC<{ charactor: Charactor }> = ({ charactor }) => 
 export const CharactorDetail: FC<{ charactor: Charactor }> = ({ charactor }) => {
   const physical = getPhysical(charactor);
 
-  const abilities = getAbilities(charactor);
-  const abilitiesText = abilities.map(ability => ability.label).join(', ');
-
   const skills = getSkills(charactor);
   const skillsText = skills.map(skill => skill.label).join(', ');
 
@@ -165,7 +161,6 @@ export const CharactorDetail: FC<{ charactor: Charactor }> = ({ charactor }) => 
         <Box sx={{ pr: 2 }}><Typography>武器: {charactor.weapon.label}  </Typography></Box>
       </Stack>
       <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
-        <Box sx={{ pr: 2 }}><Typography>アビリティ: {abilitiesText}</Typography></Box>
         <Box sx={{ pr: 2 }}><Typography>スキル: {skillsText}       </Typography></Box>
       </Stack>
       <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>

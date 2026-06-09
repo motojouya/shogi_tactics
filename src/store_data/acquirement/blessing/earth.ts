@@ -5,7 +5,6 @@ export const earth: Blessing = {
   name: "earth",
   label: "大地",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

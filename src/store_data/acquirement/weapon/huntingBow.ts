@@ -8,7 +8,6 @@ export const huntingBow: Weapon = {
   name: "huntingBow",
   label: "狩人の弓",
   skills: [toxicShot, paralysisShot, silentShot],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

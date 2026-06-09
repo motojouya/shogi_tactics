@@ -8,7 +8,6 @@ export const jadeRod: Weapon = {
   name: "jadeRod",
   label: "ヒスイロッド",
   skills: [hailstone, frostbite, silent],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

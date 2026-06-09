@@ -7,7 +7,6 @@ export const jadeStick: Weapon = {
   name: "jadeStick",
   label: "ヒスイステッキ",
   skills: [hailstone, iceSandwich],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

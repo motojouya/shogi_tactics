@@ -3,13 +3,11 @@ import { createValidateWearable } from "../../../model/acquirement";
 import { chop } from "../../skill/chop";
 import { dazzle } from "../../skill/dazzle";
 import { higherBolt } from "../../skill/higherBolt";
-import { rampartForce } from "../../ability/rampartForce";
 
 export const amethystSaber: Weapon = {
   name: "amethystSaber",
   label: "アメジストサーベル",
   skills: [chop, higherBolt, dazzle],
-  abilities: [rampartForce],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

@@ -1,13 +1,11 @@
 import type { Clothing } from "../../../model/acquirement";
 import { createValidateWearable } from "../../../model/acquirement";
-import { mpGainPlus } from "../../ability/mpGainPlus";
 import { waterCutter } from "../../skill/waterCutter";
 
 export const blueRobe: Clothing = {
   name: "blueRobe",
   label: "青の衣",
   skills: [waterCutter],
-  abilities: [mpGainPlus],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

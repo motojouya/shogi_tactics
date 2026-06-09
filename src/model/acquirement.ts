@@ -1,4 +1,3 @@
-import type { Ability } from "./ability";
 import type { Physical } from "./physical";
 import type { Skill } from "./skill";
 
@@ -6,7 +5,6 @@ export type Acquirement = {
   name: string;
   label: string;
   skills: Skill[];
-  abilities: Ability[];
   additionalPhysical: Physical;
   validateWearable: ValidateWearable;
   description: string;

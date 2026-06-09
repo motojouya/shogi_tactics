@@ -1,13 +1,11 @@
 import type { Clothing } from "../../../model/acquirement";
 import { createValidateWearable } from "../../../model/acquirement";
-import { mpGainPlus } from "../../ability/mpGainPlus";
 import { fireWall } from "../../skill/fireWall";
 
 export const redRobe: Clothing = {
   name: "redRobe",
   label: "赤の衣",
   skills: [fireWall],
-  abilities: [mpGainPlus],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

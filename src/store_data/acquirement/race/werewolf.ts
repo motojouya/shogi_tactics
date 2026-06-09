@@ -5,7 +5,6 @@ export const werewolf: Race = {
   name: "werewolf",
   label: "ワーウルフ",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

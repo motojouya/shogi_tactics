@@ -8,7 +8,6 @@ export const samuraiBow: Weapon = {
   name: "samuraiBow",
   label: "和弓",
   skills: [shot, hardRain, overbear],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

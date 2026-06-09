@@ -5,7 +5,6 @@ export const lionCollar: Clothing = {
   name: "lionCollar",
   label: "獅子の襟飾り",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

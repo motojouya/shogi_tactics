@@ -3,13 +3,11 @@ import { createValidateWearable } from "../../../model/acquirement";
 import { blow } from "../../skill/blow";
 import { gunStone } from "../../skill/gunStone";
 import { dazzle } from "../../skill/dazzle";
-import { rampartForce } from "../../ability/rampartForce";
 
 export const diamondFlail: Weapon = {
   name: "diamondFlail",
   label: "ダイヤモンドフレイル",
   skills: [blow, gunStone, dazzle],
-  abilities: [rampartForce],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

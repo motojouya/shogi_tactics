@@ -8,7 +8,6 @@ export const rubyRod: Weapon = {
   name: "rubyRod",
   label: "ルビーロッド",
   skills: [flameFall, smallHeat, ghostFire],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

@@ -5,7 +5,6 @@ export const sea: Blessing = {
   name: "sea",
   label: "海",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

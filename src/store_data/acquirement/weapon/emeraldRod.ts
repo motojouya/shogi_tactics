@@ -8,7 +8,6 @@ export const emeraldRod: Weapon = {
   name: "emeraldRod",
   label: "エメラルドロッド",
   skills: [windEdge, heavyWind, tornade],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

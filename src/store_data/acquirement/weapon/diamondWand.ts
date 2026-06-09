@@ -8,7 +8,6 @@ export const diamondWand: Weapon = {
   name: "diamondWand",
   label: "ダイヤモンドワンド",
   skills: [gunStone, rockWave, copperBlue],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

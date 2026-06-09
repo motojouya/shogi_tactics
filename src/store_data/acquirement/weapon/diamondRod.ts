@@ -8,7 +8,6 @@ export const diamondRod: Weapon = {
   name: "diamondRod",
   label: "ダイヤモンドロッド",
   skills: [gunStone, mountFall, copperBlue],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

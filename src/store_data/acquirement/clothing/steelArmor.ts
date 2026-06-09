@@ -6,7 +6,6 @@ export const steelArmor: Clothing = {
   name: "steelArmor",
   label: "鋼鉄の鎧",
   skills: [coldFeet],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

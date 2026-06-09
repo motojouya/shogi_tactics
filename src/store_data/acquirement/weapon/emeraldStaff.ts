@@ -7,7 +7,6 @@ export const emeraldStaff: Weapon = {
   name: "emeraldStaff",
   label: "エメラルドスタッフ",
   skills: [windEdge, tornade],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

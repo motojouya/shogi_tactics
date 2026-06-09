@@ -5,7 +5,6 @@ export const merman: Race = {
   name: "merman",
   label: "マーマン",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

@@ -6,7 +6,6 @@ export const furArmor: Clothing = {
   name: "furArmor",
   label: "毛皮の鎧",
   skills: [coldFeet],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

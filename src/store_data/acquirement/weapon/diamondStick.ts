@@ -8,7 +8,6 @@ export const diamondStick: Weapon = {
   name: "diamondStick",
   label: "ダイヤモンドステッキ",
   skills: [gunStone, rockWave, stoneWeather],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

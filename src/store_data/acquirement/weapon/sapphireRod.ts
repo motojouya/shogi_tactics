@@ -8,7 +8,6 @@ export const sapphireRod: Weapon = {
   name: "sapphireRod",
   label: "サファイアロッド",
   skills: [gunWater, downRushing, quench],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

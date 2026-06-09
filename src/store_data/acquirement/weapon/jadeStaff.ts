@@ -7,7 +7,6 @@ export const jadeStaff: Weapon = {
   name: "jadeStaff",
   label: "ヒスイスタッフ",
   skills: [hailstone, frostbite],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

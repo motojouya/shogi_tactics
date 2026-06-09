@@ -3,13 +3,11 @@ import { createValidateWearable } from "../../../model/acquirement";
 import { chop } from "../../skill/chop";
 import { guillotineOfGiant } from "../../skill/guillotineOfGiant";
 import { overbear } from "../../skill/overbear";
-import { rampartForce } from "../../ability/rampartForce";
 
 export const samuraiSword: Weapon = {
   name: "samuraiSword",
   label: "刀",
   skills: [chop, guillotineOfGiant, overbear],
-  abilities: [rampartForce],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

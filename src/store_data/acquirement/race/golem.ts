@@ -5,7 +5,6 @@ export const golem: Race = {
   name: "golem",
   label: "ゴーレム",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

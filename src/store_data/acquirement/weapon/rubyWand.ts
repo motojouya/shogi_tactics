@@ -8,7 +8,6 @@ export const rubyWand: Weapon = {
   name: "rubyWand",
   label: "ルビーワンド",
   skills: [flameFall, crossFire, ghostFire],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

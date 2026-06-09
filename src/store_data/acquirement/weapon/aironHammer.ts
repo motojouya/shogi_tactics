@@ -3,13 +3,11 @@ import { createValidateWearable } from "../../../model/acquirement";
 import { blow } from "../../skill/blow";
 import { overbear } from "../../skill/overbear";
 import { lightMeteor } from "../../skill/lightMeteor";
-import { rampartForce } from "../../ability/rampartForce";
 
 export const aironHammer: Weapon = {
   name: "aironHammer",
   label: "鉄のハンマー",
   skills: [blow, lightMeteor, overbear],
-  abilities: [rampartForce],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

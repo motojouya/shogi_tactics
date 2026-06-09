@@ -3,13 +3,11 @@ import { createValidateWearable } from "../../../model/acquirement";
 import { stab } from "../../skill/stab";
 import { overbear } from "../../skill/overbear";
 import { blindBull } from "../../skill/blindBull";
-import { rampartForce } from "../../ability/rampartForce";
 
 export const javelin: Weapon = {
   name: "javelin",
   label: "ジャベリン",
   skills: [stab, blindBull, overbear],
-  abilities: [rampartForce],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

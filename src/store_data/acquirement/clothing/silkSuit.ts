@@ -5,7 +5,6 @@ export const silkSuit: Clothing = {
   name: "silkSuit",
   label: "シルクの衣",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

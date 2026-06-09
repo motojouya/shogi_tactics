@@ -1,13 +1,11 @@
 import type { Clothing } from "../../../model/acquirement";
 import { createValidateWearable } from "../../../model/acquirement";
-import { mpGainPlus } from "../../ability/mpGainPlus";
 import { stoneShell } from "../../skill/stoneShell";
 
 export const cyanRobe: Clothing = {
   name: "cyanRobe",
   label: "水色の衣",
   skills: [stoneShell],
-  abilities: [mpGainPlus],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

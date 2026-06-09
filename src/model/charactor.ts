@@ -2,7 +2,6 @@ import type { Status } from "./status";
 import type { SelectOption } from "../io/dialogue";
 import type { Physical } from "./physical";
 import type { Race, Weapon, Clothing, Blessing } from "./acquirement";
-import type { Ability } from "./ability";
 import type { Skill } from "./skill";
 
 import { addPhysicals } from "./physical";
@@ -81,14 +80,6 @@ export const getSelectOption: GetSelectOption = (charactor) => ({
 export type SelectCharactor = (candidates: CharactorBattling[], values: string[]) => CharactorBattling[];
 export const selectCharactor: SelectCharactor = (candidates, values) =>
   candidates.filter((candidate) => values.includes(`${candidate.isVisitor ? "V" : "H"}:${candidate.name}`));
-
-export type GetAbilities = (charactor: Charactor) => Ability[];
-export const getAbilities: GetAbilities = (charactor) => [
-  ...charactor.race.abilities,
-  ...charactor.blessing.abilities,
-  ...charactor.clothing.abilities,
-  ...charactor.weapon.abilities,
-];
 
 export type GetSkills = (charactor: Charactor) => Skill[];
 export const getSkills: GetSkills = (charactor) => [

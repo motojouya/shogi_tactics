@@ -5,7 +5,7 @@ import type { Turn } from "./turn";
 
 import { MAGIC_TYPE_NONE } from "./skill";
 import { copyPartyBattling } from "./party";
-import { getPhysical, getAbilities, toBattleCharactor, copyCharactorBattling } from "./charactor";
+import { getPhysical, toBattleCharactor, copyCharactorBattling } from "./charactor";
 import { copyTurn } from "./turn";
 
 import { acid, quick, silent, sleep, slow } from "../store_data/status/index";
@@ -216,12 +216,10 @@ export const surrender: Surrender = (battle, actor, datetime) => {
 
 type WaitCharactor = (charactor: CharactorBattling, wt: number) => CharactorBattling;
 const waitCharactor: WaitCharactor = (charactor, wt) => {
-  const abilities = getAbilities(charactor);
-
-  const newCharactor = abilities.reduce((charactorAc, ability) => ability.wait(wt, charactorAc), {
+  const newCharactor: CharactorBattling = {
     ...charactor,
     statuses: [...charactor.statuses.map((attachedStatus) => ({ ...attachedStatus }))],
-  } as CharactorBattling);
+  };
 
   // prettier-ignore
   const wtRate = underStatus(quick, newCharactor) ? 1.5

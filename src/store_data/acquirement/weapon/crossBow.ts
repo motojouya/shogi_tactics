@@ -8,7 +8,6 @@ export const crossBow: Weapon = {
   name: "crossBow",
   label: "クロスボウ",
   skills: [shot, multiShot, dazzle],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

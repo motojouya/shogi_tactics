@@ -8,7 +8,6 @@ export const sapphireStaff: Weapon = {
   name: "sapphireStaff",
   label: "サファイアスタッフ",
   skills: [gunWater, downRushing, stickyRain],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

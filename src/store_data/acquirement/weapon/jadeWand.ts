@@ -8,7 +8,6 @@ export const jadeWand: Weapon = {
   name: "jadeWand",
   label: "ヒスイワンド",
   skills: [hailstone, iceSandwich, silent],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

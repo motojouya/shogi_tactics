@@ -8,7 +8,6 @@ export const sapphireStick: Weapon = {
   name: "sapphireStick",
   label: "サファイアステッキ",
   skills: [gunWater, flashFlood, stickyRain],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

@@ -3,13 +3,11 @@ import { createValidateWearable } from "../../../model/acquirement";
 import { blow } from "../../skill/blow";
 import { dazzle } from "../../skill/dazzle";
 import { gravelWall } from "../../skill/gravelWall";
-import { rampartForce } from "../../ability/rampartForce";
 
 export const morningStar: Weapon = {
   name: "morningStar",
   label: "モーニングスター",
   skills: [blow, gravelWall, dazzle],
-  abilities: [rampartForce],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

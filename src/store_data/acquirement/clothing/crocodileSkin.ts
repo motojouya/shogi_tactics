@@ -5,7 +5,6 @@ export const crocodileSkin: Clothing = {
   name: "crocodileSkin",
   label: "ワニ革の服",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

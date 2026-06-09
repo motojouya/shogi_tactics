@@ -8,7 +8,6 @@ export const amethystStaff: Weapon = {
   name: "amethystStaff",
   label: "アメジストスタッフ",
   skills: [higherBolt, thunder, jammer],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

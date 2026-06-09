@@ -5,7 +5,6 @@ export const fairy: Race = {
   name: "fairy",
   label: "フェアリー",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

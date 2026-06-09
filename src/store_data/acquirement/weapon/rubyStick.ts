@@ -8,7 +8,6 @@ export const rubyStick: Weapon = {
   name: "rubyStick",
   label: "ルビーステッキ",
   skills: [flameFall, crossFire, flameDigger],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

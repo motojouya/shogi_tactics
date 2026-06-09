@@ -5,7 +5,6 @@ export const sky: Blessing = {
   name: "sky",
   label: "空",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

@@ -3,13 +3,11 @@ import { createValidateWearable } from "../../../model/acquirement";
 import { chop } from "../../skill/chop";
 import { swordDance } from "../../skill/swordDance";
 import { overbear } from "../../skill/overbear";
-import { rampartForce } from "../../ability/rampartForce";
 
 export const claymore: Weapon = {
   name: "claymore",
   label: "クレイモア",
   skills: [chop, swordDance, overbear],
-  abilities: [rampartForce],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

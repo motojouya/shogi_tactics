@@ -8,7 +8,6 @@ export const sapphireWand: Weapon = {
   name: "sapphireWand",
   label: "サファイアワンド",
   skills: [gunWater, flashFlood, quench],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

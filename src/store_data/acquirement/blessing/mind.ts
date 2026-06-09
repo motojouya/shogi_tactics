@@ -5,7 +5,6 @@ export const mind: Blessing = {
   name: "mind",
   label: "心",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

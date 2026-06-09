@@ -6,7 +6,6 @@ export const mithrilArmor: Clothing = {
   name: "mithrilArmor",
   label: "ミスリルの鎧",
   skills: [concentration],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

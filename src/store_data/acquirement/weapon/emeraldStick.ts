@@ -7,7 +7,6 @@ export const emeraldStick: Weapon = {
   name: "emeraldStick",
   label: "エメラルドステッキ",
   skills: [windEdge, danceLeaves],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

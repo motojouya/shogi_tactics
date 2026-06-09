@@ -5,7 +5,6 @@ export const lizardman: Race = {
   name: "lizardman",
   label: "リザードマン",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

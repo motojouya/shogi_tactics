@@ -3,13 +3,11 @@ import { createValidateWearable } from "../../../model/acquirement";
 import { toxicScratch } from "../../skill/toxicScratch";
 import { paralysisScratch } from "../../skill/paralysisScratch";
 import { silentScratch } from "../../skill/silentScratch";
-import { rampartForce } from "../../ability/rampartForce";
 
 export const dagger: Weapon = {
   name: "dagger",
   label: "ダガー",
   skills: [toxicScratch, paralysisScratch, silentScratch],
-  abilities: [rampartForce],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

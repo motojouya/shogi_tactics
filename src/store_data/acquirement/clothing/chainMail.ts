@@ -5,7 +5,6 @@ export const chainMail: Clothing = {
   name: "chainMail",
   label: "鎖帷子",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,

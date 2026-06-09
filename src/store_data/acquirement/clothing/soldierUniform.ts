@@ -5,7 +5,6 @@ export const soldierUniform: Clothing = {
   name: "soldierUniform",
   label: "軍人の制服",
   skills: [],
-  abilities: [],
   additionalPhysical: {
     MaxHP: 0,
     MaxMP: 0,
