@@ -99,27 +99,7 @@ export const CharactorDetail: FC<{ charactor: Charactor }> = ({ charactor }) => 
         <Box sx={{ pr: 2 }}><Typography>スキル: {skillsText}       </Typography></Box>
       </Stack>
       <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
-        <Box sx={{ pr: 2 }}><Typography>STR: {physical.STR}  </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>VIT: {physical.VIT}  </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>DEX: {physical.DEX}  </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>AGI: {physical.AGI}  </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>AVD: {physical.AVD}  </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>INT: {physical.INT}  </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>MND: {physical.MND}  </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>RES: {physical.RES}  </Typography></Box>
         <Box sx={{ pr: 2 }}><Typography>MOVE: {physical.move}</Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>JUMP: {physical.jump}</Typography></Box>
-      </Stack>
-      <Stack direction="row" sx={{ borderBottom: '1px dotted royalblue', justifyContent: "flex-start", flexWrap: 'wrap' }}>
-        <Box sx={{ pr: 2 }}><Typography>火属性: {physical.FireSuitable}     </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>岩属性: {physical.RockSuitable}     </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>水属性: {physical.WaterSuitable}    </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>氷属性: {physical.IceSuitable}      </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>風属性: {physical.AirSuitable}      </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>雷属性: {physical.ThunderSuitable}  </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>刺突耐性: {physical.StabResistance} </Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>斬撃耐性: {physical.SlashResistance}</Typography></Box>
-        <Box sx={{ pr: 2 }}><Typography>打撃耐性: {physical.BlowResistance} </Typography></Box>
       </Stack>
     </Stack>
   );

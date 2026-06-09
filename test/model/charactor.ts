@@ -19,15 +19,7 @@ describe("Charctor#toCharactor", function () {
 
     const physical = getPhysical(charactor);
     expect(physical.MaxHP).toBe(300);
-    expect(physical.MaxMP).toBe(200);
-    expect(physical.STR).toBe(100);
-    expect(physical.VIT).toBe(100);
-    expect(physical.DEX).toBe(100);
-    expect(physical.AGI).toBe(100);
-    expect(physical.AVD).toBe(100);
-    expect(physical.INT).toBe(100);
-    expect(physical.MND).toBe(100);
-    expect(physical.RES).toBe(100);
     expect(physical.WT).toBe(100);
+    expect(physical.move).toBe(4);
   });
 });

@@ -48,19 +48,9 @@ const sortByWT: SortByWT = (charactors) =>
   charactors
     .filter((charactor) => charactor.hp > 0)
     .sort((left, right) => {
-      const leftPhysical = getPhysical(left);
-      const rightPhysical = getPhysical(right);
       const wtDiff = left.restWt - right.restWt;
       if (wtDiff !== 0) {
         return wtDiff;
-      }
-      const agiDiff = leftPhysical.AGI - rightPhysical.AGI;
-      if (agiDiff !== 0) {
-        return agiDiff;
-      }
-      const avdDiff = leftPhysical.AVD - rightPhysical.AVD;
-      if (avdDiff !== 0) {
-        return avdDiff;
       }
       const hpDiff = left.hp - right.hp;
       if (hpDiff !== 0) {
