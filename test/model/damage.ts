@@ -236,11 +236,7 @@ describe("Damage#rapier", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[7]) as CharactorBattling; // john
     const skill = skillRepository.get("stab") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[6].name).toBe("john");
     expect(turn.sortedCharactors[6].hp).toBe(230);
@@ -256,11 +252,7 @@ describe("Damage#rapier", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[6]) as CharactorBattling; // sam
     const skill = skillRepository.get("stab") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[6].name).toBe("sam");
     expect(turn.sortedCharactors[6].hp).toBe(280);
@@ -276,11 +268,7 @@ describe("Damage#rapier", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[1]) as CharactorBattling; // jonny
     const skill = skillRepository.get("stab") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[1].name).toBe("jonny");
     expect(turn.sortedCharactors[1].hp).toBe(210);
@@ -296,11 +284,7 @@ describe("Damage#rapier", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[5]) as CharactorBattling; // noa
     const skill = skillRepository.get("stab") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[5].name).toBe("noa");
     expect(turn.sortedCharactors[5].hp).toBe(190);
@@ -319,11 +303,7 @@ describe("Damage#samuraiBow", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[7]) as CharactorBattling; // john
     const skill = skillRepository.get("shot") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[6].name).toBe("john");
     expect(turn.sortedCharactors[6].hp).toBe(230);
@@ -339,11 +319,7 @@ describe("Damage#samuraiBow", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[6]) as CharactorBattling; // sam
     const skill = skillRepository.get("shot") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[5].name).toBe("sam");
     expect(turn.sortedCharactors[5].hp).toBe(280);
@@ -359,11 +335,7 @@ describe("Damage#samuraiBow", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[1]) as CharactorBattling; // jonny
     const skill = skillRepository.get("shot") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[0].name).toBe("jonny");
     expect(turn.sortedCharactors[0].hp).toBe(210);
@@ -379,11 +351,7 @@ describe("Damage#samuraiBow", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[5]) as CharactorBattling; // noa
     const skill = skillRepository.get("shot") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[4].name).toBe("noa");
     expect(turn.sortedCharactors[4].hp).toBe(190);
@@ -401,11 +369,7 @@ describe("Damage#flameFall", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[7]) as CharactorBattling; // john
     const skill = skillRepository.get("flameFall") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[6].name).toBe("john");
     expect(turn.sortedCharactors[6].hp).toBe(230);
@@ -421,11 +385,7 @@ describe("Damage#flameFall", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[1]) as CharactorBattling; // jonny
     const skill = skillRepository.get("flameFall") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[1].name).toBe("jonny");
     expect(turn.sortedCharactors[1].hp).toBe(210);
@@ -441,11 +401,7 @@ describe("Damage#flameFall", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[3]) as CharactorBattling; // funcy
     const skill = skillRepository.get("flameFall") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[3].name).toBe("funcy");
     expect(turn.sortedCharactors[3].hp).toBe(154);
@@ -461,11 +417,7 @@ describe("Damage#flameFall", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[2]) as CharactorBattling; // yoshua
     const skill = skillRepository.get("flameFall") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[2].name).toBe("yoshua");
     expect(turn.sortedCharactors[2].hp).toBe(246);
@@ -481,11 +433,7 @@ describe("Damage#flameFall", function () {
     const receiver = toCharactorBattling(testData.turns[0].sortedCharactors[5]) as CharactorBattling; // noa
     const skill = skillRepository.get("flameFall") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.5,
-      damage: 0.5,
-      accuracy: 0.5,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.sortedCharactors[4].name).toBe("noa");
     expect(turn.sortedCharactors[4].hp).toBe(200);

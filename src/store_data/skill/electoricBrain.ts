@@ -6,7 +6,7 @@ export const electoricBrain: Skill = {
   name: "electoricBrain",
   label: "電脳",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms,receiver) => addStatus(magicAttackUp)(skill, actor, randoms,receiver),
+  action: (skill, actor,receiver) => addStatus(magicAttackUp)(skill, actor,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_THUNDER,
   baseDamage: 0,

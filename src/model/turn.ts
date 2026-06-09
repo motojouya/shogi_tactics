@@ -1,9 +1,7 @@
 import type { CharactorBattling } from "./charactor";
 import type { Skill } from "./skill";
-import type { Randoms } from "./random";
 
 import { copyCharactorBattling } from "./charactor";
-import { copyRandoms } from "./random";
 
 export const ACTION_DO_NOTHING = "DO_NOTHING";
 
@@ -35,7 +33,6 @@ export type Turn = {
   datetime: Date;
   action: Action;
   sortedCharactors: CharactorBattling[];
-  randoms: Randoms;
 };
 
 export type CopyAction = (action: Action) => Action;
@@ -71,5 +68,4 @@ export const copyTurn: CopyTurn = (turn) => ({
   datetime: new Date(turn.datetime.getTime()),
   action: copyAction(turn.action),
   sortedCharactors: turn.sortedCharactors.map(copyCharactorBattling),
-  randoms: copyRandoms(turn.randoms),
 });

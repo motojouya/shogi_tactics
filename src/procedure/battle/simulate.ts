@@ -5,7 +5,6 @@ import type { Skill } from "../../model/skill";
 
 import { actToCharactor } from "../../model/battle";
 import { toReceiver } from "../../form/battle";
-import { createAbsolute } from "../../model/random";
 import { DataNotFoundError } from "../../store_utility/schema";
 
 export type Simulated = { survive: boolean; receiver: CharactorBattling };
@@ -24,7 +23,7 @@ export const simulate: Simulate = (battle, actor, skill, receiverWithIsVisitor, 
     return receiver;
   }
 
-  const newTurn = actToCharactor(battle, actor, skill, [receiver], actionDate, createAbsolute());
+  const newTurn = actToCharactor(battle, actor, skill, [receiver], actionDate);
   const survivedReceiver = newTurn.sortedCharactors.find(
     (charactor) => charactor.isVisitor === receiver.isVisitor && charactor.name === receiver.name,
   );

@@ -6,7 +6,7 @@ export const quick: Skill = {
   name: "quick",
   label: "クイック",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms,receiver) => addStatus(quickStatus)(skill, actor, randoms,receiver),
+  action: (skill, actor,receiver) => addStatus(quickStatus)(skill, actor,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_WIND,
   baseDamage: 0,

@@ -2,7 +2,7 @@ import type { Skill, ActionToCharactor } from "../../model/skill";
 import { calcOrdinaryAccuracy, DIRECT_TYPE_NONE, MAGIC_TYPE_WATER } from "../../model/skill";
 import { getPhysical } from "../../model/charactor";
 
-export const recover: ActionToCharactor = (self, actor, randoms,receiver) => {
+export const recover: ActionToCharactor = (self, actor,receiver) => {
   const physical = getPhysical(receiver);
   return {
     ...receiver,

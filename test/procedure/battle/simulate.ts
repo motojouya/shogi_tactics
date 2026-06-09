@@ -140,7 +140,7 @@ describe("simulate", () => {
     const result = simulate(battle, actor, skill, receiverWithIsVisitor, lastTurn, actionDate);
 
     expect(result).toEqual({
-      receiver: { ...battle.visitor.charactors[0], hp: 45 },
+      receiver: { ...battle.visitor.charactors[0], hp: 50 },
       survive: true,
     });
   });

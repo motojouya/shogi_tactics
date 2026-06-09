@@ -6,7 +6,7 @@ export const heavyWind: Skill = {
   name: "heavyWind",
   label: "春の暁",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms,receiver) => addStatus(sleep)(skill, actor, randoms,receiver),
+  action: (skill, actor,receiver) => addStatus(sleep)(skill, actor,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_WIND,
   baseDamage: 0,

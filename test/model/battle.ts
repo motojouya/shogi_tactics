@@ -235,11 +235,7 @@ describe("Battle#start", function () {
     const battle = createBattle("first-title", homeParty, visitorParty);
     expect(battle.result).toBe(GameOngoing);
 
-    const turn = start(battle, new Date(), {
-      times: 0.1,
-      damage: 0.1,
-      accuracy: 0.1,
-    });
+    const turn = start(battle, new Date());
 
     expect(turn.action.type).toBe("TIME_PASSING");
     if (turn.action.type === "TIME_PASSING") {
@@ -266,11 +262,7 @@ describe("Battle#act", function () {
     const receiver = toCharactorBattling(testData.visitor.charactors[0]) as CharactorBattling;
     const skill = skillRepository.get("chop") as Skill;
 
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date(), {
-      times: 0.1,
-      damage: 0.1,
-      accuracy: 0.1,
-    });
+    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
 
     expect(turn.action.type).toBe("DO_SKILL");
     if (turn.action.type === "DO_SKILL") {
@@ -286,7 +278,7 @@ describe("Battle#act", function () {
     expect(turn.sortedCharactors[1].name).toBe("sara");
 
     expect(turn.sortedCharactors[2].name).toBe("john");
-    expect(turn.sortedCharactors[2].hp).toBe(54);
+    expect(turn.sortedCharactors[2].hp).toBe(50);
     expect(turn.sortedCharactors[2].restWt).toBe(130);
 
     expect(turn.sortedCharactors[3].name).toBe("sam");
@@ -320,11 +312,7 @@ describe("Battle#wait", function () {
   it("ok", function () {
     const battle = toBattle(testData) as Battle;
 
-    const turn = wait(battle, 115, new Date(), {
-      times: 0.1,
-      damage: 0.1,
-      accuracy: 0.1,
-    });
+    const turn = wait(battle, 115, new Date());
 
     expect(turn.action.type).toBe("TIME_PASSING");
     if (turn.action.type === "TIME_PASSING") {

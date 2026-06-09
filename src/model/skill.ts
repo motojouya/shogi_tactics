@@ -1,4 +1,3 @@
-import type { Randoms } from "./random";
 import type { CharactorBattling } from "./charactor";
 import type { Status } from "./status";
 
@@ -31,12 +30,7 @@ export const MAGIC_TYPE_WIND: MagicType = "WIND";
 export const MAGIC_TYPE_THUNDER: MagicType = "THUNDER";
 export const MAGIC_TYPE_NONE: MagicType = "NONE";
 
-export type ActionToCharactor = (
-  self: Skill,
-  actor: CharactorBattling,
-  randoms: Randoms,
-  receiver: CharactorBattling,
-) => CharactorBattling;
+export type ActionToCharactor = (self: Skill, actor: CharactorBattling, receiver: CharactorBattling) => CharactorBattling;
 
 export type GetAccuracy = (self: Skill, actor: CharactorBattling, receiver: CharactorBattling) => number;
 
@@ -139,9 +133,8 @@ const calcDirectDefence: CalcDirectDefence = (skill, defencer) => {
   );
 };
 
-export const calcOrdinaryDirectDamage: ActionToCharactor = (self, actor, randoms, receiver) => {
+export const calcOrdinaryDirectDamage: ActionToCharactor = (self, actor, receiver) => {
   let damage = self.baseDamage + calcDirectAttack(self, actor) - calcDirectDefence(self, receiver);
-  damage += Math.ceil(randoms.damage * 10) - 5;
   if (damage < 1) {
     damage = 1;
   }
@@ -181,9 +174,8 @@ const calcMagicalDefence: CalcMagicalDefence = (skill, defencer) => {
   return ((physical.VIT + physical.MND) * directRegistance * magicRegistance * upRate * downRate) / 100 / 100;
 };
 
-export const calcOrdinaryMagicalDamage: ActionToCharactor = (self, actor, randoms, receiver) => {
+export const calcOrdinaryMagicalDamage: ActionToCharactor = (self, actor, receiver) => {
   let damage = self.baseDamage + calcMagicalAttack(self, actor) - calcMagicalDefence(self, receiver);
-  damage += Math.ceil(randoms.damage * 10) - 5;
   if (damage < 1) {
     damage = 1;
   }
@@ -201,7 +193,7 @@ export const calcOrdinaryMagicalDamage: ActionToCharactor = (self, actor, random
 };
 
 export type AddStatus = (status: Status) => ActionToCharactor;
-export const addStatus: AddStatus = (status) => (self, actor, randoms, receiver) => {
+export const addStatus: AddStatus = (status) => (self, actor, receiver) => {
   const newReceiver = {
     ...receiver,
     statuses: [...receiver.statuses.map((attachedStatus) => ({ ...attachedStatus }))],

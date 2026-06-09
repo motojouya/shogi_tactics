@@ -124,11 +124,6 @@ const testData = {
           isVisitor: true,
         },
       ],
-      randoms: {
-        times: 1,
-        damage: 1,
-        accuracy: 1,
-      },
     },
   ],
   result: GameOngoing,

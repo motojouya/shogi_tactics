@@ -8,9 +8,9 @@ import {
 } from "../../model/skill";
 import { acid } from "../status/acid";
 
-export const toxicAction: ActionToCharactor = (self, actor, randoms,receiver) => {
-  const newReceiver = calcOrdinaryDirectDamage(self, actor, randoms,receiver);
-  return addStatus(acid)(self, actor, randoms,newReceiver);
+export const toxicAction: ActionToCharactor = (self, actor,receiver) => {
+  const newReceiver = calcOrdinaryDirectDamage(self, actor,receiver);
+  return addStatus(acid)(self, actor,newReceiver);
 };
 
 export const toxicScratch: Skill = {

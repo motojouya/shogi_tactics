@@ -6,8 +6,8 @@ export const jammer: Skill = {
   name: "jammer",
   label: "妨害魔法",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms,receiver) =>
-    addStatus(magicAttackDown)(skill, actor, randoms,receiver),
+  action: (skill, actor,receiver) =>
+    addStatus(magicAttackDown)(skill, actor,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_THUNDER,
   baseDamage: 0,

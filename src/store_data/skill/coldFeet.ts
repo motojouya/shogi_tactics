@@ -6,7 +6,7 @@ export const coldFeet: Skill = {
   name: "coldFeet",
   label: "逃げ腰",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms,receiver) => addStatus(avoidUp)(skill, actor, randoms,receiver),
+  action: (skill, actor,receiver) => addStatus(avoidUp)(skill, actor,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_NONE,
   baseDamage: 0,

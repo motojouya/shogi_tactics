@@ -6,7 +6,7 @@ export const concentration: Skill = {
   name: "concentration",
   label: "精神集中",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms,receiver) => addStatus(accuracyUp)(skill, actor, randoms,receiver),
+  action: (skill, actor,receiver) => addStatus(accuracyUp)(skill, actor,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_NONE,
   baseDamage: 0,

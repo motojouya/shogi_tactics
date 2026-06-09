@@ -4,7 +4,6 @@ import type { CharactorBattling } from "../../model/charactor";
 import type { BattleRepository } from "../../store/battle";
 import type { DoSkillForm } from "../../form/battle";
 import type { Dialogue } from "../../io/window_dialogue";
-import type { Randoms } from "../../model/random";
 
 import { spendTurn } from "../../model/battle";
 import { toAction, ReceiverDuplicationError } from "../../form/battle";
@@ -20,9 +19,8 @@ export type Act = (
   doSkillForm: DoSkillForm,
   lastTurn: Turn,
   getDate: () => Date,
-  getRandoms: () => Randoms,
 ) => Promise<Battle | DataNotFoundError | ReceiverDuplicationError | UserCancel>;
-export const act: Act = (dialogue, repository) => async (battle, actor, doSkillForm, lastTurn, getDate, getRandoms) => {
+export const act: Act = (dialogue, repository) => async (battle, actor, doSkillForm, lastTurn, getDate) => {
   const doAction = toAction(doSkillForm, lastTurn.sortedCharactors);
   if (doAction instanceof DataNotFoundError || doAction instanceof ReceiverDuplicationError) {
     return doAction;
@@ -32,7 +30,7 @@ export const act: Act = (dialogue, repository) => async (battle, actor, doSkillF
     return new UserCancel("Cancelされました");
   }
 
-  const newBattle = spendTurn(battle, actor, doAction, getDate, getRandoms);
+  const newBattle = spendTurn(battle, actor, doAction, getDate);
 
   await repository.save(newBattle);
   return newBattle;

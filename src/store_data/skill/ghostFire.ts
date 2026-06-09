@@ -6,7 +6,7 @@ export const ghostFire: Skill = {
   name: "ghostFire",
   label: "鬼火",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms,receiver) => addStatus(fear)(skill, actor, randoms,receiver),
+  action: (skill, actor,receiver) => addStatus(fear)(skill, actor,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_FIRE,
   baseDamage: 0,

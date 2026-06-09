@@ -7,7 +7,6 @@ import { GameOngoing, GameHome, GameVisitor } from "../../../src/model/battle";
 import { toBattle } from "../../../src/store_schema/battle";
 import { UserCancel } from "../../../src/io/window_dialogue";
 import { surrender } from "../../../src/procedure/battle/surrender";
-import { createAbsolute } from "../../../src/model/random";
 
 const testData = {
   title: "first-title",
@@ -160,7 +159,6 @@ describe("surrender", () => {
       battleData,
       battleData.home.charactors[0],
       new Date(),
-      createAbsolute(),
     );
 
     expect(battle).toBe(null);
@@ -184,7 +182,6 @@ describe("surrender", () => {
       battleData,
       battleData.visitor.charactors[0],
       new Date(),
-      createAbsolute(),
     );
 
     expect(battle).toBe(null);
@@ -208,7 +205,6 @@ describe("surrender", () => {
       battleData,
       battleData.home.charactors[0],
       new Date(),
-      createAbsolute(),
     );
 
     expect(battle).toBeInstanceOf(UserCancel);

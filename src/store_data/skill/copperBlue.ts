@@ -6,7 +6,7 @@ export const copperBlue: Skill = {
   name: "copperBlue",
   label: "青銅",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms,receiver) => addStatus(acid)(skill, actor, randoms,receiver),
+  action: (skill, actor,receiver) => addStatus(acid)(skill, actor,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_ROCK,
   baseDamage: 0,

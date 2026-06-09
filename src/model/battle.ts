@@ -1,7 +1,6 @@
 import type { Party, PartyBattling } from "./party";
 import type { CharactorBattling } from "./charactor";
 import type { Skill } from "./skill";
-import type { Randoms } from "./random";
 import type { Turn } from "./turn";
 
 import { MAGIC_TYPE_NONE } from "./skill";
@@ -9,7 +8,7 @@ import { copyPartyBattling } from "./party";
 import { getPhysical, getAbilities, toBattleCharactor, copyCharactorBattling } from "./charactor";
 import { copyTurn } from "./turn";
 
-import { acid, paralysis, quick, silent, sleep, slow } from "../store_data/status/index";
+import { acid, quick, silent, sleep, slow } from "../store_data/status/index";
 import { underStatus } from "./status";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
@@ -100,8 +99,8 @@ export const createBattle: CreateBattle = (title, home, visitor) => {
   };
 };
 
-export type Start = (battle: Battle, datetime: Date, randoms: Randoms) => Turn;
-export const start: Start = (battle, datetime, randoms) => ({
+export type Start = (battle: Battle, datetime: Date) => Turn;
+export const start: Start = (battle, datetime) => ({
   datetime,
   action: {
     type: "TIME_PASSING",
@@ -111,11 +110,10 @@ export const start: Start = (battle, datetime, randoms) => ({
     ...battle.home.charactors.map(copyCharactorBattling),
     ...battle.visitor.charactors.map(copyCharactorBattling),
   ]),
-  randoms,
 });
 
-export type Stay = (battle: Battle, actor: CharactorBattling, datetime: Date, randoms: Randoms) => Turn;
-export const stay: Stay = (battle, actor, datetime, randoms) => {
+export type Stay = (battle: Battle, actor: CharactorBattling, datetime: Date) => Turn;
+export const stay: Stay = (battle, actor, datetime) => {
   const lastTurn = arrayLast(battle.turns);
   const newTurn: Turn = {
     datetime,
@@ -124,7 +122,6 @@ export const stay: Stay = (battle, actor, datetime, randoms) => {
       actor,
     },
     sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    randoms,
   };
 
   newTurn.sortedCharactors = newTurn.sortedCharactors.map((charactor) => {
@@ -157,9 +154,8 @@ export type ActToCharactor = (
   skill: Skill,
   receivers: CharactorBattling[],
   datetime: Date,
-  randoms: Randoms,
 ) => Turn;
-export const actToCharactor: ActToCharactor = (battle, actor, skill, receivers, datetime, randoms) => {
+export const actToCharactor: ActToCharactor = (battle, actor, skill, receivers, datetime) => {
   if (skill.mpConsumption > actor.mp) {
     throw new Error("mp shortage");
   }
@@ -169,12 +165,7 @@ export const actToCharactor: ActToCharactor = (battle, actor, skill, receivers, 
   }
 
   if (underStatus(sleep, actor)) {
-    return stay(battle, actor, datetime, randoms);
-  }
-
-  // FIXME 動けなかった際に麻痺が理由とかそういうのわかるとよい
-  if (underStatus(paralysis, actor) && randoms.accuracy > 0.5) {
-    return stay(battle, actor, datetime, randoms);
+    return stay(battle, actor, datetime);
   }
 
   const lastTurn = arrayLast(battle.turns);
@@ -187,10 +178,9 @@ export const actToCharactor: ActToCharactor = (battle, actor, skill, receivers, 
       receivers,
     },
     sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    randoms,
   };
 
-  const resultReceivers = receivers.map((receiver) => skill.action(skill, actor, randoms, receiver));
+  const resultReceivers = receivers.map((receiver) => skill.action(skill, actor, receiver));
   newTurn.sortedCharactors = newTurn.sortedCharactors
     .map(updateCharactor(resultReceivers))
     .filter((charactor) => charactor.hp > 0);
@@ -211,8 +201,8 @@ export const actToCharactor: ActToCharactor = (battle, actor, skill, receivers, 
   return newTurn;
 };
 
-export type Surrender = (battle: Battle, actor: CharactorBattling, datetime: Date, randoms: Randoms) => Turn;
-export const surrender: Surrender = (battle, actor, datetime, randoms) => {
+export type Surrender = (battle: Battle, actor: CharactorBattling, datetime: Date) => Turn;
+export const surrender: Surrender = (battle, actor, datetime) => {
   const lastTurn = arrayLast(battle.turns);
   return {
     datetime,
@@ -221,15 +211,14 @@ export const surrender: Surrender = (battle, actor, datetime, randoms) => {
       actor,
     },
     sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    randoms,
   };
 };
 
-type WaitCharactor = (charactor: CharactorBattling, wt: number, randoms: Randoms) => CharactorBattling;
-const waitCharactor: WaitCharactor = (charactor, wt, randoms) => {
+type WaitCharactor = (charactor: CharactorBattling, wt: number) => CharactorBattling;
+const waitCharactor: WaitCharactor = (charactor, wt) => {
   const abilities = getAbilities(charactor);
 
-  const newCharactor = abilities.reduce((charactorAc, ability) => ability.wait(wt, charactorAc, randoms), {
+  const newCharactor = abilities.reduce((charactorAc, ability) => ability.wait(wt, charactorAc), {
     ...charactor,
     statuses: [...charactor.statuses.map((attachedStatus) => ({ ...attachedStatus }))],
   } as CharactorBattling);
@@ -261,8 +250,8 @@ const waitCharactor: WaitCharactor = (charactor, wt, randoms) => {
   return newCharactor;
 };
 
-export type Wait = (battle: Battle, wt: number, datetime: Date, randoms: Randoms) => Turn;
-export const wait: Wait = (battle, wt, datetime, randoms) => {
+export type Wait = (battle: Battle, wt: number, datetime: Date) => Turn;
+export const wait: Wait = (battle, wt, datetime) => {
   const lastTurn = arrayLast(battle.turns);
   const newTurn: Turn = {
     datetime,
@@ -271,9 +260,8 @@ export const wait: Wait = (battle, wt, datetime, randoms) => {
       wt,
     },
     sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    randoms,
   };
-  newTurn.sortedCharactors = newTurn.sortedCharactors.map((charactor) => waitCharactor(charactor, wt, randoms));
+  newTurn.sortedCharactors = newTurn.sortedCharactors.map((charactor) => waitCharactor(charactor, wt));
 
   return newTurn;
 };
@@ -316,16 +304,15 @@ export type SpendTurn = (
   actor: CharactorBattling,
   action: Action | null,
   getDatetime: () => Date,
-  getRandoms: () => Randoms,
 ) => Battle;
-export const spendTurn: SpendTurn = (battle, actor, action, getDatetime, getRandoms) => {
+export const spendTurn: SpendTurn = (battle, actor, action, getDatetime) => {
   const newBattle = copyBattle(battle);
 
   if (action === null) {
-    newBattle.turns.push(stay(newBattle, actor, getDatetime(), getRandoms()));
+    newBattle.turns.push(stay(newBattle, actor, getDatetime()));
   } else {
     const selectedSkill = action.skill;
-    const newTurn = actToCharactor(newBattle, actor, selectedSkill, action.receivers, getDatetime(), getRandoms());
+    const newTurn = actToCharactor(newBattle, actor, selectedSkill, action.receivers, getDatetime());
     newBattle.turns.push(newTurn);
   }
 
@@ -335,7 +322,7 @@ export const spendTurn: SpendTurn = (battle, actor, action, getDatetime, getRand
   }
 
   let firstWaiting = nextActor(newBattle);
-  newBattle.turns.push(wait(newBattle, firstWaiting.restWt, getDatetime(), getRandoms()));
+  newBattle.turns.push(wait(newBattle, firstWaiting.restWt, getDatetime()));
 
   newBattle.result = isSettlement(newBattle);
   if (newBattle.result !== GameOngoing) {
@@ -343,14 +330,14 @@ export const spendTurn: SpendTurn = (battle, actor, action, getDatetime, getRand
   }
 
   while (underStatus(sleep, firstWaiting)) {
-    newBattle.turns.push(stay(newBattle, firstWaiting, getDatetime(), getRandoms()));
+    newBattle.turns.push(stay(newBattle, firstWaiting, getDatetime()));
     newBattle.result = isSettlement(newBattle);
     if (newBattle.result !== GameOngoing) {
       return newBattle;
     }
 
     firstWaiting = nextActor(newBattle);
-    newBattle.turns.push(wait(newBattle, firstWaiting.restWt, getDatetime(), getRandoms()));
+    newBattle.turns.push(wait(newBattle, firstWaiting.restWt, getDatetime()));
     newBattle.result = isSettlement(newBattle);
     if (newBattle.result !== GameOngoing) {
       return newBattle;

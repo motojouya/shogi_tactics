@@ -40,7 +40,6 @@ import {
   turnActor,
   getLastTurn,
 } from '../model/battle';
-import { createRandoms } from "../model/random";
 import { CharactorDetail, CharactorStatus } from './charactor';
 import {
   doSkillFormSchema,
@@ -150,7 +149,7 @@ const ReceiverSelect: FC<{
 const Surrender: FC<{ battle: Battle, actor: CharactorBattling }> = ({ battle, actor }) => {
   const { battleRepository, dialogue } = useIO();
   // FIXME 降参した後にbattleの状態を変化させる気がするがどうかな
-  const doSurrender = () => surrender(battleRepository, dialogue)(battle, actor, new Date(), createRandoms());
+  const doSurrender = () => surrender(battleRepository, dialogue)(battle, actor, new Date());
 
   return <Button variant='outlined' type="button" onClick={doSurrender}>降参</Button>;
 };
@@ -279,7 +278,7 @@ export const BattleTurn: FC<{
       return;
     }
 
-    const result = await act(dialogue, battleRepository)(battle, actor, doSkillForm, lastTurn, () => new Date(), createRandoms);
+    const result = await act(dialogue, battleRepository)(battle, actor, doSkillForm, lastTurn, () => new Date());
 
     if (result instanceof DataNotFoundError) {
       setMessage('入力してください');

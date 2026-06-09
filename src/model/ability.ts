@@ -1,5 +1,4 @@
 import type { CharactorBattling } from "./charactor";
-import type { Randoms } from "./random";
 
 export type Ability = {
   name: string;
@@ -8,5 +7,5 @@ export type Ability = {
   description: string;
 };
 
-export type Wait = (wt: number, charactor: CharactorBattling, randoms: Randoms) => CharactorBattling;
-export const justWait: Wait = (_wt, charactor, _randoms) => charactor;
+export type Wait = (wt: number, charactor: CharactorBattling) => CharactorBattling;
+export const justWait: Wait = (_wt, charactor) => charactor;

@@ -6,8 +6,8 @@ export const stoneShell: Skill = {
   name: "stoneShell",
   label: "亀甲岩",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms,receiver) =>
-    addStatus(directDiffenceUp)(skill, actor, randoms,receiver),
+  action: (skill, actor,receiver) =>
+    addStatus(directDiffenceUp)(skill, actor,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_ROCK,
   baseDamage: 0,

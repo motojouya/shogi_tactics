@@ -8,7 +8,6 @@ import { GameOngoing } from "../../../src/model/battle";
 import { act } from "../../../src/procedure/battle/act";
 import { DataNotFoundError } from "../../../src/store_utility/schema";
 import { UserCancel } from "../../../src/io/window_dialogue";
-import { createAbsolute } from "../../../src/model/random";
 
 const skillForm = {
   skillName: "chop",
@@ -166,7 +165,7 @@ describe("act", () => {
       notice: (_message) => {},
     };
 
-    const result = await act(dialogue, mockRepo)(battle, actor, skillForm, lastTurn, () => new Date(), createAbsolute);
+    const result = await act(dialogue, mockRepo)(battle, actor, skillForm, lastTurn, () => new Date());
 
     const turnJustBefore = result.turns.pop();
     const turnNextBefore = result.turns.pop();
@@ -202,7 +201,6 @@ describe("act", () => {
       { ...skillForm, skillName: "not-found" },
       lastTurn,
       () => new Date(),
-      createAbsolute,
     );
 
     expect(result).toBeInstanceOf(DataNotFoundError);
@@ -227,7 +225,7 @@ describe("act", () => {
       notice: (_message) => {},
     };
 
-    const result = await act(dialogue, mockRepo)(battle, actor, skillForm, lastTurn, () => new Date(), createAbsolute);
+    const result = await act(dialogue, mockRepo)(battle, actor, skillForm, lastTurn, () => new Date());
 
     expect(result).toBeInstanceOf(UserCancel);
   });

@@ -6,7 +6,7 @@ export const slow: Skill = {
   name: "slow",
   label: "スロウ",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms,receiver) => addStatus(slowStatus)(skill, actor, randoms,receiver),
+  action: (skill, actor,receiver) => addStatus(slowStatus)(skill, actor,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_ICE,
   baseDamage: 0,

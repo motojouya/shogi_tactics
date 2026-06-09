@@ -6,8 +6,8 @@ export const stickyRain: Skill = {
   name: "stickyRain",
   label: "酸性雨",
   type: "SKILL_TO_CHARACTOR",
-  action: (skill, actor, randoms,receiver) =>
-    addStatus(directAttackDown)(skill, actor, randoms,receiver),
+  action: (skill, actor,receiver) =>
+    addStatus(directAttackDown)(skill, actor,receiver),
   directType: DIRECT_TYPE_NONE,
   magicType: MAGIC_TYPE_WATER,
   baseDamage: 0,
