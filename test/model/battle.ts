@@ -145,9 +145,6 @@ const testData = {
           isVisitor: true,
         },
       ],
-      field: {
-        climate: "SUNNY",
-      },
     },
   ],
   result: GameOngoing,
@@ -250,8 +247,6 @@ describe("Battle#start", function () {
     } else {
       expect.unreachable("type should be TIME_PASSING");
     }
-
-    expect(turn.field.climate).toBe("SUNNY");
     expect(turn.sortedCharactors.length).toBe(4);
     expect(turn.sortedCharactors[0].name).toBe("chang");
     expect(turn.sortedCharactors[0].isVisitor).toBe(true);
@@ -286,8 +281,6 @@ describe("Battle#act", function () {
     } else {
       expect.unreachable("type should be DO_SKILL");
     }
-
-    expect(turn.field.climate).toBe("SUNNY");
     expect(turn.sortedCharactors.length).toBe(4);
     expect(turn.sortedCharactors[0].name).toBe("noa");
     expect(turn.sortedCharactors[1].name).toBe("sara");
@@ -315,8 +308,6 @@ describe("Battle#stay", function () {
     } else {
       expect.unreachable("type should be DO_NOTHING");
     }
-
-    expect(turn.field.climate).toBe("SUNNY");
     expect(turn.sortedCharactors.length).toBe(4);
     expect(turn.sortedCharactors[0].name).toBe("noa");
     expect(turn.sortedCharactors[1].name).toBe("sara");
@@ -341,8 +332,6 @@ describe("Battle#wait", function () {
     } else {
       expect.unreachable("type should be TIME_PASSING");
     }
-
-    expect(turn.field.climate).toBe("SUNNY");
     expect(turn.sortedCharactors.length).toBe(4);
     expect(turn.sortedCharactors[0].name).toBe("sam");
     expect(turn.sortedCharactors[0].restWt).toBe(5);

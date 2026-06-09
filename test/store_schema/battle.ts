@@ -120,9 +120,6 @@ const testData = {
           isVisitor: true,
         },
       ],
-      field: {
-        climate: "SUNNY",
-      },
     },
     {
       datetime: "2023-06-29T12:12:23",
@@ -180,9 +177,6 @@ const testData = {
           isVisitor: true,
         },
       ],
-      field: {
-        climate: "RAIN",
-      },
     },
   ],
   result: "ONGOING",

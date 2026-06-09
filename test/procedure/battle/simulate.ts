@@ -123,9 +123,6 @@ const battleData = {
           isVisitor: true,
         },
       ],
-      field: {
-        climate: "SUNNY",
-      },
     },
   ],
   result: GameOngoing,

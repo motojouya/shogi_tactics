@@ -124,9 +124,6 @@ const testData = {
           isVisitor: true,
         },
       ],
-      field: {
-        climate: "SUNNY",
-      },
       randoms: {
         times: 1,
         damage: 1,
@@ -191,8 +188,6 @@ describe("Battle#createRepository", function () {
       expect(turns[0].sortedCharactors[1].name).toBe("sara");
       expect(turns[0].sortedCharactors[2].name).toBe("john");
       expect(turns[0].sortedCharactors[3].name).toBe("noa");
-
-      expect(turns[0].field.climate).toBe("SUNNY");
 
       expect(typedBattle.result).toBe(GameOngoing);
     } else {

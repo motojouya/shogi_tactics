@@ -224,9 +224,6 @@ const testData = {
           isVisitor: true,
         },
       ],
-      field: {
-        climate: "SUNNY",
-      },
     },
   ],
   result: GameOngoing,
