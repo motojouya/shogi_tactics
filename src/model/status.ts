@@ -3,7 +3,6 @@ import type { CharactorBattling } from "./charactor";
 export type Status = {
   name: string;
   label: string;
-  wt: number;
   description: string;
 };
 

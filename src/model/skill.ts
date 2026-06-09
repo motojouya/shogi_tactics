@@ -108,6 +108,9 @@ export const calcOrdinaryMagicalDamage: ActionToCharactor = (self, actor, receiv
   };
 };
 
+// FIXME status.wt削除に伴う応急処置。statusごとの継続時間がなくなったため、固定の初期restWtを付与する
+const STATUS_DURATION = 500;
+
 export type AddStatus = (status: Status) => ActionToCharactor;
 export const addStatus: AddStatus = (status) => (self, actor, receiver) => {
   const newReceiver = {
@@ -117,7 +120,7 @@ export const addStatus: AddStatus = (status) => (self, actor, receiver) => {
   if (!underStatus(status, newReceiver)) {
     newReceiver.statuses.push({
       status,
-      restWt: status.wt,
+      restWt: STATUS_DURATION,
     });
   }
   return newReceiver;
