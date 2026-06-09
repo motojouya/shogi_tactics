@@ -38,28 +38,19 @@ export const toBattle: ToBattle = (battleJson) => {
   const { title } = battleJson;
 
   const home = toPartyBattling(battleJson.home);
-  if (
-    home instanceof DataNotFoundError ||
-    home instanceof CharactorDuplicationError
-  ) {
+  if (home instanceof DataNotFoundError || home instanceof CharactorDuplicationError) {
     return home;
   }
 
   const visitor = toPartyBattling(battleJson.visitor);
-  if (
-    visitor instanceof DataNotFoundError ||
-    visitor instanceof CharactorDuplicationError
-  ) {
+  if (visitor instanceof DataNotFoundError || visitor instanceof CharactorDuplicationError) {
     return visitor;
   }
 
   const turns: Turn[] = [];
   for (const turnJson of battleJson.turns) {
     const turn = toTurn(turnJson);
-    if (
-      turn instanceof DataNotFoundError ||
-      turn instanceof JsonSchemaUnmatchError
-    ) {
+    if (turn instanceof DataNotFoundError || turn instanceof JsonSchemaUnmatchError) {
       return turn;
     }
     turns.push(turn);

@@ -5,7 +5,7 @@ import { magicAttackUp } from "../status/magicAttackUp";
 export const electoricBrain: Skill = {
   name: "electoricBrain",
   label: "電脳",
-  action: (skill, actor,receiver) => addStatus(magicAttackUp)(skill, actor,receiver),
+  action: (skill, actor, receiver) => addStatus(magicAttackUp)(skill, actor, receiver),
   baseDamage: 0,
   receiverCount: 1,
   additionalWt: 100,

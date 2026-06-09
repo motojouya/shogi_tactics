@@ -8,9 +8,10 @@ import { createRepository as createRepositoryBase } from "../store_utility/disk_
 export const NAMESPACE = "charactor";
 export const SCHEMA_KEY = "name";
 
-export const createRepository = createRepositoryBase<
-  CharactorSchema,
-  Charactor,
-  CharactorJson,
-  DataNotFoundError
->(NAMESPACE, charactorSchema, toCharactor, toCharactorJson, SCHEMA_KEY);
+export const createRepository = createRepositoryBase<CharactorSchema, Charactor, CharactorJson, DataNotFoundError>(
+  NAMESPACE,
+  charactorSchema,
+  toCharactor,
+  toCharactorJson,
+  SCHEMA_KEY,
+);

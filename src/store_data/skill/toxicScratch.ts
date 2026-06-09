@@ -1,13 +1,10 @@
 import type { Skill, ActionToCharactor } from "../../model/skill";
-import {
-  calcOrdinaryDirectDamage,
-  addStatus,
-} from "../../model/skill";
+import { calcOrdinaryDirectDamage, addStatus } from "../../model/skill";
 import { acid } from "../status/acid";
 
-export const toxicAction: ActionToCharactor = (self, actor,receiver) => {
-  const newReceiver = calcOrdinaryDirectDamage(self, actor,receiver);
-  return addStatus(acid)(self, actor,newReceiver);
+export const toxicAction: ActionToCharactor = (self, actor, receiver) => {
+  const newReceiver = calcOrdinaryDirectDamage(self, actor, receiver);
+  return addStatus(acid)(self, actor, newReceiver);
 };
 
 export const toxicScratch: Skill = {

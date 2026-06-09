@@ -8,15 +8,10 @@ import { toParty } from "../../form/party";
 export type SaveParty = (
   repository: PartyRepository,
   checkExists: boolean,
-) => (
-  partyForm: PartyForm,
-) => Promise<null | DataNotFoundError | CharactorDuplicationError | DataExistError>;
+) => (partyForm: PartyForm) => Promise<null | DataNotFoundError | CharactorDuplicationError | DataExistError>;
 export const saveParty: SaveParty = (repository, checkExists) => async (partyForm) => {
   const party = toParty(partyForm);
-  if (
-    party instanceof DataNotFoundError ||
-    party instanceof CharactorDuplicationError
-  ) {
+  if (party instanceof DataNotFoundError || party instanceof CharactorDuplicationError) {
     return party;
   }
 

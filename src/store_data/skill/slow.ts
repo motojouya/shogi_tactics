@@ -5,7 +5,7 @@ import { slow as slowStatus } from "../status/slow";
 export const slow: Skill = {
   name: "slow",
   label: "スロウ",
-  action: (skill, actor,receiver) => addStatus(slowStatus)(skill, actor,receiver),
+  action: (skill, actor, receiver) => addStatus(slowStatus)(skill, actor, receiver),
   baseDamage: 0,
   receiverCount: 1,
   additionalWt: 100,

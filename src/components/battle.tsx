@@ -152,11 +152,10 @@ const Surrender: FC<{ battle: Battle, actor: CharactorBattling }> = ({ battle, a
 };
 
 const SkillSelect: FC<{
-  actor: CharactorBattling,
   replace: UseFieldArrayReplace<DoSkillForm, 'receiversWithIsVisitor'>
   errors: FieldErrors<DoSkillForm>,
   control: Control<DoSkillForm>,
-}> = ({ actor, replace, errors, control }) => {
+}> = ({ replace, errors, control }) => {
 
   const skills = getSkills();
   const skillOptions = skills
@@ -398,7 +397,6 @@ export const BattleTurn: FC<{
               </Box>
               <Stack>
                 <SkillSelect
-                  actor={actor}
                   errors={errors}
                   replace={replace}
                   control={control}

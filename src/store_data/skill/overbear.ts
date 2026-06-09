@@ -5,7 +5,7 @@ import { avoidDown } from "../status/avoidDown";
 export const overbear: Skill = {
   name: "overbear",
   label: "威圧",
-  action: (skill, actor,receiver) => addStatus(avoidDown)(skill, actor,receiver),
+  action: (skill, actor, receiver) => addStatus(avoidDown)(skill, actor, receiver),
   baseDamage: 0,
   receiverCount: 1,
   additionalWt: 100,

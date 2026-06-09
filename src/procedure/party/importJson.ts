@@ -12,12 +12,7 @@ export type ImportParty = (
 ) => (
   comfirmMessage: string | undefined,
 ) => Promise<
-  | Party
-  | DataNotFoundError
-  | JsonSchemaUnmatchError
-  | CharactorDuplicationError
-  | EmptyParameter
-  | UserCancel
+  Party | DataNotFoundError | JsonSchemaUnmatchError | CharactorDuplicationError | EmptyParameter | UserCancel
 >;
 export const importParty: ImportParty = (dialogue, repository) => async (comfirmMessage) => {
   if (comfirmMessage && !dialogue.confirm(comfirmMessage)) {

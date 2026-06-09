@@ -5,8 +5,7 @@ import { directAttackDown } from "../status/directAttackDown";
 export const stickyRain: Skill = {
   name: "stickyRain",
   label: "酸性雨",
-  action: (skill, actor,receiver) =>
-    addStatus(directAttackDown)(skill, actor,receiver),
+  action: (skill, actor, receiver) => addStatus(directAttackDown)(skill, actor, receiver),
   baseDamage: 0,
   receiverCount: 1,
   additionalWt: 100,

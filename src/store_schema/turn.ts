@@ -149,9 +149,7 @@ export const toAction: ToModel<Action, ActionJson, DataNotFoundError> = (actionJ
   };
 };
 
-export const toTurn: ToModel<Turn, TurnJson, DataNotFoundError | JsonSchemaUnmatchError> = (
-  turnJson,
-) => {
+export const toTurn: ToModel<Turn, TurnJson, DataNotFoundError | JsonSchemaUnmatchError> = (turnJson) => {
   // TODO date parse不要では？JsonSchemaUnmatchErrorも
   let datetime;
   try {

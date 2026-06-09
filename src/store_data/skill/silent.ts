@@ -5,7 +5,7 @@ import { silent as silentStatus } from "../status/silent";
 export const silent: Skill = {
   name: "silent",
   label: "音食う雪",
-  action: (skill, actor,receiver) => addStatus(silentStatus)(skill, actor,receiver),
+  action: (skill, actor, receiver) => addStatus(silentStatus)(skill, actor, receiver),
   baseDamage: 0,
   receiverCount: 1,
   additionalWt: 100,

@@ -41,9 +41,7 @@ export const toPartyBattlingJson: ToJson<PartyBattling, PartyBattlingJson> = (pa
   charactors: party.charactors.map(toCharactorBattlingJson),
 });
 
-export const toParty: ToModel<Party, PartyJson, DataNotFoundError | CharactorDuplicationError> = (
-  partyJson,
-) => {
+export const toParty: ToModel<Party, PartyJson, DataNotFoundError | CharactorDuplicationError> = (partyJson) => {
   const { name } = partyJson;
 
   const charactorObjs: Charactor[] = [];

@@ -5,7 +5,7 @@ import { fear } from "../status/fear";
 export const ghostFire: Skill = {
   name: "ghostFire",
   label: "鬼火",
-  action: (skill, actor,receiver) => addStatus(fear)(skill, actor,receiver),
+  action: (skill, actor, receiver) => addStatus(fear)(skill, actor, receiver),
   baseDamage: 0,
   receiverCount: 1,
   additionalWt: 100,

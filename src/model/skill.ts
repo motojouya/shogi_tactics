@@ -14,7 +14,11 @@ import {
   fear,
 } from "../store_data/status/index";
 
-export type ActionToCharactor = (self: Skill, actor: CharactorBattling, receiver: CharactorBattling) => CharactorBattling;
+export type ActionToCharactor = (
+  self: Skill,
+  actor: CharactorBattling,
+  receiver: CharactorBattling,
+) => CharactorBattling;
 
 export type SkillToCharactor = {
   name: string;

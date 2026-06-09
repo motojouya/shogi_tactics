@@ -5,8 +5,7 @@ import { magicDiffenceDown } from "../status/magicDiffenceDown";
 export const flameDigger: Skill = {
   name: "flameDigger",
   label: "炎で穿つ",
-  action: (skill, actor,receiver) =>
-    addStatus(magicDiffenceDown)(skill, actor,receiver),
+  action: (skill, actor, receiver) => addStatus(magicDiffenceDown)(skill, actor, receiver),
   baseDamage: 0,
   receiverCount: 1,
   additionalWt: 100,

@@ -5,7 +5,7 @@ import { avoidUp } from "../status/avoidUp";
 export const coldFeet: Skill = {
   name: "coldFeet",
   label: "逃げ腰",
-  action: (skill, actor,receiver) => addStatus(avoidUp)(skill, actor,receiver),
+  action: (skill, actor, receiver) => addStatus(avoidUp)(skill, actor, receiver),
   baseDamage: 0,
   receiverCount: 1,
   additionalWt: 100,

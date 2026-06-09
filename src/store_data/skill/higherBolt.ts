@@ -1,7 +1,5 @@
 import type { Skill } from "../../model/skill";
-import {
-  calcOrdinaryMagicalDamage,
-} from "../../model/skill";
+import { calcOrdinaryMagicalDamage } from "../../model/skill";
 
 export const higherBolt: Skill = {
   name: "higherBolt",

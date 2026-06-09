@@ -5,8 +5,7 @@ import { magicAttackDown } from "../status/magicAttackDown";
 export const jammer: Skill = {
   name: "jammer",
   label: "妨害魔法",
-  action: (skill, actor,receiver) =>
-    addStatus(magicAttackDown)(skill, actor,receiver),
+  action: (skill, actor, receiver) => addStatus(magicAttackDown)(skill, actor, receiver),
   baseDamage: 0,
   receiverCount: 1,
   additionalWt: 100,

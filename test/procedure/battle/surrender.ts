@@ -155,11 +155,7 @@ describe("surrender", () => {
       notice: (_message) => {},
     };
 
-    const battle = await surrender(mockRepo, dialogue)(
-      battleData,
-      battleData.home.charactors[0],
-      new Date(),
-    );
+    const battle = await surrender(mockRepo, dialogue)(battleData, battleData.home.charactors[0], new Date());
 
     expect(battle).toBe(null);
   });
@@ -178,11 +174,7 @@ describe("surrender", () => {
       notice: (_message) => {},
     };
 
-    const battle = await surrender(mockRepo, dialogue)(
-      battleData,
-      battleData.visitor.charactors[0],
-      new Date(),
-    );
+    const battle = await surrender(mockRepo, dialogue)(battleData, battleData.visitor.charactors[0], new Date());
 
     expect(battle).toBe(null);
   });
@@ -201,11 +193,7 @@ describe("surrender", () => {
       notice: (_message) => {},
     };
 
-    const battle = await surrender(mockRepo, dialogue)(
-      battleData,
-      battleData.home.charactors[0],
-      new Date(),
-    );
+    const battle = await surrender(mockRepo, dialogue)(battleData, battleData.home.charactors[0], new Date());
 
     expect(battle).toBeInstanceOf(UserCancel);
   });

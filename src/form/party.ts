@@ -20,19 +20,14 @@ export const toPartyForm: ToPartyForm = (party) => ({
   charactors: party.charactors.map(toCharactorForm),
 });
 
-export type ToParty = (
-  partyForm: PartyForm,
-) => Party | DataNotFoundError | CharactorDuplicationError;
+export type ToParty = (partyForm: PartyForm) => Party | DataNotFoundError | CharactorDuplicationError;
 export const toParty: ToParty = (partyForm) => {
   const { name } = partyForm;
 
   const charactorObjs: Charactor[] = [];
   for (const charactor of partyForm.charactors) {
     const charactorObj = toCharactor(charactor);
-    if (
-      charactorObj instanceof DataNotFoundError ||
-      charactorObj instanceof EmptyParameter
-    ) {
+    if (charactorObj instanceof DataNotFoundError || charactorObj instanceof EmptyParameter) {
       return charactorObj;
     }
     charactorObjs.push(charactorObj);

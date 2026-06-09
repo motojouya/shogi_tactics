@@ -1,13 +1,10 @@
 import type { Skill, ActionToCharactor } from "../../model/skill";
-import {
-  calcOrdinaryDirectDamage,
-  addStatus,
-} from "../../model/skill";
+import { calcOrdinaryDirectDamage, addStatus } from "../../model/skill";
 import { paralysis } from "../status/paralysis";
 
-export const paralysisAction: ActionToCharactor = (self, actor,receiver) => {
-  const newReceiver = calcOrdinaryDirectDamage(self, actor,receiver);
-  return addStatus(paralysis)(self, actor,newReceiver);
+export const paralysisAction: ActionToCharactor = (self, actor, receiver) => {
+  const newReceiver = calcOrdinaryDirectDamage(self, actor, receiver);
+  return addStatus(paralysis)(self, actor, newReceiver);
 };
 
 export const paralysisShot: Skill = {

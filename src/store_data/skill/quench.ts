@@ -1,7 +1,7 @@
 import type { Skill, ActionToCharactor } from "../../model/skill";
 import { getPhysical } from "../../model/charactor";
 
-export const recover: ActionToCharactor = (self, actor,receiver) => {
+export const recover: ActionToCharactor = (self, actor, receiver) => {
   const physical = getPhysical(receiver);
   return {
     ...receiver,
