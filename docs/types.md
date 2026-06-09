@@ -21,7 +21,7 @@ type CharactorReference = {
 type Origin = { // 駒の初期配置を表す。ゲーム開始前の状態を定義するために必要
   type: "ORIGIN";
 };
-type DoSkill = {
+type DoAction = {
   type: "DO_SKILL";
   skillKey: string;
   receivers: CharactorReference[]
@@ -35,11 +35,11 @@ type Surrender = {
   type: "SURRENDER";
   actor: CharactorReference;
 };
-type Action = DoSkill | DoNothing | Surrender;
+type Order = DoAction | DoNothing | Surrender; // 旧Action
 
 type Turn = {
   datetime: Date;
-  action: Action;
+  order: Order;
   charactors: Charactor[]; // 行動適用・死亡除外後の全生存駒。point昇順=次の行動順
 };
 
@@ -65,7 +65,7 @@ export type Status = {
 
 // 技の効果を定義する関数
 export type Act = (
-  self: Skill, // TODO
+  self: Action, // TODO
   actor: CharactorReference,
   receiver: CharactorReference[],
   turn: Turn,
@@ -73,12 +73,12 @@ export type Act = (
 
 // 技を適用するキャラクターの選択肢をFilterする関数
 export type Filter = (
-  self: Skill, // TODO
+  self: Action, // TODO
   actor: CharactorReference,
   turn: Turn,
 ) => CharactorReference[];
 
-export type Skill = {
+export type Action = { // 旧skill
   key: string;
   name: string;
   description: string;
@@ -97,7 +97,7 @@ export type Piece = {
   description: string;
   MaxHP: number;
   move: number;
-  skills: Skill[];
+  actions: Action[];
 };
 ```
 
