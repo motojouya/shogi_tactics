@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 
-import type { Database } from "../../src/io/database";
-import type { Battle } from "../../src/model/battle";
-import { GameOngoing } from "../../src/model/battle";
-import { toBattle } from "../../src/store_schema/battle";
-import { createRepository } from "../../src/store/battle";
+import type { Database } from "../io/database";
+import type { Battle } from "../model/battle";
+import { GameOngoing } from "../model/battle";
+import { toBattle } from "../store_schema/battle";
+import { createRepository } from "./battle";
 import { format } from "date-fns";
 
 const testData = {

@@ -1,10 +1,10 @@
-import type { PartyRepository } from "../../../src/store/party";
+import type { PartyRepository } from "../../store/party";
 
-import { DataExistError } from "../../../src/store_utility/schema";
-import { CharactorDuplicationError } from "../../../src/model/party";
+import { DataExistError } from "../../store_utility/schema";
+import { CharactorDuplicationError } from "../../model/party";
 
 import { describe, it, expect } from "vitest";
-import { saveParty } from "../../../src/procedure/party/save";
+import { saveParty } from "./save";
 
 const partyRepository: PartyRepository = {
   save: (_obj) => new Promise((resolve, _reject) => resolve()),

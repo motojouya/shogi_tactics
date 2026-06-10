@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 
-import type { Party } from "../../src/model/party";
-import { CharactorDuplicationError } from "../../src/model/party";
-import { toParty } from "../../src/store_schema/party";
+import type { Party } from "./party";
+import { CharactorDuplicationError } from "./party";
+import { toParty } from "../store_schema/party";
 
 describe("Party#toParty", function () {
   it("CharactorDuplicationError", function () {

@@ -1,8 +1,8 @@
-import type { Dialogue } from "../../../src/io/window_dialogue";
-import type { PartyRepository } from "../../../src/store/party";
+import type { Dialogue } from "../../io/window_dialogue";
+import type { PartyRepository } from "../../store/party";
 
 import { describe, it, expect } from "vitest";
-import { dismissParty } from "../../../src/procedure/party/dismiss";
+import { dismissParty } from "./dismiss";
 
 const partyRepository: PartyRepository = {
   save: (_obj) => new Promise((resolve, _reject) => resolve()),

@@ -1,18 +1,11 @@
-import type { BattleRepository } from "../../../src/store/battle";
-import type { Dialogue } from "../../../src/io/window_dialogue";
+import type { BattleRepository } from "../../store/battle";
 
 import { describe, it, expect } from "vitest";
 
-import { toBattle } from "../../../src/store_schema/battle";
-import { GameOngoing } from "../../../src/model/battle";
-import { act } from "../../../src/procedure/battle/act";
-import { DataNotFoundError } from "../../../src/store_utility/schema";
-import { UserCancel } from "../../../src/io/window_dialogue";
-
-const skillForm = {
-  skillName: "chop",
-  receiversWithIsVisitor: [{ value: "john__VISITOR" }],
-};
+import { toBattle } from "../../store_schema/battle";
+import { toParty } from "../../store_schema/party";
+import { startBattle } from "./start";
+import { GameOngoing } from "../../model/battle";
 
 const battleData = {
   title: "first-title",
@@ -27,7 +20,7 @@ const battleData = {
         weapon: "swordAndShield",
         statuses: [],
         hp: 100,
-        mp: 50,
+        mp: 0,
         restWt: 120,
         isVisitor: false,
       },
@@ -90,7 +83,7 @@ const battleData = {
           weapon: "swordAndShield",
           statuses: [],
           hp: 100,
-          mp: 50,
+          mp: 0,
           restWt: 120,
           isVisitor: false,
         },
@@ -136,6 +129,46 @@ const battleData = {
   result: GameOngoing,
 };
 
+const homeData = {
+  name: "home",
+  charactors: [
+    {
+      name: "sam",
+      race: "human",
+      blessing: "earth",
+      clothing: "steelArmor",
+      weapon: "swordAndShield",
+    },
+    {
+      name: "sara",
+      race: "human",
+      blessing: "earth",
+      clothing: "redRobe",
+      weapon: "rubyRod",
+    },
+  ],
+};
+
+const visitorData = {
+  name: "visitor",
+  charactors: [
+    {
+      name: "sam",
+      race: "human",
+      blessing: "earth",
+      clothing: "steelArmor",
+      weapon: "swordAndShield",
+    },
+    {
+      name: "sara",
+      race: "human",
+      blessing: "earth",
+      clothing: "redRobe",
+      weapon: "rubyRod",
+    },
+  ],
+};
+
 const battleRepository: BattleRepository = {
   save: (_obj) => new Promise((resolve, _reject) => resolve()),
   get: (_name) => new Promise((resolve, _reject) => resolve(toBattle(battleData))),
@@ -145,88 +178,15 @@ const battleRepository: BattleRepository = {
   exportJson: (_obj, _fileName) => new Promise((resolve, _reject) => resolve(null)),
 };
 
-describe("act", () => {
-  it("act", async () => {
-    const battle = toBattle(battleData);
-    const actor = battle.home.charactors[0];
-    const lastTurn = battle.turns[battleData.turns.length - 1];
+describe("startBattle", () => {
+  it("start battle", async () => {
+    const homeParty = toParty(homeData);
+    const visitorParty = toParty(visitorData);
+    const battle = await startBattle(battleRepository)("title", homeParty, visitorParty, new Date());
 
-    const mockRepo: BattleRepository = {
-      ...battleRepository,
-      save: async (_battle) => {
-        expect(true).toBe(true);
-      },
-    };
-    const dialogue: Dialogue = {
-      confirm: (message) => {
-        expect(message).toBe("実行していいですか？");
-        return true;
-      },
-      notice: (_message) => {},
-    };
-
-    const result = await act(dialogue, mockRepo)(battle, actor, skillForm, lastTurn, () => new Date());
-
-    const turnJustBefore = result.turns.pop();
-    const turnNextBefore = result.turns.pop();
-
-    expect(result).toStrictEqual(battle);
-
-    expect(turnJustBefore.action.type).toBe("TIME_PASSING");
-    expect(turnNextBefore.action.type).toBe("DO_SKILL");
-  });
-
-  it("data not found", async () => {
-    const battle = toBattle(battleData);
-    const actor = battle.home.charactors[0];
-    const lastTurn = battle.turns[battleData.turns.length - 1];
-
-    const mockRepo: BattleRepository = {
-      ...battleRepository,
-      save: async (_battle) => {
-        expect.unreachable();
-      },
-    };
-    const dialogue: Dialogue = {
-      confirm: (message) => {
-        expect(message).toBe("実行していいですか？");
-        return true;
-      },
-      notice: (_message) => {},
-    };
-
-    const result = await act(dialogue, mockRepo)(
-      battle,
-      actor,
-      { ...skillForm, skillName: "not-found" },
-      lastTurn,
-      () => new Date(),
-    );
-
-    expect(result).toBeInstanceOf(DataNotFoundError);
-  });
-
-  it("cancel", async () => {
-    const battle = toBattle(battleData);
-    const actor = battle.home.charactors[0];
-    const lastTurn = battle.turns[battleData.turns.length - 1];
-
-    const mockRepo: BattleRepository = {
-      ...battleRepository,
-      save: async (_battle) => {
-        expect.unreachable();
-      },
-    };
-    const dialogue: Dialogue = {
-      confirm: (message) => {
-        expect(message).toBe("実行していいですか？");
-        return false;
-      },
-      notice: (_message) => {},
-    };
-
-    const result = await act(dialogue, mockRepo)(battle, actor, skillForm, lastTurn, () => new Date());
-
-    expect(result).toBeInstanceOf(UserCancel);
+    expect(battle.title).toBe("title");
+    expect(battle.home.name).toBe("home");
+    expect(battle.visitor.name).toBe("visitor");
+    expect(battle.turns.length).toBe(2);
   });
 });

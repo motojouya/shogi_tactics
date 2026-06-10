@@ -52,6 +52,6 @@ export default defineConfig({
   },
   base: path,
   test: {
-    include: ["test/**/*.ts"],
+    include: ["src/**/*.unit.test.ts", "test/**/*.ts"],
   },
 });

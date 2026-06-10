@@ -1,11 +1,11 @@
 import type { Dialogue } from "../../io/window_dialogue";
-import type { PartyRepository } from "../../../src/store/party";
+import type { PartyRepository } from "../../store/party";
 
 import { describe, it, expect } from "vitest";
-import { CharactorDuplicationError } from "../../../src/model/party";
-import { UserCancel, EmptyParameter } from "../../../src/io/window_dialogue";
-import { importParty } from "../../../src/procedure/party/importJson";
-import { toParty } from "../../../src/store_schema/party";
+import { CharactorDuplicationError } from "../../model/party";
+import { UserCancel, EmptyParameter } from "../../io/window_dialogue";
+import { importParty } from "./importJson";
+import { toParty } from "../../store_schema/party";
 
 const partyRepository: PartyRepository = {
   save: (_obj) => new Promise((resolve, _reject) => resolve()),

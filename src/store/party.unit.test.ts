@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 
-import type { Party } from "../../src/model/party";
-import type { Database } from "../../src/io/database";
-import { toParty } from "../../src/store_schema/party";
-import { createRepository } from "../../src/store/party";
+import type { Party } from "../model/party";
+import type { Database } from "../io/database";
+import { toParty } from "../store_schema/party";
+import { createRepository } from "./party";
 
 const dbMock: Database = {
   save: (_namespace, _objctKey, _obj) => new Promise((resolve, _reject) => resolve()),

@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 
-import type { Charactor } from "../../src/model/charactor";
-import type { CharactorJson } from "../../src/store_schema/charactor";
+import type { Charactor } from "./charactor";
+import type { CharactorJson } from "../store_schema/charactor";
 
-import { getPhysical } from "../../src/model/charactor";
-import { toCharactor } from "../../src/store_schema/charactor";
+import { getPhysical } from "./charactor";
+import { toCharactor } from "../store_schema/charactor";
 
 describe("Charctor#toCharactor", function () {
   it("ok", function () {

@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 
-import type { Charactor } from "../../src/model/charactor";
-import type { Database } from "../../src/io/database";
-import { toCharactor } from "../../src/store_schema/charactor";
-import { createRepository } from "../../src/store/charactor";
+import type { Charactor } from "../model/charactor";
+import type { Database } from "../io/database";
+import { toCharactor } from "../store_schema/charactor";
+import { createRepository } from "./charactor";
 
 const dbMock: Database = {
   save: (_namespace, _objctKey, _obj) => new Promise((resolve, _reject) => resolve()),

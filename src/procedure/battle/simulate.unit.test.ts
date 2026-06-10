@@ -1,14 +1,12 @@
-import type { BattleRepository } from "../../../src/store/battle";
-import type { Dialogue } from "../../../src/io/window_dialogue";
-
 import { describe, it, expect } from "vitest";
 
-import { GameOngoing, GameHome, GameVisitor } from "../../../src/model/battle";
-import { toBattle } from "../../../src/store_schema/battle";
-import { UserCancel } from "../../../src/io/window_dialogue";
-import { surrender } from "../../../src/procedure/battle/surrender";
+import { DataNotFoundError } from "../../store_utility/schema";
+import { toBattle } from "../../store_schema/battle";
+import { GameOngoing } from "../../model/battle";
+import { skillRepository } from "../../store/skill";
+import { simulate } from "./simulate";
 
-const testData = {
+const battleData = {
   title: "first-title",
   home: {
     name: "home",
@@ -21,7 +19,7 @@ const testData = {
         weapon: "swordAndShield",
         statuses: [],
         hp: 100,
-        mp: 0,
+        mp: 50,
         restWt: 120,
         isVisitor: false,
       },
@@ -84,7 +82,7 @@ const testData = {
           weapon: "swordAndShield",
           statuses: [],
           hp: 100,
-          mp: 0,
+          mp: 50,
           restWt: 120,
           isVisitor: false,
         },
@@ -130,71 +128,50 @@ const testData = {
   result: GameOngoing,
 };
 
-const battleRepository: BattleRepository = {
-  save: (_obj) => new Promise((resolve, _reject) => resolve()),
-  get: (_name) => new Promise((resolve, _reject) => resolve(battle)),
-  remove: (_name) => new Promise((resolve, _reject) => resolve()),
-  list: () => new Promise((resolve, _reject) => resolve([])),
-  importJson: (_fileName) => new Promise((resolve, _reject) => resolve(battle)),
-  exportJson: (_obj, _fileName) => new Promise((resolve, _reject) => resolve(null)),
-};
+describe("simulate", () => {
+  it("simulate", () => {
+    const battle = toBattle(battleData);
+    const actor = battle.home.charactors[0];
+    const skill = skillRepository.get("chop");
+    const receiverWithIsVisitor = "john__VISITOR";
+    const lastTurn = battle.turns[battle.turns.length - 1];
+    const actionDate = new Date();
 
-// test
-describe("surrender", () => {
-  it("home surrender", async () => {
-    const battleData = toBattle(testData);
+    const result = simulate(battle, actor, skill, receiverWithIsVisitor, lastTurn, actionDate);
 
-    const mockRepo: BattleRepository = {
-      ...battleRepository,
-      save: async (battle) => {
-        expect(battle.result).toBe(GameVisitor);
-      },
-    };
-    const dialogue: Dialogue = {
-      confirm: () => true,
-      notice: (_message) => {},
-    };
-
-    const battle = await surrender(mockRepo, dialogue)(battleData, battleData.home.charactors[0], new Date());
-
-    expect(battle).toBe(null);
+    expect(result).toEqual({
+      receiver: { ...battle.visitor.charactors[0], hp: 10 },
+      survive: true,
+    });
   });
+  it("simulate not survive", () => {
+    const battle = toBattle(battleData);
+    battle.visitor.charactors[1].hp = 1;
+    battle.turns[0].sortedCharactors[3].hp = 1;
 
-  it("visitor surrender", async () => {
-    const battleData = toBattle(testData);
+    const actor = battle.home.charactors[0];
+    const skill = skillRepository.get("chop");
+    const receiverWithIsVisitor = "noa__VISITOR";
+    const lastTurn = battle.turns[battle.turns.length - 1];
+    const actionDate = new Date();
 
-    const mockRepo: BattleRepository = {
-      ...battleRepository,
-      save: async (battle) => {
-        expect(battle.result).toBe(GameHome);
-      },
-    };
-    const dialogue: Dialogue = {
-      confirm: () => true,
-      notice: (_message) => {},
-    };
+    const result = simulate(battle, actor, skill, receiverWithIsVisitor, lastTurn, actionDate);
 
-    const battle = await surrender(mockRepo, dialogue)(battleData, battleData.visitor.charactors[0], new Date());
-
-    expect(battle).toBe(null);
+    expect(result).toEqual({
+      receiver: { ...battle.visitor.charactors[1], hp: 1 },
+      survive: false,
+    });
   });
+  it("simulate not found", () => {
+    const battle = toBattle(battleData);
+    const actor = battle.home.charactors[0];
+    const skill = skillRepository.get("chop");
+    const receiverWithIsVisitor = "NOT_FOUND__VISITOR";
+    const lastTurn = battle.turns[battle.turns.length - 1];
+    const actionDate = new Date();
 
-  it("cancel", async () => {
-    const battleData = toBattle(testData);
+    const result = simulate(battle, actor, skill, receiverWithIsVisitor, lastTurn, actionDate);
 
-    const mockRepo: BattleRepository = {
-      ...battleRepository,
-      save: async () => {
-        expect.unreachable();
-      },
-    };
-    const dialogue: Dialogue = {
-      confirm: () => false,
-      notice: (_message) => {},
-    };
-
-    const battle = await surrender(mockRepo, dialogue)(battleData, battleData.home.charactors[0], new Date());
-
-    expect(battle).toBeInstanceOf(UserCancel);
+    expect(result).toBeInstanceOf(DataNotFoundError);
   });
 });

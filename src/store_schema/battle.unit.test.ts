@@ -1,19 +1,15 @@
-import type { BattleRepository } from "../../../src/store/battle";
-
 import { describe, it, expect } from "vitest";
 
-import { toBattle } from "../../../src/store_schema/battle";
-import { toParty } from "../../../src/store_schema/party";
-import { startBattle } from "../../../src/procedure/battle/start";
-import { GameOngoing } from "../../../src/model/battle";
+import type { Battle } from "../model/battle";
+import { toBattle } from "./battle";
 
-const battleData = {
+const testData = {
   title: "first-title",
   home: {
-    name: "home",
+    name: "light",
     charactors: [
       {
-        name: "sam",
+        name: "denim",
         race: "human",
         blessing: "earth",
         clothing: "steelArmor",
@@ -25,7 +21,7 @@ const battleData = {
         isVisitor: false,
       },
       {
-        name: "sara",
+        name: "vyse",
         race: "human",
         blessing: "earth",
         clothing: "redRobe",
@@ -39,10 +35,10 @@ const battleData = {
     ],
   },
   visitor: {
-    name: "visitor",
+    name: "dark",
     charactors: [
       {
-        name: "john",
+        name: "catiua",
         race: "human",
         blessing: "earth",
         clothing: "steelArmor",
@@ -54,7 +50,7 @@ const battleData = {
         isVisitor: true,
       },
       {
-        name: "noa",
+        name: "lanselot",
         race: "human",
         blessing: "earth",
         clothing: "redRobe",
@@ -73,6 +69,63 @@ const battleData = {
       action: {
         type: "TIME_PASSING",
         wt: 0,
+      },
+      sortedCharactors: [
+        {
+          name: "denim",
+          race: "human",
+          blessing: "earth",
+          clothing: "steelArmor",
+          weapon: "swordAndShield",
+          statuses: [],
+          hp: 100,
+          mp: 0,
+          restWt: 120,
+          isVisitor: false,
+        },
+        {
+          name: "vyse",
+          race: "human",
+          blessing: "earth",
+          clothing: "redRobe",
+          weapon: "rubyRod",
+          statuses: [],
+          hp: 100,
+          mp: 0,
+          restWt: 115,
+          isVisitor: false,
+        },
+        {
+          name: "catiua",
+          race: "human",
+          blessing: "earth",
+          clothing: "steelArmor",
+          weapon: "swordAndShield",
+          statuses: [],
+          hp: 100,
+          mp: 0,
+          restWt: 130,
+          isVisitor: true,
+        },
+        {
+          name: "lanselot",
+          race: "human",
+          blessing: "earth",
+          clothing: "redRobe",
+          weapon: "rubyRod",
+          statuses: [],
+          hp: 100,
+          mp: 0,
+          restWt: 110,
+          isVisitor: true,
+        },
+      ],
+    },
+    {
+      datetime: "2023-06-29T12:12:23",
+      action: {
+        type: "TIME_PASSING",
+        wt: 130,
       },
       sortedCharactors: [
         {
@@ -126,67 +179,13 @@ const battleData = {
       ],
     },
   ],
-  result: GameOngoing,
+  result: "ONGOING",
 };
 
-const homeData = {
-  name: "home",
-  charactors: [
-    {
-      name: "sam",
-      race: "human",
-      blessing: "earth",
-      clothing: "steelArmor",
-      weapon: "swordAndShield",
-    },
-    {
-      name: "sara",
-      race: "human",
-      blessing: "earth",
-      clothing: "redRobe",
-      weapon: "rubyRod",
-    },
-  ],
-};
-
-const visitorData = {
-  name: "visitor",
-  charactors: [
-    {
-      name: "sam",
-      race: "human",
-      blessing: "earth",
-      clothing: "steelArmor",
-      weapon: "swordAndShield",
-    },
-    {
-      name: "sara",
-      race: "human",
-      blessing: "earth",
-      clothing: "redRobe",
-      weapon: "rubyRod",
-    },
-  ],
-};
-
-const battleRepository: BattleRepository = {
-  save: (_obj) => new Promise((resolve, _reject) => resolve()),
-  get: (_name) => new Promise((resolve, _reject) => resolve(toBattle(battleData))),
-  remove: (_name) => new Promise((resolve, _reject) => resolve()),
-  list: () => new Promise((resolve, _reject) => resolve([])),
-  importJson: (_fileName) => new Promise((resolve, _reject) => resolve(toBattle(battleData))),
-  exportJson: (_obj, _fileName) => new Promise((resolve, _reject) => resolve(null)),
-};
-
-describe("startBattle", () => {
-  it("start battle", async () => {
-    const homeParty = toParty(homeData);
-    const visitorParty = toParty(visitorData);
-    const battle = await startBattle(battleRepository)("title", homeParty, visitorParty, new Date());
-
-    expect(battle.title).toBe("title");
-    expect(battle.home.name).toBe("home");
-    expect(battle.visitor.name).toBe("visitor");
-    expect(battle.turns.length).toBe(2);
+describe("Battle#toBattle", function () {
+  it("toBattle", async () => {
+    const battle = toBattle(testData) as Battle;
+    console.log(battle);
+    expect(battle.title).toBe("first-title");
   });
 });

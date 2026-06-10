@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
-import type { Physical } from "../../src/model/physical";
-import { addPhysicals } from "../../src/model/physical";
+import type { Physical } from "./physical";
+import { addPhysicals } from "./physical";
 
 const basePhysical: Physical = {
   MaxHP: 100,

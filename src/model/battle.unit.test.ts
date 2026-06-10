@@ -1,8 +1,8 @@
-import type { Battle } from "../../src/model/battle";
-import type { Party } from "../../src/model/party";
-import type { Skill } from "../../src/model/skill";
-import type { CharactorBattling } from "../../src/model/charactor";
-import type { BattleJson } from "../../src/store_schema/battle";
+import type { Battle } from "./battle";
+import type { Party } from "./party";
+import type { Skill } from "./skill";
+import type { CharactorBattling } from "./charactor";
+import type { BattleJson } from "../store_schema/battle";
 
 import { describe, it, expect } from "vitest";
 
@@ -17,15 +17,15 @@ import {
   GameHome,
   GameVisitor,
   GameDraw,
-} from "../../src/model/battle";
-import { toBattle } from "../../src/store_schema/battle";
-import { toParty } from "../../src/store_schema/party";
+} from "./battle";
+import { toBattle } from "../store_schema/battle";
+import { toParty } from "../store_schema/party";
 import { format } from "date-fns";
 
-import { toCharactorBattling } from "../../src/store_schema/charactor";
-import { CharactorDuplicationError } from "../../src/model/party";
-import { JsonSchemaUnmatchError, DataNotFoundError } from "../../src/store_utility/schema";
-import { skillRepository } from "../../src/store/skill";
+import { toCharactorBattling } from "../store_schema/charactor";
+import { CharactorDuplicationError } from "./party";
+import { JsonSchemaUnmatchError, DataNotFoundError } from "../store_utility/schema";
+import { skillRepository } from "../store/skill";
 
 const testData = {
   title: "first-title",
