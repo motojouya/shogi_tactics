@@ -51,11 +51,11 @@ webのみ
     battleとskillとコマのrepository  
   - controller  
     ロジック定義  
-  - component  
+  - components  
     画面の部品  
   - feature  
     機能であり実際のページの概念  
-  - page  
+  - pages  
     featureに振り分けるがurlはこちらに紐づく  
 - test  
   playwrightのテスト  
