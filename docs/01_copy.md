@@ -185,14 +185,25 @@ modelファイルの削除は、それを参照する`store_data`配下（acquir
 - model -> 何もしない
 - store -> repositoryに命名変更
 - store_data -> dataに命名変更
-- store_schema -> 何もしない（step10でmodelの同名ファイルへ吸収して消える前提。このステップでは温存する）
+- store_schema -> modelに統合。更にmodelの型情報をzodから導出できるように修正する
 - store_utility -> ファイルをrepositoryに移動
 - components -> 何もしない
 - form -> 何もしない
-- io -> storeに命名変更
+- io -> 中身はrepositoryに移動して削除
 - pages -> 何もしない
 - procedure -> controllerに命名変更
 - subpage -> featureに命名変更
+
+この作業は後でやる。先に機能的な調整とデータモデルの整備が先。
+それが整ってから、ディレクトリ構成や命名を見直す感じで。
+データモデルをみなさないと、保存モデルとドメインモデルの差異を埋めるモジュールが消せないので。
+
+データモデルの修正計画は、以降の計画を盛り込みつつ、再度見直し。コード読んでちゃんとやったほうがいい。
+ただし、次のtestコロケーションは先行して行う。
+
+repositoryだが、初期化が必要なのはbattle tableぐらいで、それは毎回いるので、全部初期化して、複数のrepositoryをまとめたオブジェクトを引き回す感じにする。
+battleのkeyはuuidにする。uuidも日付とかも、repository経由で取得できるようにする。
+battleのrepositoryは、変換とかの機能がなくなり、key生成もcontrollerでuuidを取得する感じなので、ロジックがなく、本当に保存だけの役割にする。
 
 ## 7. testコロケーション
 testファイルはすべて`.unit.test.ts`という拡張子とし、src配下のテストファイル対象と同じディレクトリに配置する。  
