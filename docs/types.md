@@ -18,8 +18,8 @@ type UnitReference = {
   piece: string;
 };
 
-type Origin = { // 駒の初期配置を表す。ゲーム開始前の状態を定義するために必要
-  type: "ORIGIN";
+type Formation = { // 駒の初期配置を表す。ゲーム開始前の状態を定義するために必要
+  type: "FORMATION";
 };
 type DoAction = {
   type: "DO_SKILL";
@@ -35,7 +35,7 @@ type Surrender = {
   type: "SURRENDER";
   actor: UnitReference;
 };
-type Order = DoAction | DoNothing | Surrender; // 旧Action
+type Order = Formation | DoAction | DoNothing | Surrender; // 旧Action
 
 type Turn = {
   datetime: Date;
@@ -51,6 +51,7 @@ type Battle = {
   second_player_name: string;
   stepBase: number;  // 順番ポイントのBASE(=開始時の総駒数。定数。step11)
   turns: Turn[];     // length===0 はparty作成段階(画面出し分けの条件)
+  unitCount: number;
   result: GameResult;
   version: string;
 };
