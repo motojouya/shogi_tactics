@@ -1,65 +1,47 @@
 
 とりあえず、書き出すところから
-
-## UI/UX
-画像として将棋のコマを入れるのは必要
-
-## インフラ
+ゴールイメージとしての型と機能のイメージはあるが、具体的な機能の書き出しができてない
+現状とのギャップをどのようにして埋めていくべきか、作業を分割して考えることができていない。これはデータ型とかから考えられるはず
+まずは機能的な部分の書き出しか
 
 ## 機能
+- 型定義の変化
+  - types.mdに記載している形にする。これに伴って様々な機能変化があるので、これはタスクではなくゴール。
+- battleのkeyはuuidにする
+  - 画面上の表示はfirst player name, second player name, 日付時刻, battleの状態
+  - uuidは画面上に表示されないkey
+  - battleにtitleのような任意の名前はつけられない
+- 時間経過ロジックの変更
+  - 最初にorderが決まっている状態
+  - 基礎コスト+Actionごとのコストが加算される
+  - コストが小さいunitから動くが、コスト同値ならorderが小さい方から
+  - ActionコストはActionごとに決まっていて、基礎コストは基本的に全体のunit数だが、最初に設定可能
+- battleにはversionがあり、そのversionのルールで実行する
+  - 画面のurl上もversionが切られる
+  - そのversionのbattleは途中で変更できない
 
-## モデリング
+## 実作業
+- model命名変更
+  - charactor -> piece
+  - charactor battling -> unit
+
+## others
+
+battleのkeyはuuidにする。uuidも日付とかも、repository経由で取得できるようにする。battle repositoryはuuid生成を行わない。repositoryはシンプルになる。
 時間経過ロジックがポイントベースになるのでだいぶ変化するはず
 技について影響距離と到達距離の項目追加
-
-partyを作るモードとデフォルトのpartyモードの追加
 visitor,homeをfirst,secondに変更する。またプレイヤー名を入力できるようにしてだれがfirst,secondか分かるように
 party登録の際は、second->firstの順で交互にコマを登録していくので、その順序で
 version管理したい。pathごとにversionを定義する感じ。一覧はversionなしで、battle自体がversionをもって、特定のpathに行くイメージ。なので一覧のpathは別にして、versionごとのpathを切る。そこでversionの変数を定義してアプリケーションにわたすイメージ
-dependabotの導入
-github actions(workflow)の見直し。単一パッケージ化に伴い、`check.yml`の`-w @motojouya/kniw-command`/`-w @motojouya/kniw-core`参照や、`gh-pages.yml`、`package.json`のname/repository/homepage、README/LICENSE/description配下のkniw表記を棚卸し・修正する。あわせてworkflowのtrigger(workflow_dispatch)を本来の形に戻す。  
-また、`.npmrc`の`min-release-age`を効かせるためCIでnpmを11.10.0以上に更新する（node 22同梱のnpmは10.x系）。ローカル環境でも同様にnpmを更新しておく。
+physical.tsの残りの項目はcharacter.tsに移動
 
-項目をすべて移動
-- physical.tsの残りの項目はcharacter.tsに移動
-
-## 6. ディレクトリ統廃合
-命名や移動をするごとにbuid,testなどのチェックを行う。
-
-- model -> 何もしない
-- store -> repositoryに命名変更
-- store_data -> dataに命名変更
-- store_schema -> modelに統合。更にmodelの型情報をzodから導出できるように修正する
-- store_utility -> ファイルをrepositoryに移動
-- components -> 何もしない
-- form -> 何もしない
-- io -> 中身はrepositoryに移動して削除
-- pages -> 何もしない
-- procedure -> controllerに命名変更
-- subpage -> featureに命名変更
-
-この作業は後でやる。先に機能的な調整とデータモデルの整備が先。
-それが整ってから、ディレクトリ構成や命名を見直す感じで。
-データモデルをみなさないと、保存モデルとドメインモデルの差異を埋めるモジュールが消せないので。
-
-データモデルの修正計画は、以降の計画を盛り込みつつ、再度見直し。コード読んでちゃんとやったほうがいい。
-ただし、次のtestコロケーションは先行して行う。
-
-repositoryだが、初期化が必要なのはbattle tableぐらいで、それは毎回いるので、全部初期化して、複数のrepositoryをまとめたオブジェクトを引き回す感じにする。
-battleのkeyはuuidにする。uuidも日付とかも、repository経由で取得できるようにする。
-battleのrepositoryは、変換とかの機能がなくなり、key生成もcontrollerでuuidを取得する感じなので、ロジックがなく、本当に保存だけの役割にする。
 
 ## 8. party.tsの削除
 partyの内容はbattleに統合するので、character[]をbattleに埋め込んだうえで、party.tsを削除する。  
 partyを作る画面があるが、これはbattleのstepとしてpartyを作る段階を用意するので、battleの画面で出し分ける感じになる。  
 partyを作る段階とは、battleのturn[]のlengthが0の状態で、partyを作り終えたのであれば、turnに1つ追加する。これを条件としてparty作成画面を出し分ける。
 
-### Battle / Turn のデータ型（F/G）
-データ型の定義は `types.md` に集約する（`Battle` / `Turn` / `Charactor` / `Action` / `CharactorReference` 等）。要点のみ：
-- `Roster` は廃止。プレイヤー名は `Battle.first_player_name` / `second_player_name` として持ち、駒は `Turn.charactors`（全生存駒の1リスト、`steps`昇順＝行動順）に集約する。`side` で陣営を区別。
-- `Charactor` は `{ piece, hp, side, steps, statuses }`（駒種キーのみ保持、skill実体は持たない。step9参照）。
 - `Battle.turns.length === 0` がparty作成段階（画面出し分け条件）。party確定で先頭Turnを1つ追加する。先頭Turnの `actor` は null 許容（行動前）。
-- `Battle` は `stepBase`（step11のBASE＝開始時総駒数の定数）と `version` を持つ。
 
 ## 9. skillの参照
 skillはcharacterに埋め込まれた形で参照されるが、character上はkeyのみを持ち、controllerでskill実態を参照する。  
@@ -74,12 +56,6 @@ character上のskillの埋め込みを削除したうえで、ロジックを成
 
 > 補足: 「通常行動/反動行動」はstep11のcost(2/7)と対応。駒種(piece)ごとの固定技なので、kniwのacquirement(装備でskillが変わる仕組み)とは異なり、駒種で一意に決まる。
 > なお、同一プレイヤー(side)内に同じ駒種は複数持てないルールなので、`CharactorReference`＝`{ side, piece }` で駒を一意に特定できる。
-
-## 10. store_schema削除
-store_schemaの実装内容は、modelの同名ファイルに移動する。  
-また、modelの型情報をzodの型情報から導出できるように修正する。
-
-> NOTE: schemaをmodelに取り込むと、model -> store(repository) -> model のような循環依存が生じる可能性がある（現状はstore_schemaが中間層として循環を断っている）。step5・9でacquirement等のrepository参照が消えていれば回避できる見込みだが、当該タスク着手時に改めて依存関係を調査し、循環が残らないか確認してから進め方を決める。  
 
 ## 11. 時間経過ロジックの変更
 kniwでは時間経過を仮想的な時間（WT/restWt）で表現していた。これを**行動ポイント方式**に置き換える。  
@@ -116,4 +92,30 @@ kniwでは時間経過を仮想的な時間（WT/restWt）で表現していた�
 
 > 「行動済み/未行動の2リスト」は、この `steps` 列を並べ替えたビューとして導出できる（`steps`昇順の先頭が次の行動者）。内部表現は `steps` カウンタ1本とする。
 
+
+## UI/UX
+画像として将棋のコマを入れるのは必要
+partyを作るモードとデフォルトのpartyモードの追加
+
+## 開発の下回り
+- dependabot導入
+- github actions見直し
+  - npm workspace使わなくなったので、それに伴って開発コマンドの見直し
+  - アプリケーション名の見直し
+- ディレクトリ統廃合
+  - model -> 何もしない
+  - store -> repositoryに命名変更
+  - store_data -> dataに命名変更
+  - store_schema -> modelに統合。更にmodelの型情報をzodから導出できるように修正する
+  - store_utility -> ファイルをrepositoryに移動
+  - components -> 何もしない
+  - form -> 何もしない
+  - io -> 中身はrepositoryに移動して削除
+  - pages -> 何もしない
+  - procedure -> controllerに命名変更
+  - subpage -> featureに命名変更
+- modelの型はzodから導出できるように
+  - 保存するデータ型が一致していない状態を解消する必要があるので、battleからのskill参照やpiece参照をkey参照にして、presentationやcontrollerで解決する
+- repositoryの初期化はすべて一緒に行う
+  - 初期化が必要なのはbattle tableぐらいで毎回使うので
 

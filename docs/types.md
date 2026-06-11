@@ -4,16 +4,16 @@
 ```ts
 type Side = "FIRST" | "SECOND";
 
-type Charactor = {
+type Unit = {
   side: Side;
   piece: string;  // 駒種キー
   hp: number;    // 体力
   steps: number; // 順番ポイント(初期0)。小さいほど先に行動
   statuses: string[]; // 状態異常キーの配列
 };
-// orderはcharactorを持つ配列のindexで代用
+// orderはunitを持つ配列のindexで代用
 
-type CharactorReference = {
+type UnitReference = {
   side: Side;
   piece: string;
 };
@@ -24,23 +24,23 @@ type Origin = { // 駒の初期配置を表す。ゲーム開始前の状態を�
 type DoAction = {
   type: "DO_SKILL";
   skillKey: string;
-  receivers: CharactorReference[]
-  actor: CharactorReference;
+  receivers: UnitReference[]
+  actor: UnitReference;
 };
 type DoNothing = {
   type: "DO_NOTHING";
-  actor: CharactorReference;
+  actor: UnitReference;
 };
 type Surrender = {
   type: "SURRENDER";
-  actor: CharactorReference;
+  actor: UnitReference;
 };
 type Order = DoAction | DoNothing | Surrender; // 旧Action
 
 type Turn = {
   datetime: Date;
   order: Order;
-  charactors: Charactor[]; // 行動適用・死亡除外後の全生存駒。point昇順=次の行動順
+  units: Unit[]; // 行動適用・死亡除外後の全生存駒。point昇順=次の行動順
 };
 
 type GameResult = "ONGOING" | "FIRST" | "SECOND" | "DRAW";
@@ -66,17 +66,17 @@ export type Status = {
 // 技の効果を定義する関数
 export type Act = (
   self: Action, // TODO
-  actor: CharactorReference,
-  receiver: CharactorReference[],
+  actor: UnitReference,
+  receiver: UnitReference[],
   turn: Turn,
 ) => Turn;
 
 // 技を適用するキャラクターの選択肢をFilterする関数
 export type Filter = (
   self: Action, // TODO
-  actor: CharactorReference,
+  actor: UnitReference,
   turn: Turn,
-) => CharactorReference[];
+) => UnitReference[];
 
 export type Action = { // 旧skill
   key: string;
