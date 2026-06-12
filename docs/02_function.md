@@ -1,7 +1,7 @@
 
-## 機能定義
+# plan
 
-### 機能
+## 機能
 - 型定義の変化
   - types.mdに記載している形にする。これに伴って様々な機能変化があるので、これはタスクではなくゴール。
 - battleのkeyはuuidにする
@@ -32,12 +32,10 @@
   - 戦乱モードでは、先手、後手で交互にunitを選んでいき、事前にきめた規定数まで選んだら完了して、戦闘に進める
   - partyの事前登録という概念はなくなる
 - partyという概念がなく、先手/後手に属するunitであることがわかればいいので、フラットにunitを管理しつつ、unit自身が先手/後手であることを知っている構造
+- 画像として将棋のコマを入れるのは必要
+- partyを作るモードとデフォルトのpartyモードの追加
 
-### UI/UX
-画像として将棋のコマを入れるのは必要
-partyを作るモードとデフォルトのpartyモードの追加
-
-## 実作業
+## 作業感
 
 ### モデリングとロジック
 - model命名変更
@@ -84,3 +82,85 @@ partyを作るモードとデフォルトのpartyモードの追加
   - 保存するデータ型が一致していない状態を解消する必要があるので、battleからのskill参照やpiece参照をkey参照にして、presentationやcontrollerで解決する
 - repositoryの初期化はすべて一緒に行う
   - 初期化が必要なのはbattle tableぐらいで毎回使うので
+
+## 作業計画
+
+### 1. rename
+- Order: Actionからrename
+
+### 2. 新規項目、型定義
+- Formation: 新規定義
+- Status: label->key
+- Action: 新規定義だが、skill参考に
+- Piece: 新規定義だが、character,physical参考に
+- Unit: 新規定義だが、character,physical,character_battling参考に
+- UnitReference: 新規定義。unit.tsに
+- Side: 新規定義。unit.tsに
+- Turn: units追加。初期値はlength=0
+- Battle: key,first_player_name,second_player_name,stepBase,unitCount,version追加。初期値は適当
+
+### 3. piece,actionをそれぞれ定義
+- data/action
+- data/status
+- data/piece
+- store/action
+- store/status
+- store/piece
+
+### 4. actionのact関数、filter関数の共通化
+- ちゃんとロジック精査する
+
+### 5. battle開始時のstepBase,unitCount,player_nameの入力。default値としてのversion指定
+- モーダル画面で出して、battle登録したら、そのbattleの画面に
+- titleの項目削除
+- keyはuuidを設定
+
+### 6. battleでのparty追加ロジック
+- battleでpartyを追加して開始できるようにする
+- battleで追加する際に、party battlingを追加できるようにする
+- party_battlingではなく、battle.unitsに登録するようにする
+- home,visitorの削除
+
+### 7. characters->units移行
+- controller,presentationでのpiece,status,action store呼び出し
+- ダメージ計算は主にActionのact関数に閉じているので、Action keyを受け付けて呼び出せるように切り替える
+- turn管理ロジックの変更で、orderのtime_passingが消える、stepBaseの参照などの変化がある。
+
+### 8.戦乱モードではなく、通常モードでplayer_nameだけ入力できるformを用意し、default値のunitsを適用
+
+### 9. battle画面のurlをversion番号に
+- 同一versionじゃないと表示できなく
+
+### 10. 一覧画面のurlをlistに
+- battleが指定されたら、versionをみて、当該のversion画面に遷移
+
+### 11. modelの型はzodから導出できるように
+- 保存するデータ型が一致していない状態を解消する必要があるので、battleからのskill参照やpiece参照をkey参照にして、presentationやcontrollerで解決する
+
+### 12. repositoryの初期化はすべて一緒に行う
+- 初期化が必要なのはbattle tableぐらいで毎回使うので
+
+### 13. ディレクトリ統廃合
+- model -> 何もしない
+- store -> repositoryに命名変更
+- store_data -> dataに命名変更
+- store_schema -> modelに統合。更にmodelの型情報をzodから導出できるように修正する
+- store_utility -> ファイルをrepositoryに移動
+- components -> 何もしない
+- form -> 何もしない
+- io -> 中身はrepositoryに移動して削除
+- pages -> 何もしない
+- procedure -> controllerに命名変更
+- subpage -> featureに命名変更
+
+### 14. 駒画像導入
+
+### 15. UI調整
+たぶんもっといろいろ治すところが出てくる
+
+### 16. dependabot導入
+
+### 17. github actions見直し
+- npm workspace使わなくなったので、それに伴って開発コマンドの見直し
+- アプリケーション名の見直し
+

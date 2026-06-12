@@ -18,7 +18,7 @@ type UnitReference = {
   piece: string;
 };
 
-type Formation = { // 駒の初期配置を表す。ゲーム開始前の状態を定義するために必要
+type Formation = { // unitの決定中の状態
   type: "FORMATION";
 };
 type DoAction = {
@@ -46,10 +46,10 @@ type Turn = {
 type GameResult = "ONGOING" | "FIRST" | "SECOND" | "DRAW";
 
 type Battle = {
-  title: string;
+  key: string;
   first_player_name: string;
   second_player_name: string;
-  stepBase: number;  // 順番ポイントのBASE(=開始時の総駒数。定数。step11)
+  stepBase: number;  // 順番ポイントのBASE(=開始時の総駒数。定数。step11)。1以上でないといけない。基本はunit数
   turns: Turn[];     // length===0 はparty作成段階(画面出し分けの条件)
   unitCount: number;
   result: GameResult;
