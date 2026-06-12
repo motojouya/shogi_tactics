@@ -105,6 +105,7 @@
 - Turn: units追加。初期値はlength=0
 - Battle: key,first_player_name,second_player_name,stepBase,unitCount,version追加。初期値は適当
 - この段階では新型は「追加」のみ（旧型と共存）とし、buildをgreenに保つ。実際の差し替えはstep5以降。
+- **このstepで新規定義したモジュールには、ロジックを持つものにテストを追加する**（コロケーションの`*.unit.test.ts`）。
 
 ### 3. piece,actionをそれぞれ定義
 - data/action
@@ -126,26 +127,28 @@
 - titleの項目削除
 - keyはuuidを設定
 - **uuid・日時はrepository経由で供給する（provider化）**。controllerがrepositoryからuuid/日時を取得してbattleを生成する（01_copy.md L205）。
-- **version は v1 では「保存文字列＋URLガードのみ」と割り切る**。versionごとのルール分岐ロジックは持たず、battleが自分のversion文字列を保持し、URL(step9/10)で表示可否をガードするだけにする。
-- このstep完了時点ではhome/visitorは残置（units化はstep6/7）。store_schema/battle・store/battle（key: title→uuid）・procedure/start・subpage/componentsのURL/参照をこのstep内で揃えてgreenに戻す。
+- **version は v1 では「保存文字列＋URLガードのみ」と割り切る**。versionごとのルール分岐ロジックは持たず、battleが自分のversion文字列を保持し、URL(step10/11)で表示可否をガードするだけにする。
+- このstep完了時点ではhome/visitorは残置（units化はstep6以降）。store_schema/battle・store/battle（key: title→uuid）・procedure/start・subpage/componentsのURL/参照をこのstep内で揃えてgreenに戻す。
 
 ### 6. battleでのparty追加ロジック
 - battleでpartyを追加して開始できるようにする
 - battleで追加する際に、party battlingを追加できるようにする
 - party_battlingではなく、battle.unitsに登録するようにする
 - home,visitorの削除
-- **境界の注意**: `home/visitorの削除`と、それらを参照している箇所の`battle.units`への切替は、step完了時にgreenを満たすため**このstep内で完結させる**（参照切替をstep7に残さない）。step7はcontroller/presentationでのstore参照・利用ロジックに限定する。
+- **境界の注意**: `home/visitorの削除`と、それらを参照している箇所の`battle.units`への切替は、step完了時にgreenを満たすため**このstep内で完結させる**（参照切替をstep8に残さない）。store key参照への寄せ（controller/presentationでのstore参照・利用ロジック）はstep8で行う。なおaction/skill解決は、step7の時間モデル移行が先に来るため、このstepでは完全なkey参照を求めず過渡的な形でよい。
 
-### 7. characters->units移行
-- controller,presentationでのpiece,status,action store呼び出し
-- ダメージ計算は主にActionのact関数に閉じているので、Action keyを受け付けて呼び出せるように切り替える
-
-### 8. steps/stepBase 時間モデルへの移行
-（01_copy.md「11. 時間経過ロジックの変更」を引き継ぐ。step7のturnロジック変更から分離した独立step）
+### 7. steps/stepBase 時間モデルへの移行
+（01_copy.md「11. 時間経過ロジックの変更」を引き継ぐ独立step。units構築(step6)で入る`steps`を直後に確定させ、参照配線(step8)が安定した順序エンジン/Turn契約に対して行えるよう、参照・利用切替より先に行う）
 - WT/restWtによる仮想時間を廃し、**行動ポイント方式**へ。各駒は`steps`（初期0）を持ち、`steps`最小の駒が次に行動。同点は`Turn.units`のindex（初期順）で決着。
 - 行動後: 死亡駒を除外し、行動駒の`steps += stepBase + cost`（cost: 何もしない0 / 通常行動2 / 反動行動7）。`stepBase`は開始時駒数で**定数固定**。
 - `Order`の`TimePassing`を廃止。`actor`は`Turn`が持つ。kniwの二重Turn/sleepループ/時間経過処理を廃し、`spendTurn`を「行動適用→死亡除外→steps更新→並べ替え→勝敗判定」に簡素化。
 - `datetime`はTurnの履歴用に残す。
+- この時点ではaction/skillの解決はstep6から引き継いだ過渡的な形のままでよく、順序エンジンをsteps化してgreenに戻す。key参照への寄せはstep8で行う。
+
+### 8. characters->units移行
+- controller,presentationでのpiece,status,action store呼び出し
+- ダメージ計算は主にActionのact関数に閉じているので、Action keyを受け付けて呼び出せるように切り替える
+- step7で確定したsteps順序エンジンとTurn/act契約に対して、参照解決をkeyベースへ配線する。
 
 ### 9. 戦乱モードではなく、通常モードでplayer_nameだけ入力できるformを用意し、default値のunitsを適用
 
