@@ -1,4 +1,4 @@
-import type { Turn, Action } from "../model/turn";
+import type { Turn, Order } from "../model/turn";
 import type { CharactorBattling } from "../model/charactor";
 import type { ToModel, ToJson } from "../store_utility/schema";
 
@@ -53,7 +53,7 @@ export const turnSchema = z.object({
 export type TurnSchema = typeof turnSchema;
 export type TurnJson = z.infer<TurnSchema>;
 
-export const toActionJson: ToJson<Action, ActionJson> = (action) => {
+export const toActionJson: ToJson<Order, ActionJson> = (action) => {
   if (action.type === "DO_SKILL") {
     return {
       type: "DO_SKILL",
@@ -92,7 +92,7 @@ export const toTurnJson: ToJson<Turn, TurnJson> = (turn) => ({
   sortedCharactors: turn.sortedCharactors.map(toCharactorBattlingJson),
 });
 
-export const toAction: ToModel<Action, ActionJson, DataNotFoundError> = (actionJson) => {
+export const toAction: ToModel<Order, ActionJson, DataNotFoundError> = (actionJson) => {
   if (actionJson.type === "DO_SKILL") {
     const skillActor = toCharactorBattling(actionJson.actor);
     if (skillActor instanceof DataNotFoundError) {

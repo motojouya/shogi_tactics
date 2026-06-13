@@ -27,45 +27,45 @@ export type TimePassing = {
   wt: number;
 };
 
-export type Action = TimePassing | DoNothing | DoSkill | Surrender;
+export type Order = TimePassing | DoNothing | DoSkill | Surrender;
 
 export type Turn = {
   datetime: Date;
-  action: Action;
+  action: Order;
   sortedCharactors: CharactorBattling[];
 };
 
-export type CopyAction = (action: Action) => Action;
-export const copyAction: CopyAction = (action) => {
-  if (action.type === "DO_SKILL") {
+export type CopyOrder = (order: Order) => Order;
+export const copyOrder: CopyOrder = (order) => {
+  if (order.type === "DO_SKILL") {
     return {
-      type: action.type,
-      actor: copyCharactorBattling(action.actor),
-      skill: action.skill,
-      receivers: action.receivers.map(copyCharactorBattling),
+      type: order.type,
+      actor: copyCharactorBattling(order.actor),
+      skill: order.skill,
+      receivers: order.receivers.map(copyCharactorBattling),
     };
   }
-  if (action.type === "DO_NOTHING") {
+  if (order.type === "DO_NOTHING") {
     return {
-      type: action.type,
-      actor: copyCharactorBattling(action.actor),
+      type: order.type,
+      actor: copyCharactorBattling(order.actor),
     };
   }
-  if (action.type === "SURRENDER") {
+  if (order.type === "SURRENDER") {
     return {
-      type: action.type,
-      actor: copyCharactorBattling(action.actor),
+      type: order.type,
+      actor: copyCharactorBattling(order.actor),
     };
   }
   return {
-    type: action.type,
-    wt: action.wt,
+    type: order.type,
+    wt: order.wt,
   };
 };
 
 export type CopyTurn = (turn: Turn) => Turn;
 export const copyTurn: CopyTurn = (turn) => ({
   datetime: new Date(turn.datetime.getTime()),
-  action: copyAction(turn.action),
+  action: copyOrder(turn.action),
   sortedCharactors: turn.sortedCharactors.map(copyCharactorBattling),
 });
