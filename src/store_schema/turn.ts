@@ -176,5 +176,6 @@ export const toTurn: ToModel<Turn, TurnJson, DataNotFoundError | JsonSchemaUnmat
     datetime,
     action,
     sortedCharactors,
+    units: [], // step2: プレースホルダ。schema(turnSchema/TurnJson)へのunits反映はstep5以降
   };
 };

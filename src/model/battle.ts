@@ -24,6 +24,13 @@ export type Battle = {
   visitor: PartyBattling;
   turns: Turn[];
   result: GameResult;
+  // step2で追加した新フィールド(types.md準拠)。実際の供給・差し替えはstep5以降
+  key: string;
+  first_player_name: string;
+  second_player_name: string;
+  stepBase: number; // 順番ポイントのBASE(=開始時の総駒数)。1以上
+  unitCount: number;
+  version: string;
 };
 
 export type CopyBattle = (battle: Battle) => Battle;
@@ -33,6 +40,12 @@ export const copyBattle: CopyBattle = (battle) => ({
   visitor: copyPartyBattling(battle.visitor),
   turns: battle.turns.map(copyTurn),
   result: battle.result,
+  key: battle.key,
+  first_player_name: battle.first_player_name,
+  second_player_name: battle.second_player_name,
+  stepBase: battle.stepBase,
+  unitCount: battle.unitCount,
+  version: battle.version,
 });
 
 export type GetLastTurn = (battle: Battle) => Turn;
@@ -75,12 +88,20 @@ export const createBattle: CreateBattle = (title, home, visitor) => {
     name: visitor.name,
     charactors: visitor.charactors.map((charactor) => toBattleCharactor(charactor, true)),
   };
+  const unitCount = homeBatting.charactors.length + visitorBatting.charactors.length;
   return {
     title,
     home: homeBatting,
     visitor: visitorBatting,
     turns: [],
     result: GameOngoing,
+    // step2: 新フィールドのプレースホルダ初期値。uuid/version供給・stepBase確定はstep5以降
+    key: "",
+    first_player_name: home.name,
+    second_player_name: visitor.name,
+    stepBase: unitCount > 0 ? unitCount : 1,
+    unitCount,
+    version: "v1",
   };
 };
 
@@ -95,6 +116,7 @@ export const start: Start = (battle, datetime) => ({
     ...battle.home.charactors.map(copyCharactorBattling),
     ...battle.visitor.charactors.map(copyCharactorBattling),
   ]),
+  units: [],
 });
 
 export type Stay = (battle: Battle, actor: CharactorBattling, datetime: Date) => Turn;
@@ -107,6 +129,7 @@ export const stay: Stay = (battle, actor, datetime) => {
       actor,
     },
     sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
+    units: [],
   };
 
   newTurn.sortedCharactors = newTurn.sortedCharactors.map((charactor) => {
@@ -155,6 +178,7 @@ export const actToCharactor: ActToCharactor = (battle, actor, skill, receivers, 
       receivers,
     },
     sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
+    units: [],
   };
 
   const resultReceivers = receivers.map((receiver) => skill.action(skill, actor, receiver));
@@ -187,6 +211,7 @@ export const surrender: Surrender = (battle, actor, datetime) => {
       actor,
     },
     sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
+    units: [],
   };
 };
 
@@ -231,6 +256,7 @@ export const wait: Wait = (battle, wt, datetime) => {
       wt,
     },
     sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
+    units: [],
   };
   newTurn.sortedCharactors = newTurn.sortedCharactors.map((charactor) => waitCharactor(charactor, wt));
 

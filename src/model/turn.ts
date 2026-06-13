@@ -1,9 +1,15 @@
 import type { CharactorBattling } from "./charactor";
 import type { Skill } from "./skill";
+import type { Unit } from "./unit";
 
 import { copyCharactorBattling } from "./charactor";
+import { copyUnit } from "./unit";
 
 export const ACTION_DO_NOTHING = "DO_NOTHING";
+
+export type Formation = {
+  type: "FORMATION";
+};
 
 export type DoSkill = {
   type: "DO_SKILL";
@@ -33,6 +39,7 @@ export type Turn = {
   datetime: Date;
   action: Order;
   sortedCharactors: CharactorBattling[];
+  units: Unit[]; // 行動適用・死亡除外後の全生存駒。steps昇順=次の行動順。初期値はlength=0
 };
 
 export type CopyOrder = (order: Order) => Order;
@@ -68,4 +75,5 @@ export const copyTurn: CopyTurn = (turn) => ({
   datetime: new Date(turn.datetime.getTime()),
   action: copyOrder(turn.action),
   sortedCharactors: turn.sortedCharactors.map(copyCharactorBattling),
+  units: turn.units.map(copyUnit),
 });

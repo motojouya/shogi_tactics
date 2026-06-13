@@ -64,5 +64,12 @@ export const toBattle: ToBattle = (battleJson) => {
     visitor,
     turns,
     result,
+    // step2: プレースホルダ初期値。schema(battleSchema/BattleJson)への反映・供給はstep5以降
+    key: "",
+    first_player_name: home.name,
+    second_player_name: visitor.name,
+    stepBase: 1,
+    unitCount: 0,
+    version: "v1",
   };
 };
