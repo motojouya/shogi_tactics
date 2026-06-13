@@ -66,7 +66,6 @@ export type Status = {
 
 // 技の効果を定義する関数
 export type Act = (
-  self: Action, // TODO
   actor: UnitReference,
   receiver: UnitReference[],
   turn: Turn,
@@ -74,10 +73,12 @@ export type Act = (
 
 // 技を適用するキャラクターの選択肢をFilterする関数
 export type Filter = (
-  self: Action, // TODO
   actor: UnitReference,
   turn: Turn,
 ) => UnitReference[];
+
+// selfはAct/Filterを生成するファクトリ関数のクロージャで閉じ込める
+// 例: effectBaseDamage(self): Act, filterActor(self): Filter, filterAlive(self): Filter
 
 export type Action = { // 旧skill
   key: string;
