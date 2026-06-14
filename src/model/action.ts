@@ -36,6 +36,55 @@ export const effectBaseDamage: EffectBaseDamage = (self) => (_actor, receiver, t
   return newTurn;
 };
 
+// receiverのstatusesにstatus keyを付与(重複は追加しない)し、cloneしたTurnを返すActを生成する。
+// 付与するstatus keyはファクトリ引数で渡す。例: effectGrantStatus("interception")
+export type EffectGrantStatus = (statusKey: string) => (self: Action) => Act;
+export const effectGrantStatus: EffectGrantStatus = (statusKey) => (_self) => (_actor, receiver, turn) => {
+  const newTurn = copyTurn(turn);
+  newTurn.units = newTurn.units.map((unit) => {
+    if (receiver.some((reference) => sameUnit(reference, toUnitReference(unit)))) {
+      if (unit.statuses.includes(statusKey)) {
+        return unit;
+      }
+      return { ...unit, statuses: [...unit.statuses, statusKey] };
+    }
+    return unit;
+  });
+  return newTurn;
+};
+
+// FIXME MaxHPはPieceが持つがactからpieceRepositoryを参照すると循環依存になるため、暫定でpieceキーから上限を固定で導出する。
+// step8でcontroller/presentation側のkey解決に寄せる際に、Unit/Pieceから正しいMaxHPを供給する形へ置き換える。
+type HealCap = (piece: string) => number;
+const healCap: HealCap = (piece) => (piece === "king" ? 2 : 3);
+
+// receiverの体力を上限(healCap)まで回復し、cloneしたTurnを返すActを生成する(回復処方=最大回復)。
+// 既に上限を超えている場合(身代わり等)は減らさない。
+export type EffectHeal = (self: Action) => Act;
+export const effectHeal: EffectHeal = (_self) => (_actor, receiver, turn) => {
+  const newTurn = copyTurn(turn);
+  newTurn.units = newTurn.units.map((unit) => {
+    if (receiver.some((reference) => sameUnit(reference, toUnitReference(unit)))) {
+      return { ...unit, hp: Math.max(unit.hp, healCap(unit.piece)) };
+    }
+    return unit;
+  });
+  return newTurn;
+};
+
+// receiverの体力を1回復し、cloneしたTurnを返すActを生成する(身代わり=上限を超えて追加可能)。
+export type EffectOverHeal = (self: Action) => Act;
+export const effectOverHeal: EffectOverHeal = (_self) => (_actor, receiver, turn) => {
+  const newTurn = copyTurn(turn);
+  newTurn.units = newTurn.units.map((unit) => {
+    if (receiver.some((reference) => sameUnit(reference, toUnitReference(unit)))) {
+      return { ...unit, hp: unit.hp + 1 };
+    }
+    return unit;
+  });
+  return newTurn;
+};
+
 // actor自身のunit_referenceのみを選択肢として返すFilterを生成する
 export type FilterActor = (self: Action) => Filter;
 export const filterActor: FilterActor = (_self) => (actor, _turn) => [actor];

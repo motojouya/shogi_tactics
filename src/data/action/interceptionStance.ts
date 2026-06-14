@@ -1,8 +1,7 @@
 import type { Action } from "../../model/action";
-import { buildAction, effectBaseDamage, filterActor } from "../../model/action";
+import { buildAction, effectGrantStatus, filterActor } from "../../model/action";
 
 // 金将の反動行動。迎撃体制。自分にinterception statusを付与する。
-// statusを付与する効果はstep4で実装する。現状はbaseDamage0のno-op。
 export const interceptionStance: Action = buildAction(
   {
     key: "interceptionStance",
@@ -14,6 +13,6 @@ export const interceptionStance: Action = buildAction(
     effectLength: 1,
     reachLength: 0,
   },
-  effectBaseDamage,
+  effectGrantStatus("interception"),
   filterActor,
 );

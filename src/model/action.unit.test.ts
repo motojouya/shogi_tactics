@@ -3,7 +3,15 @@ import { describe, it, expect } from "vitest";
 import type { Action, Act, Filter } from "./action";
 import type { Unit } from "./unit";
 import type { Turn } from "./turn";
-import { buildAction, effectBaseDamage, filterActor, filterAlive } from "./action";
+import {
+  buildAction,
+  effectBaseDamage,
+  effectGrantStatus,
+  effectHeal,
+  effectOverHeal,
+  filterActor,
+  filterAlive,
+} from "./action";
 
 const noopAct: Act = (_actor, _receiver, turn) => turn;
 const noopFilter: Filter = (_actor, _turn) => [];
@@ -104,6 +112,91 @@ describe("Action#buildAction", function () {
 
     // filterはfilterActor相当でactorのみ返す
     expect(action.filter({ side: "FIRST", piece: "king" }, turn)).toEqual([{ side: "FIRST", piece: "king" }]);
+  });
+});
+
+describe("Action#effectGrantStatus", function () {
+  it("receiverのstatusesにstatus keyを付与する", function () {
+    const turn = buildTurn([
+      { side: "FIRST", piece: "gold", hp: 3, steps: 0, statuses: [] },
+      { side: "SECOND", piece: "silver", hp: 3, steps: 0, statuses: [] },
+    ]);
+
+    const result = effectGrantStatus("interception")(baseAction)(
+      { side: "FIRST", piece: "gold" },
+      [{ side: "FIRST", piece: "gold" }],
+      turn,
+    );
+
+    expect(result.units[0].statuses).toEqual(["interception"]); // 付与された
+    expect(result.units[1].statuses).toEqual([]); // 対象外
+  });
+
+  it("既に同じstatusを持つ場合は重複して付与しない", function () {
+    const turn = buildTurn([{ side: "FIRST", piece: "gold", hp: 3, steps: 0, statuses: ["interception"] }]);
+
+    const result = effectGrantStatus("interception")(baseAction)(
+      { side: "FIRST", piece: "gold" },
+      [{ side: "FIRST", piece: "gold" }],
+      turn,
+    );
+
+    expect(result.units[0].statuses).toEqual(["interception"]);
+  });
+
+  it("元のTurnは変更されない(clone)", function () {
+    const turn = buildTurn([{ side: "FIRST", piece: "gold", hp: 3, steps: 0, statuses: [] }]);
+
+    effectGrantStatus("interception")(baseAction)(
+      { side: "FIRST", piece: "gold" },
+      [{ side: "FIRST", piece: "gold" }],
+      turn,
+    );
+
+    expect(turn.units[0].statuses).toEqual([]);
+  });
+});
+
+describe("Action#effectHeal", function () {
+  it("kingは上限2、それ以外は上限3まで回復する", function () {
+    const turn = buildTurn([
+      { side: "FIRST", piece: "king", hp: 1, steps: 0, statuses: [] },
+      { side: "FIRST", piece: "gold", hp: 1, steps: 0, statuses: [] },
+    ]);
+
+    const result = effectHeal(baseAction)(
+      { side: "FIRST", piece: "pawn" },
+      [
+        { side: "FIRST", piece: "king" },
+        { side: "FIRST", piece: "gold" },
+      ],
+      turn,
+    );
+
+    expect(result.units[0].hp).toBe(2); // king上限2
+    expect(result.units[1].hp).toBe(3); // それ以外上限3
+  });
+
+  it("既に上限を超えている場合は減らさない", function () {
+    const turn = buildTurn([{ side: "FIRST", piece: "king", hp: 4, steps: 0, statuses: [] }]);
+
+    const result = effectHeal(baseAction)({ side: "FIRST", piece: "pawn" }, [{ side: "FIRST", piece: "king" }], turn);
+
+    expect(result.units[0].hp).toBe(4);
+  });
+});
+
+describe("Action#effectOverHeal", function () {
+  it("体力を1回復し、上限を超えて追加できる", function () {
+    const turn = buildTurn([{ side: "FIRST", piece: "promotedPawn", hp: 3, steps: 0, statuses: [] }]);
+
+    const result = effectOverHeal(baseAction)(
+      { side: "FIRST", piece: "promotedPawn" },
+      [{ side: "FIRST", piece: "promotedPawn" }],
+      turn,
+    );
+
+    expect(result.units[0].hp).toBe(4); // 上限3を超える
   });
 });
 

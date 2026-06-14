@@ -78,7 +78,9 @@ export type Filter = (
 ) => UnitReference[];
 
 // selfはAct/Filterを生成するファクトリ関数のクロージャで閉じ込める
-// 例: effectBaseDamage(self): Act, filterActor(self): Filter, filterAlive(self): Filter
+// Act生成: effectBaseDamage(self), effectGrantStatus(statusKey)(self), effectHeal(self), effectOverHeal(self)
+// Filter生成: filterActor(self), filterAlive(self)
+// 座標依存(範囲/貫通/押出/防柵)・操り人形等はact内では実装せずno-op(説明テキスト扱い)
 
 export type Action = { // 旧skill
   key: string;
