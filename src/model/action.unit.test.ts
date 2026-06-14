@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 import type { Action, Act, Filter } from "./action";
 import type { Unit } from "./unit";
 import type { Turn } from "./turn";
-import { effectBaseDamage, filterActor, filterAlive } from "./action";
+import { buildAction, effectBaseDamage, filterActor, filterAlive } from "./action";
 
 const noopAct: Act = (_actor, _receiver, turn) => turn;
 const noopFilter: Filter = (_actor, _turn) => [];
@@ -76,6 +76,34 @@ describe("Action#filterActor", function () {
     const result = filterActor(baseAction)({ side: "FIRST", piece: "king" }, turn);
 
     expect(result).toEqual([{ side: "FIRST", piece: "king" }]);
+  });
+});
+
+describe("Action#buildAction", function () {
+  it("act/filterが構築したaction自身を参照して動く", function () {
+    const action = buildAction(
+      {
+        key: "buildTest",
+        name: "ビルドテスト",
+        description: "",
+        baseDamage: 3,
+        receiverCount: 1,
+        cost: 2,
+        effectLength: 1,
+        reachLength: 1,
+      },
+      effectBaseDamage,
+      filterActor,
+    );
+
+    const turn = buildTurn([{ side: "SECOND", piece: "gold", hp: 5, steps: 0, statuses: [] }]);
+
+    // actはaction.baseDamage(3)を参照する
+    const acted = action.act({ side: "FIRST", piece: "king" }, [{ side: "SECOND", piece: "gold" }], turn);
+    expect(acted.units[0].hp).toBe(2); // 5 - 3
+
+    // filterはfilterActor相当でactorのみ返す
+    expect(action.filter({ side: "FIRST", piece: "king" }, turn)).toEqual([{ side: "FIRST", piece: "king" }]);
   });
 });
 

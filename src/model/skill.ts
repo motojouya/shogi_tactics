@@ -1,7 +1,7 @@
 import type { CharactorBattling } from "./charactor";
-import type { Status } from "./status";
+import type { Status } from "./charactor_status";
 
-import { underStatus } from "./status";
+import { underStatus } from "./charactor_status";
 import {
   directAttackUp,
   directAttackDown,

@@ -1,0 +1,19 @@
+import type { Action } from "../../model/action";
+import { buildAction, effectBaseDamage, filterAlive } from "../../model/action";
+
+// 成銀の反動行動。押出攻撃。近接の敵に攻撃1し、1マス後退させる(障害物があれば押し出せない)。
+// 後退(押し出し)の座標判定はstep4方針によりno-op(説明テキスト扱い)。ダメージのみ適用する。
+export const pushAttack: Action = buildAction(
+  {
+    key: "pushAttack",
+    name: "押出攻撃",
+    description: "近接マスの敵に攻撃1し、1マス後退させる。後ろに障害物があれば押し出せない",
+    baseDamage: 1,
+    receiverCount: 1,
+    cost: 7,
+    effectLength: 1,
+    reachLength: 1,
+  },
+  effectBaseDamage,
+  filterAlive,
+);

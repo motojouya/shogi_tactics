@@ -1,0 +1,18 @@
+import type { Action } from "../../model/action";
+import { buildAction, effectBaseDamage, filterAlive } from "../../model/action";
+
+// 桂馬の反動行動。近接強撃。近接の相手に攻撃2。
+export const chargeMelee: Action = buildAction(
+  {
+    key: "chargeMelee",
+    name: "近接強撃",
+    description: "近接マスの相手に攻撃2",
+    baseDamage: 2,
+    receiverCount: 1,
+    cost: 7,
+    effectLength: 1,
+    reachLength: 1,
+  },
+  effectBaseDamage,
+  filterAlive,
+);

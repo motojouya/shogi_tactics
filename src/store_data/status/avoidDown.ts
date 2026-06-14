@@ -1,4 +1,4 @@
-import type { Status } from "../../model/status";
+import type { Status } from "../../model/charactor_status";
 
 export const avoidDown: Status = {
   name: "avoidDown",

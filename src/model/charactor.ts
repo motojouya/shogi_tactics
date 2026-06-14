@@ -1,4 +1,4 @@
-import type { Status } from "./status";
+import type { Status } from "./charactor_status";
 import type { SelectOption } from "../io/dialogue";
 import type { Physical } from "./physical";
 

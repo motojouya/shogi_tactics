@@ -1,0 +1,14 @@
+export { king } from "./king";
+export { gold } from "./gold";
+export { silver } from "./silver";
+export { rook } from "./rook";
+export { bishop } from "./bishop";
+export { knight } from "./knight";
+export { lance } from "./lance";
+export { dragon } from "./dragon";
+export { horse } from "./horse";
+export { promotedSilver } from "./promotedSilver";
+export { promotedKnight } from "./promotedKnight";
+export { promotedLance } from "./promotedLance";
+export { pawn } from "./pawn";
+export { promotedPawn } from "./promotedPawn";

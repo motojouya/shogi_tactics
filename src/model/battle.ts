@@ -8,7 +8,7 @@ import { getPhysical, toBattleCharactor, copyCharactorBattling } from "./charact
 import { copyTurn } from "./turn";
 
 import { acid, quick, sleep, slow } from "../store_data/status/index";
-import { underStatus } from "./status";
+import { underStatus } from "./charactor_status";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
 

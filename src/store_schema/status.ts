@@ -1,10 +1,10 @@
-import type { Status } from "../model/status";
+import type { Status } from "../model/charactor_status";
 import type { ToModel, ToJson } from "../store_utility/schema";
 
 import { z } from "zod";
 
 import { DataNotFoundError } from "../store_utility/schema";
-import { statusRepository } from "../store/status";
+import { statusRepository } from "../store/charactor_status";
 
 export const statusSchema = z.string();
 export type StatusSchema = typeof statusSchema;

@@ -44,3 +44,17 @@ export const filterActor: FilterActor = (_self) => (actor, _turn) => [actor];
 export type FilterAlive = (self: Action) => Filter;
 export const filterAlive: FilterAlive = (_self) => (_actor, turn) =>
   turn.units.filter((unit) => unit.hp >= 1).map(toUnitReference);
+
+// act/filterはself(Action)を必要とするため、構築時の自己参照を吸収するヘルパ。
+// baseDamage等のメタを持つActionを先に組み立て、actFactory/filterFactoryでact/filterを後付けする。
+export type BuildAction = (
+  base: Omit<Action, "act" | "filter">,
+  actFactory: (self: Action) => Act,
+  filterFactory: (self: Action) => Filter,
+) => Action;
+export const buildAction: BuildAction = (base, actFactory, filterFactory) => {
+  const action = base as Action;
+  action.act = actFactory(action);
+  action.filter = filterFactory(action);
+  return action;
+};
