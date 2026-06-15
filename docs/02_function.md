@@ -128,7 +128,7 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 ### 5. battle開始時のstepBase,unitCount,player_nameの入力。default値としてのversion指定
 - new画面でbattle登録したら、battleの画面で表示する
 - titleの項目削除
-- keyはuuidを設定
+- keyはuuidを設定。uuidはv7を利用する
 - **uuid・日時はrepository経由で供給する（provider化）**。controllerがrepositoryからuuid/日時を取得してbattleを生成する（01_copy.md L205）。
 - **version は v1 では「保存文字列＋URLガードのみ」と割り切る**。versionごとのルール分岐ロジックは持たず、battleが自分のversion文字列を保持し、URL(step10/11)で表示可否をガードするだけにする。
 - このstep完了時点ではhome/visitorは残置（units化はstep6以降）。store_schema/battle・store/battle（key: title→uuid）・procedure/start・subpage/componentsのURL/参照をこのstep内で揃えてgreenに戻す。
