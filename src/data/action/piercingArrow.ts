@@ -13,7 +13,7 @@ export const piercingArrow: Action = buildAction(
     cost: 7,
     effectLength: 5,
     reachLength: 5,
-    // 効果は直線(reachRange)で表すため、着地点中心のeffectRangeは持たない。
+    // 直線(reachRange)上の各マスに着地効果を出すため、effectRangeは着地点中心の単体とする。
     effectRange: [
       [0, 0, 0],
       [0, 1, 0],
