@@ -93,6 +93,10 @@ export type Action = { // 旧skill
   cost: number;
   effectLength: number;
   reachLength: number;
+  // 影響範囲の可視化用マス表現。値は10進だが2進で意味を持つ(bit0=影響あり, bit1=Actorのマス)
+  // 0=影響なし, 1=影響あり, 2=Actorのマス(影響なし), 3=Actorのマス かつ 影響あり
+  effectRange: number[][]; // 対象/着地点を中心[1][1]とした3×3
+  reachRange: number[][]; // Actorを中心[3][3]とした7×7(piercingArrowのみActorを2マス下[5][3]へ)
 };
 
 export type Piece = {

@@ -21,6 +21,10 @@ export type Action = {
   cost: number;
   effectLength: number;
   reachLength: number;
+  // 画面上で影響範囲を可視化するための将棋マス表現。値は10進だが2進で意味を持つ(bit0=影響あり, bit1=Actorのマス)。
+  // 0=影響なし, 1=影響あり, 2=Actorのマス(影響なし), 3=Actorのマス かつ 影響あり。
+  effectRange: number[][]; // 対象/着地点を中心[1][1]とした3×3
+  reachRange: number[][]; // Actorを中心[3][3]とした7×7(piercingArrowのみActorを2マス下[5][3]へずらす)
 };
 
 // reachLengthがこの値より大きいActionを遠隔攻撃とみなす(矢かわしの無効化判定に使用)。

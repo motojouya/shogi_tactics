@@ -27,6 +27,20 @@ const baseAction: Action = {
   cost: 2,
   effectLength: 1,
   reachLength: 1,
+  effectRange: [
+    [0, 0, 0],
+    [0, 1, 0],
+    [0, 0, 0],
+  ],
+  reachRange: [
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 1, 2, 1, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+  ],
 };
 
 const buildTurn = (units: Unit[]): Turn => ({
@@ -146,6 +160,20 @@ describe("Action#buildAction", function () {
         cost: 2,
         effectLength: 1,
         reachLength: 1,
+        effectRange: [
+          [0, 0, 0],
+          [0, 1, 0],
+          [0, 0, 0],
+        ],
+        reachRange: [
+          [0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 1, 0, 0, 0],
+          [0, 0, 1, 2, 1, 0, 0],
+          [0, 0, 0, 1, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0, 0],
+        ],
       },
       effectBaseDamage,
       filterActor,

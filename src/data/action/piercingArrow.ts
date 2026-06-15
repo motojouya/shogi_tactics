@@ -13,6 +13,22 @@ export const piercingArrow: Action = buildAction(
     cost: 7,
     effectLength: 5,
     reachLength: 5,
+    // 効果は直線(reachRange)で表すため、着地点中心のeffectRangeは持たない。
+    effectRange: [
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0],
+    ],
+    // 直線5マス貫通。Actorを中心から2マス下[5][3]へずらし、上方向へ5マスを影響範囲とする。
+    reachRange: [
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 2, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0],
+    ],
   },
   effectBaseDamage,
   filterAlive,
