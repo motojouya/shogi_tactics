@@ -126,7 +126,7 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - filterは盤位置で判定せず、**全unitリストからの絞り込み**を返し、最終的な対象はユーザーが手動選択する。
 
 ### 5. battle開始時のstepBase,unitCount,player_nameの入力。default値としてのversion指定
-- モーダル画面で出して、battle登録したら、そのbattleの画面に
+- new画面でbattle登録したら、battleの画面で表示する
 - titleの項目削除
 - keyはuuidを設定
 - **uuid・日時はrepository経由で供給する（provider化）**。controllerがrepositoryからuuid/日時を取得してbattleを生成する（01_copy.md L205）。
