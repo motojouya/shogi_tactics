@@ -72,6 +72,53 @@ describe("Action#effectBaseDamage", function () {
 
     expect(turn.units[0].hp).toBe(3);
   });
+
+  it("interceptionを持つreceiverは被ダメージが1減る", function () {
+    const turn = buildTurn([{ side: "SECOND", piece: "gold", hp: 3, steps: 0, statuses: ["interception"] }]);
+
+    const result = effectBaseDamage(baseAction)(
+      { side: "FIRST", piece: "king" },
+      [{ side: "SECOND", piece: "gold" }],
+      turn,
+    );
+
+    expect(result.units[0].hp).toBe(2); // 3 - (baseDamage2 - 1)
+  });
+
+  it("interceptionで軽減してもダメージは0未満にならない", function () {
+    const oneDamage: Action = { ...baseAction, baseDamage: 1 };
+    const turn = buildTurn([{ side: "SECOND", piece: "gold", hp: 3, steps: 0, statuses: ["interception"] }]);
+
+    const result = effectBaseDamage(oneDamage)(
+      { side: "FIRST", piece: "king" },
+      [{ side: "SECOND", piece: "gold" }],
+      turn,
+    );
+
+    expect(result.units[0].hp).toBe(3); // 1 - 1 = 0ダメージ
+  });
+
+  it("arrowDodgeを持つreceiverは遠隔攻撃(reachLength>2)のダメージが0になる", function () {
+    const ranged: Action = { ...baseAction, reachLength: 3 };
+    const turn = buildTurn([{ side: "SECOND", piece: "gold", hp: 3, steps: 0, statuses: ["arrowDodge"] }]);
+
+    const result = effectBaseDamage(ranged)(
+      { side: "FIRST", piece: "rook" },
+      [{ side: "SECOND", piece: "gold" }],
+      turn,
+    );
+
+    expect(result.units[0].hp).toBe(3); // 無効化
+  });
+
+  it("arrowDodgeを持っていても近接攻撃(reachLength<=2)は通常通りダメージを受ける", function () {
+    const melee: Action = { ...baseAction, reachLength: 2 };
+    const turn = buildTurn([{ side: "SECOND", piece: "gold", hp: 3, steps: 0, statuses: ["arrowDodge"] }]);
+
+    const result = effectBaseDamage(melee)({ side: "FIRST", piece: "king" }, [{ side: "SECOND", piece: "gold" }], turn);
+
+    expect(result.units[0].hp).toBe(1); // 3 - 2
+  });
 });
 
 describe("Action#filterActor", function () {

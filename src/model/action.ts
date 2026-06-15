@@ -23,13 +23,26 @@ export type Action = {
   reachLength: number;
 };
 
-// baseDamageを対象者(receiver)に与え、cloneしたTurnのunitsを更新して返すActを生成する
+// reachLengthがこの値より大きいActionを遠隔攻撃とみなす(矢かわしの無効化判定に使用)。
+const RANGED_REACH_THRESHOLD = 2;
+
+// baseDamageを対象者(receiver)に与え、cloneしたTurnのunitsを更新して返すActを生成する。
+// receiverのstatusesによる被ダメージ軽減を考慮する:
+// - interception(迎撃体制): 受けるダメージが1減る。
+// - arrowDodge(矢かわし): 遠隔攻撃(reachLength > 2)のダメージが0になる。
 export type EffectBaseDamage = (self: Action) => Act;
 export const effectBaseDamage: EffectBaseDamage = (self) => (_actor, receiver, turn) => {
   const newTurn = copyTurn(turn);
   newTurn.units = newTurn.units.map((unit) => {
     if (receiver.some((reference) => sameUnit(reference, toUnitReference(unit)))) {
-      return { ...unit, hp: Math.max(unit.hp - self.baseDamage, 0) };
+      let damage = self.baseDamage;
+      if (self.reachLength > RANGED_REACH_THRESHOLD && unit.statuses.includes("arrowDodge")) {
+        damage = 0;
+      }
+      if (unit.statuses.includes("interception")) {
+        damage = Math.max(damage - 1, 0);
+      }
+      return { ...unit, hp: Math.max(unit.hp - damage, 0) };
     }
     return unit;
   });
