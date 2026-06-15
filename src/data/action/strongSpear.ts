@@ -8,7 +8,7 @@ export const strongSpear: Action = buildAction(
     name: "槍の強撃",
     description: "2マス先まで届く攻撃2(上下左右の4方のみ)",
     baseDamage: 2,
-    receiverCount: 1,
+    receiverCount: 2,
     cost: 7,
     effectLength: 1,
     reachLength: 2,

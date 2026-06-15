@@ -11,7 +11,7 @@ export const rangedSpread: Action = buildAction(
     baseDamage: 1,
     receiverCount: 5,
     cost: 7,
-    effectLength: 5,
+    effectLength: 2,
     reachLength: 2,
   },
   effectBaseDamage,
