@@ -45,8 +45,7 @@ const baseAction: Action = {
 
 const buildTurn = (units: Unit[]): Turn => ({
   datetime: new Date("2024-01-01T00:00:00"),
-  action: { type: "TIME_PASSING", wt: 0 },
-  sortedCharactors: [],
+  order: { type: "FORMATION" },
   units,
 });
 

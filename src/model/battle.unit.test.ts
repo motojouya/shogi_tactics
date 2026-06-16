@@ -1,363 +1,177 @@
-import type { Battle } from "./battle";
-import type { Unit } from "./unit";
-import type { Skill } from "./skill";
-import type { CharactorBattling } from "./charactor";
-import type { BattleJson } from "../store_schema/battle";
-
 import { describe, it, expect } from "vitest";
 
+import type { Unit, UnitReference } from "./unit";
+import type { Battle } from "./battle";
+
 import {
-  actToCharactor,
-  stay,
-  wait,
-  start,
-  isSettlement,
   createBattle,
+  start,
+  spendTurn,
+  surrender,
+  isSettlement,
+  nextActor,
+  sortedUnits,
+  getLastTurn,
   GameOngoing,
-  GameHome,
-  GameVisitor,
+  GameFirst,
+  GameSecond,
   GameDraw,
 } from "./battle";
-import { toBattle } from "../store_schema/battle";
-import { format } from "date-fns";
+import { buildAction, effectBaseDamage, filterAlive } from "./action";
 
-import { toCharactorBattling } from "../store_schema/charactor";
-import { CharactorDuplicationError } from "./party";
-import { JsonSchemaUnmatchError, DataNotFoundError } from "../store_utility/schema";
-import { skillRepository } from "../store/skill";
+const zeros7 = Array.from({ length: 7 }, () => [0, 0, 0, 0, 0, 0, 0]);
 
-const testData = {
-  key: "0191e000-0000-7000-8000-000000000000",
-  first_player_name: "home",
-  second_player_name: "visitor",
-  stepBase: 4,
-  unitCount: 4,
-  version: "v1",
-  home: {
-    name: "home",
-    charactors: [
-      {
-        name: "sam",
-        race: "human",
-        blessing: "earth",
-        clothing: "steelArmor",
-        weapon: "swordAndShield",
-        statuses: [],
-        hp: 100,
-        mp: 100,
-        restWt: 120,
-        isVisitor: false,
-      },
-      {
-        name: "sara",
-        race: "human",
-        blessing: "earth",
-        clothing: "redRobe",
-        weapon: "rubyRod",
-        statuses: [],
-        hp: 100,
-        mp: 100,
-        restWt: 115,
-        isVisitor: false,
-      },
+// 攻撃2/コスト2のテスト用Action。
+const attack = buildAction(
+  {
+    key: "atk",
+    name: "攻撃",
+    description: "",
+    baseDamage: 2,
+    receiverCount: 1,
+    cost: 2,
+    effectLength: 1,
+    reachLength: 1,
+    effectRange: [
+      [0, 0, 0],
+      [0, 1, 0],
+      [0, 0, 0],
     ],
+    reachRange: zeros7,
   },
-  visitor: {
-    name: "visitor",
-    charactors: [
-      {
-        name: "john",
-        race: "human",
-        blessing: "earth",
-        clothing: "steelArmor",
-        weapon: "swordAndShield",
-        statuses: [],
-        hp: 100,
-        mp: 100,
-        restWt: 130,
-        isVisitor: true,
-      },
-      {
-        name: "noa",
-        race: "human",
-        blessing: "earth",
-        clothing: "redRobe",
-        weapon: "rubyRod",
-        statuses: [],
-        hp: 100,
-        mp: 100,
-        restWt: 110,
-        isVisitor: true,
-      },
-    ],
-  },
-  turns: [
-    {
-      datetime: "2023-06-29T12:12:21",
-      action: {
-        type: "TIME_PASSING",
-        wt: 0,
-      },
-      sortedCharactors: [
-        {
-          name: "sam",
-          race: "human",
-          blessing: "earth",
-          clothing: "steelArmor",
-          weapon: "swordAndShield",
-          statuses: [],
-          hp: 100,
-          mp: 100,
-          restWt: 120,
-          isVisitor: false,
-        },
-        {
-          name: "sara",
-          race: "human",
-          blessing: "earth",
-          clothing: "redRobe",
-          weapon: "rubyRod",
-          statuses: [],
-          hp: 100,
-          mp: 100,
-          restWt: 115,
-          isVisitor: false,
-        },
-        {
-          name: "john",
-          race: "human",
-          blessing: "earth",
-          clothing: "steelArmor",
-          weapon: "swordAndShield",
-          statuses: [],
-          hp: 100,
-          mp: 100,
-          restWt: 130,
-          isVisitor: true,
-        },
-        {
-          name: "noa",
-          race: "human",
-          blessing: "earth",
-          clothing: "redRobe",
-          weapon: "rubyRod",
-          statuses: [],
-          hp: 100,
-          mp: 100,
-          restWt: 110,
-          isVisitor: true,
-        },
-      ],
-    },
-  ],
-  result: GameOngoing,
-} as BattleJson;
+  effectBaseDamage,
+  filterAlive,
+);
 
-type FormatDate = (date: Date) => string;
-const formatDate: FormatDate = (date) => format(date, "yyyy-MM-dd'T'HH:mm:ss");
+const makeBattle = (units: Unit[], stepBase = 2): Battle => {
+  const battle = createBattle("key", "first", "second", stepBase, units.length, "v1");
+  battle.turns.push(start(units, new Date("2024-01-01T00:00:00")));
+  return battle;
+};
 
-describe("Battle#toBattle", function () {
-  it("ok", function () {
-    const battle = toBattle(testData);
+const ref = (side: "FIRST" | "SECOND", piece: string): UnitReference => ({ side, piece });
 
-    if (
-      battle instanceof DataNotFoundError ||
-      battle instanceof CharactorDuplicationError ||
-      battle instanceof JsonSchemaUnmatchError
-    ) {
-      expect.unreachable("battle is value");
-    } else {
-      expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
-      expect(battle.first_player_name).toBe("home");
-      expect(battle.second_player_name).toBe("visitor");
-      expect(battle.turns.length).toBe(1);
-      expect(formatDate(battle.turns[0].datetime)).toBe("2023-06-29T12:12:21");
-      expect(battle.result).toBe(GameOngoing);
-    }
+describe("Battle#createBattle", function () {
+  it("骨格(turns=[])を生成する", function () {
+    const battle = createBattle("key", "first", "second", 4, 2, "v1");
+    expect(battle.turns.length).toBe(0);
+    expect(battle.result).toBe(GameOngoing);
+    expect(battle.stepBase).toBe(4);
+    expect(battle.unitCount).toBe(2);
   });
 });
 
 describe("Battle#start", function () {
-  it("ok", function () {
-    // step6: createBattleはbattle骨格(turns=[])のみ。ロスターはstart()でunitsとして積む。
-    const battle = createBattle("0191e000-0000-7000-8000-000000000000", "first", "second", 4, 4, "v1");
-    expect(battle.result).toBe(GameOngoing);
-    expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
-    expect(battle.first_player_name).toBe("first");
-    expect(battle.second_player_name).toBe("second");
-    expect(battle.stepBase).toBe(4);
-    expect(battle.unitCount).toBe(4);
-    expect(battle.turns.length).toBe(0);
-
-    const units: Unit[] = [
-      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
-      { side: "SECOND", piece: "pawn", hp: 1, steps: 0, statuses: [] },
-    ];
-    const turn = start(units, new Date());
-
-    expect(turn.action.type).toBe("TIME_PASSING");
-    if (turn.action.type === "TIME_PASSING") {
-      expect(turn.action.wt).toBe(0);
-    } else {
-      expect.unreachable("type should be TIME_PASSING");
-    }
-    // step6: sortedCharactors/WTエンジンは残置(空シード)。ロスターはunitsが持つ。
-    expect(turn.sortedCharactors.length).toBe(0);
+  it("編成unitsから先頭TurnをFORMATIONで生成する", function () {
+    const turn = start(
+      [
+        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
+        { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+      ],
+      new Date("2024-01-01T00:00:00"),
+    );
+    expect(turn.order.type).toBe("FORMATION");
     expect(turn.units.length).toBe(2);
-    expect(turn.units[0].side).toBe("FIRST");
-    expect(turn.units[0].piece).toBe("king");
-    expect(turn.units[1].side).toBe("SECOND");
-    expect(turn.units[1].piece).toBe("pawn");
   });
 });
 
-describe("Battle#act", function () {
-  it("charactor", function () {
-    const battle = toBattle(testData) as Battle;
-    const actor = toCharactorBattling(testData.home.charactors[0]) as CharactorBattling;
-    const receiver = toCharactorBattling(testData.visitor.charactors[0]) as CharactorBattling;
-    const skill = skillRepository.get("chop") as Skill;
-
-    const turn = actToCharactor(battle, actor, skill, [receiver], new Date());
-
-    expect(turn.action.type).toBe("DO_SKILL");
-    if (turn.action.type === "DO_SKILL") {
-      expect(turn.action.actor.name).toBe("sam");
-      expect(turn.action.skill.name).toBe("chop");
-      expect(turn.action.receivers.length).toBe(1);
-      expect(turn.action.receivers[0].name).toBe("john");
-    } else {
-      expect.unreachable("type should be DO_SKILL");
-    }
-    expect(turn.sortedCharactors.length).toBe(4);
-    expect(turn.sortedCharactors[0].name).toBe("noa");
-    expect(turn.sortedCharactors[1].name).toBe("sara");
-
-    expect(turn.sortedCharactors[2].name).toBe("john");
-    expect(turn.sortedCharactors[2].hp).toBe(10);
-    expect(turn.sortedCharactors[2].restWt).toBe(130);
-
-    expect(turn.sortedCharactors[3].name).toBe("sam");
-    expect(turn.sortedCharactors[3].hp).toBe(100);
-    expect(turn.sortedCharactors[3].restWt).toBe(200);
-  });
-});
-
-describe("Battle#stay", function () {
-  it("ok", function () {
-    const battle = toBattle(testData) as Battle;
-    const actor = toCharactorBattling(testData.home.charactors[0]) as CharactorBattling;
-
-    const turn = stay(battle, actor, new Date());
-
-    expect(turn.action.type).toBe("DO_NOTHING");
-    if (turn.action.type === "DO_NOTHING") {
-      expect(turn.action.actor.name).toBe("sam");
-    } else {
-      expect.unreachable("type should be DO_NOTHING");
-    }
-    expect(turn.sortedCharactors.length).toBe(4);
-    expect(turn.sortedCharactors[0].name).toBe("sam");
-    expect(turn.sortedCharactors[1].name).toBe("noa");
-    expect(turn.sortedCharactors[2].name).toBe("sara");
-    expect(turn.sortedCharactors[3].name).toBe("john");
-  });
-});
-
-describe("Battle#wait", function () {
-  it("ok", function () {
-    const battle = toBattle(testData) as Battle;
-
-    const turn = wait(battle, 115, new Date());
-
-    expect(turn.action.type).toBe("TIME_PASSING");
-    if (turn.action.type === "TIME_PASSING") {
-      expect(turn.action.wt).toBe(115);
-    } else {
-      expect.unreachable("type should be TIME_PASSING");
-    }
-    expect(turn.sortedCharactors.length).toBe(4);
-    expect(turn.sortedCharactors[0].name).toBe("sam");
-    expect(turn.sortedCharactors[0].restWt).toBe(5);
-    expect(turn.sortedCharactors[1].name).toBe("sara");
-    expect(turn.sortedCharactors[1].restWt).toBe(0);
-    expect(turn.sortedCharactors[2].name).toBe("john");
-    expect(turn.sortedCharactors[2].restWt).toBe(15);
-    expect(turn.sortedCharactors[3].name).toBe("noa");
-    expect(turn.sortedCharactors[3].restWt).toBe(0);
-  });
-});
-
-// export type IsSettlement = (battle: Battle) => GameResult;
-// export const isSettlement: IsSettlement = battle => {
-// return GameDraw;
-// return GameHome;
-// return GameVisitor;
-// return GameOngoing;
-describe("Battle#isSettlement", function () {
-  it("GameOngoing", function () {
-    const battle = toBattle(testData) as Battle;
-    const gameResult = isSettlement(battle);
-    expect(gameResult).toBe(GameOngoing);
-  });
-  it("GameHome", function () {
-    const data = {
-      ...testData,
-      turns: [
-        {
-          ...testData.turns[0],
-          sortedCharactors: [
-            { ...testData.turns[0].sortedCharactors[0] },
-            { ...testData.turns[0].sortedCharactors[1], hp: 0 },
-            { ...testData.turns[0].sortedCharactors[2], hp: 0 },
-            { ...testData.turns[0].sortedCharactors[3], hp: 0 },
-          ],
-        },
+describe("Battle#sortedUnits / nextActor", function () {
+  it("steps昇順、同点はindex(初期順)で並ぶ", function () {
+    const turn = start(
+      [
+        { side: "FIRST", piece: "a", hp: 1, steps: 5, statuses: [] },
+        { side: "SECOND", piece: "b", hp: 1, steps: 2, statuses: [] },
+        { side: "FIRST", piece: "c", hp: 1, steps: 2, statuses: [] },
       ],
-    };
-
-    const battle = toBattle(data) as Battle;
-    const gameResult = isSettlement(battle);
-    expect(gameResult).toBe(GameHome);
+      new Date("2024-01-01T00:00:00"),
+    );
+    expect(sortedUnits(turn).map((unit) => unit.piece)).toEqual(["b", "c", "a"]);
+    expect(nextActor(turn)?.piece).toBe("b");
   });
-  it("GameVisitor", function () {
-    const data = {
-      ...testData,
-      turns: [
-        {
-          ...testData.turns[0],
-          sortedCharactors: [
-            { ...testData.turns[0].sortedCharactors[0], hp: 0 },
-            { ...testData.turns[0].sortedCharactors[1], hp: 0 },
-            { ...testData.turns[0].sortedCharactors[2] },
-            { ...testData.turns[0].sortedCharactors[3], hp: 0 },
-          ],
-        },
-      ],
-    };
 
-    const battle = toBattle(data) as Battle;
-    const gameResult = isSettlement(battle);
-    expect(gameResult).toBe(GameVisitor);
+  it("死亡駒(hp0)は除外する", function () {
+    const turn = start(
+      [
+        { side: "FIRST", piece: "a", hp: 0, steps: 1, statuses: [] },
+        { side: "SECOND", piece: "b", hp: 1, steps: 2, statuses: [] },
+      ],
+      new Date("2024-01-01T00:00:00"),
+    );
+    expect(sortedUnits(turn).map((unit) => unit.piece)).toEqual(["b"]);
   });
-  it("GameDraw", function () {
-    const data = {
-      ...testData,
-      turns: [
-        {
-          ...testData.turns[0],
-          sortedCharactors: [
-            { ...testData.turns[0].sortedCharactors[0], hp: 0 },
-            { ...testData.turns[0].sortedCharactors[1], hp: 0 },
-            { ...testData.turns[0].sortedCharactors[2], hp: 0 },
-            { ...testData.turns[0].sortedCharactors[3], hp: 0 },
-          ],
-        },
-      ],
-    };
+});
 
-    const battle = toBattle(data) as Battle;
-    const gameResult = isSettlement(battle);
-    expect(gameResult).toBe(GameDraw);
+describe("Battle#spendTurn", function () {
+  it("DO_SKILL: ダメージ適用・actorのsteps加算・steps昇順並べ替え", function () {
+    const battle = makeBattle([
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
+      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+    ]);
+    const result = spendTurn(battle, ref("FIRST", "king"), { action: attack, receivers: [ref("SECOND", "pawn")] }, () => new Date());
+
+    const last = getLastTurn(result);
+    expect(last.order.type).toBe("DO_SKILL");
+
+    const pawn = last.units.find((unit) => unit.piece === "pawn");
+    const king = last.units.find((unit) => unit.piece === "king");
+    expect(pawn?.hp).toBe(1); // 3 - 2
+    expect(king?.steps).toBe(4); // 0 + stepBase2 + cost2
+    expect(last.units[0].piece).toBe("pawn"); // steps0 < steps4
+    expect(result.result).toBe(GameOngoing);
+  });
+
+  it("死亡駒は除外し、片側全滅で決着する", function () {
+    const battle = makeBattle([
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
+      { side: "SECOND", piece: "pawn", hp: 2, steps: 0, statuses: [] },
+    ]);
+    const result = spendTurn(battle, ref("FIRST", "king"), { action: attack, receivers: [ref("SECOND", "pawn")] }, () => new Date());
+
+    const last = getLastTurn(result);
+    expect(last.units.length).toBe(1);
+    expect(last.units[0].piece).toBe("king");
+    expect(result.result).toBe(GameFirst);
+  });
+
+  it("DO_NOTHING: 自分の持続statusをクリアしsteps加算(cost0)", function () {
+    const battle = makeBattle([
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: ["interception"] },
+      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+    ]);
+    const result = spendTurn(battle, ref("FIRST", "king"), null, () => new Date());
+
+    const last = getLastTurn(result);
+    expect(last.order.type).toBe("DO_NOTHING");
+    const king = last.units.find((unit) => unit.piece === "king");
+    expect(king?.statuses).toEqual([]); // 自分の行動で失効
+    expect(king?.steps).toBe(2); // 0 + stepBase2 + cost0
+  });
+});
+
+describe("Battle#surrender / isSettlement", function () {
+  it("surrenderしたsideが負ける", function () {
+    const battle = makeBattle([
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
+      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+    ]);
+    battle.turns.push(surrender(battle, ref("FIRST", "king"), new Date()));
+    expect(getLastTurn(battle).order.type).toBe("SURRENDER");
+    expect(isSettlement(battle)).toBe(GameSecond);
+  });
+
+  it("両側生存ならONGOING", function () {
+    const battle = makeBattle([
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
+      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+    ]);
+    expect(isSettlement(battle)).toBe(GameOngoing);
+  });
+
+  it("両側全滅ならDRAW", function () {
+    const battle = makeBattle([
+      { side: "FIRST", piece: "king", hp: 0, steps: 0, statuses: [] },
+      { side: "SECOND", piece: "pawn", hp: 0, steps: 0, statuses: [] },
+    ]);
+    expect(isSettlement(battle)).toBe(GameDraw);
   });
 });

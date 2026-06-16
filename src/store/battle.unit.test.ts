@@ -12,122 +12,15 @@ const testData = {
   first_player_name: "home",
   second_player_name: "visitor",
   stepBase: 4,
-  unitCount: 4,
+  unitCount: 2,
   version: "v1",
-  home: {
-    name: "home",
-    charactors: [
-      {
-        name: "sam",
-        race: "human",
-        blessing: "earth",
-        clothing: "steelArmor",
-        weapon: "swordAndShield",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 120,
-        isVisitor: false,
-      },
-      {
-        name: "sara",
-        race: "human",
-        blessing: "earth",
-        clothing: "redRobe",
-        weapon: "rubyRod",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 115,
-        isVisitor: false,
-      },
-    ],
-  },
-  visitor: {
-    name: "visitor",
-    charactors: [
-      {
-        name: "john",
-        race: "human",
-        blessing: "earth",
-        clothing: "steelArmor",
-        weapon: "swordAndShield",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 130,
-        isVisitor: true,
-      },
-      {
-        name: "noa",
-        race: "human",
-        blessing: "earth",
-        clothing: "redRobe",
-        weapon: "rubyRod",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 110,
-        isVisitor: true,
-      },
-    ],
-  },
   turns: [
     {
       datetime: "2023-06-29T12:12:21",
-      action: {
-        type: "TIME_PASSING",
-        wt: 0,
-      },
-      sortedCharactors: [
-        {
-          name: "sam",
-          race: "human",
-          blessing: "earth",
-          clothing: "steelArmor",
-          weapon: "swordAndShield",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 120,
-          isVisitor: false,
-        },
-        {
-          name: "sara",
-          race: "human",
-          blessing: "earth",
-          clothing: "redRobe",
-          weapon: "rubyRod",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 115,
-          isVisitor: false,
-        },
-        {
-          name: "john",
-          race: "human",
-          blessing: "earth",
-          clothing: "steelArmor",
-          weapon: "swordAndShield",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 130,
-          isVisitor: true,
-        },
-        {
-          name: "noa",
-          race: "human",
-          blessing: "earth",
-          clothing: "redRobe",
-          weapon: "rubyRod",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 110,
-          isVisitor: true,
-        },
+      order: { type: "FORMATION" },
+      units: [
+        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
+        { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
       ],
     },
   ],
@@ -163,24 +56,15 @@ describe("Battle#createRepository", function () {
       expect(typedBattle.first_player_name).toBe("home");
       expect(typedBattle.second_player_name).toBe("visitor");
       expect(typedBattle.stepBase).toBe(4);
-      expect(typedBattle.unitCount).toBe(4);
+      expect(typedBattle.unitCount).toBe(2);
       expect(typedBattle.version).toBe("v1");
 
       const turns = typedBattle.turns;
       expect(turns.length).toBe(1);
       expect(formatDate(turns[0].datetime)).toBe("2023-06-29T12:12:21");
-      if (turns[0].action.type === "TIME_PASSING") {
-        expect(turns[0].action.type).toBe("TIME_PASSING");
-        expect(turns[0].action.wt).toBe(0);
-      } else {
-        expect.unreachable("type shoud be TIME_PASSING");
-      }
-
-      expect(turns[0].sortedCharactors.length).toBe(4);
-      expect(turns[0].sortedCharactors[0].name).toBe("sam");
-      expect(turns[0].sortedCharactors[1].name).toBe("sara");
-      expect(turns[0].sortedCharactors[2].name).toBe("john");
-      expect(turns[0].sortedCharactors[3].name).toBe("noa");
+      expect(turns[0].order.type).toBe("FORMATION");
+      expect(turns[0].units.length).toBe(2);
+      expect(turns[0].units[0].piece).toBe("king");
 
       expect(typedBattle.result).toBe(GameOngoing);
     } else {

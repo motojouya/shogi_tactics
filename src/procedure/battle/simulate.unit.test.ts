@@ -1,179 +1,58 @@
 import { describe, it, expect } from "vitest";
 
-import { DataNotFoundError } from "../../store_utility/schema";
-import { toBattle } from "../../store_schema/battle";
-import { GameOngoing } from "../../model/battle";
-import { skillRepository } from "../../store/skill";
+import { start } from "../../model/battle";
+import { buildAction, effectBaseDamage, filterAlive } from "../../model/action";
 import { simulate } from "./simulate";
 
-const battleData = {
-  title: "first-title",
-  home: {
-    name: "home",
-    charactors: [
-      {
-        name: "sam",
-        race: "human",
-        blessing: "earth",
-        clothing: "steelArmor",
-        weapon: "swordAndShield",
-        statuses: [],
-        hp: 100,
-        mp: 50,
-        restWt: 120,
-        isVisitor: false,
-      },
-      {
-        name: "sara",
-        race: "human",
-        blessing: "earth",
-        clothing: "redRobe",
-        weapon: "rubyRod",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 115,
-        isVisitor: false,
-      },
-    ],
-  },
-  visitor: {
-    name: "visitor",
-    charactors: [
-      {
-        name: "john",
-        race: "human",
-        blessing: "earth",
-        clothing: "steelArmor",
-        weapon: "swordAndShield",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 130,
-        isVisitor: true,
-      },
-      {
-        name: "noa",
-        race: "human",
-        blessing: "earth",
-        clothing: "redRobe",
-        weapon: "rubyRod",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 110,
-        isVisitor: true,
-      },
-    ],
-  },
-  turns: [
-    {
-      datetime: "2023-06-29T12:12:21",
-      action: {
-        type: "TIME_PASSING",
-        wt: 0,
-      },
-      sortedCharactors: [
-        {
-          name: "sam",
-          race: "human",
-          blessing: "earth",
-          clothing: "steelArmor",
-          weapon: "swordAndShield",
-          statuses: [],
-          hp: 100,
-          mp: 50,
-          restWt: 120,
-          isVisitor: false,
-        },
-        {
-          name: "sara",
-          race: "human",
-          blessing: "earth",
-          clothing: "redRobe",
-          weapon: "rubyRod",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 115,
-          isVisitor: false,
-        },
-        {
-          name: "john",
-          race: "human",
-          blessing: "earth",
-          clothing: "steelArmor",
-          weapon: "swordAndShield",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 130,
-          isVisitor: true,
-        },
-        {
-          name: "noa",
-          race: "human",
-          blessing: "earth",
-          clothing: "redRobe",
-          weapon: "rubyRod",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 110,
-          isVisitor: true,
-        },
-      ],
-    },
-  ],
-  result: GameOngoing,
-};
+const zeros7 = Array.from({ length: 7 }, () => [0, 0, 0, 0, 0, 0, 0]);
 
-// FIXME step6: home/visitor廃止＋sortedCharactors空シードによりactorをbattle.home.charactorsから取得できない。
-// WTエンジン依存のため、step7のsteps/unitsエンジン化に合わせてunitsベースで書き直して復活させる。
-describe.skip("simulate", () => {
+const attack = buildAction(
+  {
+    key: "atk",
+    name: "攻撃",
+    description: "",
+    baseDamage: 2,
+    receiverCount: 1,
+    cost: 2,
+    effectLength: 1,
+    reachLength: 1,
+    effectRange: [
+      [0, 0, 0],
+      [0, 1, 0],
+      [0, 0, 0],
+    ],
+    reachRange: zeros7,
+  },
+  effectBaseDamage,
+  filterAlive,
+);
+
+const actor = { side: "FIRST", piece: "king" } as const;
+
+describe("simulate", () => {
   it("simulate", () => {
-    const battle = toBattle(battleData);
-    const actor = battle.home.charactors[0];
-    const skill = skillRepository.get("chop");
-    const receiverWithIsVisitor = "john__VISITOR";
-    const lastTurn = battle.turns[battle.turns.length - 1];
-    const actionDate = new Date();
-
-    const result = simulate(battle, actor, skill, receiverWithIsVisitor, lastTurn, actionDate);
-
-    expect(result).toEqual({
-      receiver: { ...battle.visitor.charactors[0], hp: 10 },
-      survive: true,
-    });
+    const turn = start(
+      [
+        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
+        { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+      ],
+      new Date("2024-01-01T00:00:00"),
+    );
+    const result = simulate(attack, actor, { side: "SECOND", piece: "pawn" }, turn);
+    expect(result.survive).toBe(true);
+    expect(result.unit?.hp).toBe(1); // 3 - 2
   });
+
   it("simulate not survive", () => {
-    const battle = toBattle(battleData);
-    battle.visitor.charactors[1].hp = 1;
-    battle.turns[0].sortedCharactors[3].hp = 1;
-
-    const actor = battle.home.charactors[0];
-    const skill = skillRepository.get("chop");
-    const receiverWithIsVisitor = "noa__VISITOR";
-    const lastTurn = battle.turns[battle.turns.length - 1];
-    const actionDate = new Date();
-
-    const result = simulate(battle, actor, skill, receiverWithIsVisitor, lastTurn, actionDate);
-
-    expect(result).toEqual({
-      receiver: { ...battle.visitor.charactors[1], hp: 1 },
-      survive: false,
-    });
-  });
-  it("simulate not found", () => {
-    const battle = toBattle(battleData);
-    const actor = battle.home.charactors[0];
-    const skill = skillRepository.get("chop");
-    const receiverWithIsVisitor = "NOT_FOUND__VISITOR";
-    const lastTurn = battle.turns[battle.turns.length - 1];
-    const actionDate = new Date();
-
-    const result = simulate(battle, actor, skill, receiverWithIsVisitor, lastTurn, actionDate);
-
-    expect(result).toBeInstanceOf(DataNotFoundError);
+    const turn = start(
+      [
+        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
+        { side: "SECOND", piece: "pawn", hp: 2, steps: 0, statuses: [] },
+      ],
+      new Date("2024-01-01T00:00:00"),
+    );
+    const result = simulate(attack, actor, { side: "SECOND", piece: "pawn" }, turn);
+    expect(result.survive).toBe(false);
+    expect(result.unit?.hp).toBe(0); // 2 - 2
   });
 });

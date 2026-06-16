@@ -1,234 +1,74 @@
-import type { BattleRepository } from "../../store/battle";
-import type { Dialogue } from "../../io/window_dialogue";
-
 import { describe, it, expect } from "vitest";
 
-import { toBattle } from "../../store_schema/battle";
-import { GameOngoing } from "../../model/battle";
+import type { BattleRepository } from "../../store/battle";
+import type { Dialogue } from "../../io/window_dialogue";
+import type { Battle } from "../../model/battle";
+import type { DoActionForm } from "../../form/battle";
+
+import { createBattle, start, getLastTurn } from "../../model/battle";
 import { act } from "./act";
 import { DataNotFoundError } from "../../store_utility/schema";
 import { UserCancel } from "../../io/window_dialogue";
 
-const skillForm = {
-  skillName: "chop",
-  receiversWithIsVisitor: [{ value: "john__VISITOR" }],
-};
-
-const battleData = {
-  title: "first-title",
-  home: {
-    name: "home",
-    charactors: [
-      {
-        name: "sam",
-        race: "human",
-        blessing: "earth",
-        clothing: "steelArmor",
-        weapon: "swordAndShield",
-        statuses: [],
-        hp: 100,
-        mp: 50,
-        restWt: 120,
-        isVisitor: false,
-      },
-      {
-        name: "sara",
-        race: "human",
-        blessing: "earth",
-        clothing: "redRobe",
-        weapon: "rubyRod",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 115,
-        isVisitor: false,
-      },
-    ],
-  },
-  visitor: {
-    name: "visitor",
-    charactors: [
-      {
-        name: "john",
-        race: "human",
-        blessing: "earth",
-        clothing: "steelArmor",
-        weapon: "swordAndShield",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 130,
-        isVisitor: true,
-      },
-      {
-        name: "noa",
-        race: "human",
-        blessing: "earth",
-        clothing: "redRobe",
-        weapon: "rubyRod",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 110,
-        isVisitor: true,
-      },
-    ],
-  },
-  turns: [
-    {
-      datetime: "2023-06-29T12:12:21",
-      action: {
-        type: "TIME_PASSING",
-        wt: 0,
-      },
-      sortedCharactors: [
-        {
-          name: "sam",
-          race: "human",
-          blessing: "earth",
-          clothing: "steelArmor",
-          weapon: "swordAndShield",
-          statuses: [],
-          hp: 100,
-          mp: 50,
-          restWt: 120,
-          isVisitor: false,
-        },
-        {
-          name: "sara",
-          race: "human",
-          blessing: "earth",
-          clothing: "redRobe",
-          weapon: "rubyRod",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 115,
-          isVisitor: false,
-        },
-        {
-          name: "john",
-          race: "human",
-          blessing: "earth",
-          clothing: "steelArmor",
-          weapon: "swordAndShield",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 130,
-          isVisitor: true,
-        },
-        {
-          name: "noa",
-          race: "human",
-          blessing: "earth",
-          clothing: "redRobe",
-          weapon: "rubyRod",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 110,
-          isVisitor: true,
-        },
+const makeBattle = (): Battle => {
+  const battle = createBattle("key", "first", "second", 2, 2, "v1");
+  battle.turns.push(
+    start(
+      [
+        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
+        { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
       ],
-    },
-  ],
-  result: GameOngoing,
+      new Date("2024-01-01T00:00:00"),
+    ),
+  );
+  return battle;
 };
 
 const battleRepository: BattleRepository = {
-  save: (_obj) => new Promise((resolve, _reject) => resolve()),
-  get: (_name) => new Promise((resolve, _reject) => resolve(toBattle(battleData))),
-  remove: (_name) => new Promise((resolve, _reject) => resolve()),
-  list: () => new Promise((resolve, _reject) => resolve([])),
-  importJson: (_fileName) => new Promise((resolve, _reject) => resolve(toBattle(battleData))),
-  exportJson: (_obj, _fileName) => new Promise((resolve, _reject) => resolve(null)),
+  save: async () => {},
+  get: async () => null,
+  remove: async () => {},
+  list: async () => [],
+  importJson: async () => null,
+  exportJson: async () => null,
 };
 
-// FIXME step6: home/visitor廃止＋sortedCharactors空シードによりactorをbattle.home.charactorsから取得できない。
-// WTエンジン依存のため、step7のsteps/unitsエンジン化に合わせてunitsベースで書き直して復活させる。
-describe.skip("act", () => {
+const dialogue = (confirm: boolean): Dialogue => ({
+  confirm: () => confirm,
+  notice: () => {},
+  getUuid: () => "key",
+  now: () => new Date("2024-01-01T00:00:00"),
+});
+
+const actor = { side: "FIRST", piece: "king" } as const;
+
+describe("act", () => {
   it("act", async () => {
-    const battle = toBattle(battleData);
-    const actor = battle.home.charactors[0];
-    const lastTurn = battle.turns[battleData.turns.length - 1];
+    const battle = makeBattle();
+    const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const mockRepo: BattleRepository = {
-      ...battleRepository,
-      save: async (_battle) => {
-        expect(true).toBe(true);
-      },
-    };
-    const dialogue: Dialogue = {
-      confirm: (message) => {
-        expect(message).toBe("実行していいですか？");
-        return true;
-      },
-      notice: (_message) => {},
-    };
+    const result = await act(dialogue(true), battleRepository)(battle, actor, form, () => new Date("2024-01-01T00:00:00"));
 
-    const result = await act(dialogue, mockRepo)(battle, actor, skillForm, lastTurn, () => new Date());
-
-    const turnJustBefore = result.turns.pop();
-    const turnNextBefore = result.turns.pop();
-
-    expect(result).toStrictEqual(battle);
-
-    expect(turnJustBefore.action.type).toBe("TIME_PASSING");
-    expect(turnNextBefore.action.type).toBe("DO_SKILL");
+    if (result instanceof DataNotFoundError || result instanceof UserCancel || "message" in result) {
+      expect.unreachable("act should succeed");
+    } else {
+      expect(getLastTurn(result).order.type).toBe("DO_SKILL");
+    }
   });
 
   it("data not found", async () => {
-    const battle = toBattle(battleData);
-    const actor = battle.home.charactors[0];
-    const lastTurn = battle.turns[battleData.turns.length - 1];
+    const battle = makeBattle();
+    const form: DoActionForm = { actionKey: "noSuchAction", receivers: [{ value: "SECOND:pawn" }] };
 
-    const mockRepo: BattleRepository = {
-      ...battleRepository,
-      save: async (_battle) => {
-        expect.unreachable();
-      },
-    };
-    const dialogue: Dialogue = {
-      confirm: (message) => {
-        expect(message).toBe("実行していいですか？");
-        return true;
-      },
-      notice: (_message) => {},
-    };
-
-    const result = await act(dialogue, mockRepo)(
-      battle,
-      actor,
-      { ...skillForm, skillName: "not-found" },
-      lastTurn,
-      () => new Date(),
-    );
-
-    expect(result).toBeInstanceOf(DataNotFoundError);
+    const result = await act(dialogue(true), battleRepository)(battle, actor, form, () => new Date("2024-01-01T00:00:00"));
+    expect(result instanceof DataNotFoundError).toBe(true);
   });
 
   it("cancel", async () => {
-    const battle = toBattle(battleData);
-    const actor = battle.home.charactors[0];
-    const lastTurn = battle.turns[battleData.turns.length - 1];
+    const battle = makeBattle();
+    const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const mockRepo: BattleRepository = {
-      ...battleRepository,
-      save: async (_battle) => {
-        expect.unreachable();
-      },
-    };
-    const dialogue: Dialogue = {
-      confirm: (message) => {
-        expect(message).toBe("実行していいですか？");
-        return false;
-      },
-      notice: (_message) => {},
-    };
-
-    const result = await act(dialogue, mockRepo)(battle, actor, skillForm, lastTurn, () => new Date());
-
-    expect(result).toBeInstanceOf(UserCancel);
+    const result = await act(dialogue(false), battleRepository)(battle, actor, form, () => new Date("2024-01-01T00:00:00"));
+    expect(result instanceof UserCancel).toBe(true);
   });
 });
