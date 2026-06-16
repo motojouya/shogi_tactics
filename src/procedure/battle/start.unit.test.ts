@@ -5,138 +5,16 @@ import { describe, it, expect } from "vitest";
 
 import type { Unit } from "../../model/unit";
 
-import { toBattle } from "../../store_schema/battle";
 import { registerBattle, startBattle } from "./start";
 import { GameOngoing } from "../../model/battle";
 
-const battleData = {
-  title: "first-title",
-  home: {
-    name: "home",
-    charactors: [
-      {
-        name: "sam",
-        race: "human",
-        blessing: "earth",
-        clothing: "steelArmor",
-        weapon: "swordAndShield",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 120,
-        isVisitor: false,
-      },
-      {
-        name: "sara",
-        race: "human",
-        blessing: "earth",
-        clothing: "redRobe",
-        weapon: "rubyRod",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 115,
-        isVisitor: false,
-      },
-    ],
-  },
-  visitor: {
-    name: "visitor",
-    charactors: [
-      {
-        name: "john",
-        race: "human",
-        blessing: "earth",
-        clothing: "steelArmor",
-        weapon: "swordAndShield",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 130,
-        isVisitor: true,
-      },
-      {
-        name: "noa",
-        race: "human",
-        blessing: "earth",
-        clothing: "redRobe",
-        weapon: "rubyRod",
-        statuses: [],
-        hp: 100,
-        mp: 0,
-        restWt: 110,
-        isVisitor: true,
-      },
-    ],
-  },
-  turns: [
-    {
-      datetime: "2023-06-29T12:12:21",
-      action: {
-        type: "TIME_PASSING",
-        wt: 0,
-      },
-      sortedCharactors: [
-        {
-          name: "sam",
-          race: "human",
-          blessing: "earth",
-          clothing: "steelArmor",
-          weapon: "swordAndShield",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 120,
-          isVisitor: false,
-        },
-        {
-          name: "sara",
-          race: "human",
-          blessing: "earth",
-          clothing: "redRobe",
-          weapon: "rubyRod",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 115,
-          isVisitor: false,
-        },
-        {
-          name: "john",
-          race: "human",
-          blessing: "earth",
-          clothing: "steelArmor",
-          weapon: "swordAndShield",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 130,
-          isVisitor: true,
-        },
-        {
-          name: "noa",
-          race: "human",
-          blessing: "earth",
-          clothing: "redRobe",
-          weapon: "rubyRod",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 110,
-          isVisitor: true,
-        },
-      ],
-    },
-  ],
-  result: GameOngoing,
-};
-
+// registerBattle/startBattleはget/importJsonを呼ばないので、それらはnull固定のスタブで十分。
 const battleRepository: BattleRepository = {
   save: (_obj) => new Promise((resolve, _reject) => resolve()),
-  get: (_name) => new Promise((resolve, _reject) => resolve(toBattle(battleData))),
+  get: (_name) => new Promise((resolve, _reject) => resolve(null)),
   remove: (_name) => new Promise((resolve, _reject) => resolve()),
   list: () => new Promise((resolve, _reject) => resolve([])),
-  importJson: (_fileName) => new Promise((resolve, _reject) => resolve(toBattle(battleData))),
+  importJson: (_fileName) => new Promise((resolve, _reject) => resolve(null)),
   exportJson: (_obj, _fileName) => new Promise((resolve, _reject) => resolve(null)),
 };
 
