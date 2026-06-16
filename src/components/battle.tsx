@@ -48,6 +48,7 @@ import {
   DO_NOTHING,
 } from '../form/battle';
 import { pieceRepository } from '../store/piece';
+import { statusRepository } from '../store/status';
 
 import { DataNotFoundError } from '../store_utility/schema';
 import { act } from '../procedure/battle/act';
@@ -58,9 +59,14 @@ import { useIO } from './context';
 import { Container } from './utility';
 
 const sideLabel = (side: 'FIRST' | 'SECOND'): string => (side === 'FIRST' ? '先手' : '後手');
+// step8: battleはkeyしか持たないので、presentationでstore参照してpiece/statusを解決する。
 const pieceName = (pieceKey: string): string => {
   const piece = pieceRepository.get(pieceKey);
   return piece ? piece.name : pieceKey;
+};
+const statusName = (statusKey: string): string => {
+  const status = statusRepository.get(statusKey);
+  return status ? status.name : statusKey;
 };
 
 const GameStatus: FC<{ battle: Battle }> = ({ battle }) => {
@@ -102,7 +108,7 @@ const UnitStatus: FC<{ unit: Unit }> = ({ unit }) => (
     <Box sx={{ pr: 1 }}><Typography>{`HP ${unit.hp}`}</Typography></Box>
     <Box sx={{ pr: 1 }}><Typography>{`steps ${unit.steps}`}</Typography></Box>
     {unit.statuses.length > 0 && (
-      <Box sx={{ pr: 1 }}><Typography>{`状態: ${unit.statuses.join(', ')}`}</Typography></Box>
+      <Box sx={{ pr: 1 }}><Typography>{`状態: ${unit.statuses.map(statusName).join(', ')}`}</Typography></Box>
     )}
   </Stack>
 );
