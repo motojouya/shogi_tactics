@@ -141,6 +141,17 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - home,visitorの削除
 - **境界の注意**: `home/visitorの削除`と、それらを参照している箇所の`battle.units`への切替は、step完了時にgreenを満たすため**このstep内で完結させる**（参照切替をstep8に残さない）。store key参照への寄せ（controller/presentationでのstore参照・利用ロジック）はstep8で行う。なおaction/skill解決は、step7の時間モデル移行が先に来るため、このstepでは完全なkey参照を求めず過渡的な形でよい。
 
+#### 6の済み分（実装メモ）
+- `Turn.units`をロスターのsource of truthに（types.md準拠。Battle.unitsは新設しない）。`store_schema/unit.ts`新規・`turnSchema.units`（`default([])`で旧データ互換）・`battleSchema`からhome/visitor削除。
+- `model/battle.ts`: Battle型からhome/visitor削除、`createBattle(key, firstName, secondName, stepBase, unitCount, version)`は骨格(turns=[])生成、`start(units, datetime)`で先頭Turn.units構築。sortedCharactors/WTエンジンは**非稼働で残置**（units消費の順序エンジン化はstep7）。
+- UI: `components/unit.tsx`(SelectUnits)新規、`new.tsx`はparty選択を廃しplayer名入力＋piece選択でunits構築。player名はparty名流用をやめ明示入力に。
+- WTエンジン依存の`act/simulate/surrender`の単体テストは`describe.skip`（step7でunitsベースに書き直して復活）。
+
+#### 6の残作業（ここから再開）
+- **units選択をnew.tsxから「次の画面」へ移す**。battle登録直後の画面（編成段階）でunitsを選ぶUX。types.mdの`Battle.turns.length===0`＝編成段階の出し分けに対応させ、編成確定で先頭Turn（units入り）を1つ追加する流れにする。
+- これに伴い**battleの型制約が変わる**: 現状`start()`が先頭Turn(units入り)を必ず作るが、再開後は「turns=[]（=units未選択・編成中）」を正規の状態として許容する。
+- **`units=0ならbattleを進めない`制約も変わる**: new.tsxでの「駒1つ以上必須」バリデーションは編成画面側へ移し、登録時点ではunits=0（編成前）を許可する。編成画面でunits>0を確定したら戦闘に進める、という制約に組み替える。
+
 ### 7. steps/stepBase 時間モデルへの移行
 （01_copy.md「11. 時間経過ロジックの変更」を引き継ぐ独立step。units構築(step6)で入る`steps`を直後に確定させ、参照配線(step8)が安定した順序エンジン/Turn契約に対して行えるよう、参照・利用切替より先に行う）
 - WT/restWtによる仮想時間を廃し、**行動ポイント方式**へ。各駒は`steps`（初期0）を持ち、`steps`最小の駒が次に行動。同点は`Turn.units`のindex（初期順）で決着。
