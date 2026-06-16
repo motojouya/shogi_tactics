@@ -5,6 +5,7 @@ import type { Unit } from "./unit";
 
 import { getPhysical, copyCharactorBattling } from "./charactor";
 import { copyTurn } from "./turn";
+import { copyUnit } from "./unit";
 
 import { acid, quick, sleep, slow } from "../store_data/status/index";
 import { underStatus } from "./charactor_status";

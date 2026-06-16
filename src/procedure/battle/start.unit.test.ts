@@ -3,8 +3,9 @@ import type { Dialogue } from "../../io/window_dialogue";
 
 import { describe, it, expect } from "vitest";
 
+import type { Unit } from "../../model/unit";
+
 import { toBattle } from "../../store_schema/battle";
-import { toParty } from "../../store_schema/party";
 import { startBattle } from "./start";
 import { GameOngoing } from "../../model/battle";
 
@@ -130,46 +131,6 @@ const battleData = {
   result: GameOngoing,
 };
 
-const homeData = {
-  name: "home",
-  charactors: [
-    {
-      name: "sam",
-      race: "human",
-      blessing: "earth",
-      clothing: "steelArmor",
-      weapon: "swordAndShield",
-    },
-    {
-      name: "sara",
-      race: "human",
-      blessing: "earth",
-      clothing: "redRobe",
-      weapon: "rubyRod",
-    },
-  ],
-};
-
-const visitorData = {
-  name: "visitor",
-  charactors: [
-    {
-      name: "sam",
-      race: "human",
-      blessing: "earth",
-      clothing: "steelArmor",
-      weapon: "swordAndShield",
-    },
-    {
-      name: "sara",
-      race: "human",
-      blessing: "earth",
-      clothing: "redRobe",
-      weapon: "rubyRod",
-    },
-  ],
-};
-
 const battleRepository: BattleRepository = {
   save: (_obj) => new Promise((resolve, _reject) => resolve()),
   get: (_name) => new Promise((resolve, _reject) => resolve(toBattle(battleData))),
@@ -186,19 +147,23 @@ const dialogue: Dialogue = {
   now: () => new Date("2023-06-29T12:12:21"),
 };
 
+const units: Unit[] = [
+  { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
+  { side: "SECOND", piece: "pawn", hp: 1, steps: 0, statuses: [] },
+];
+
 describe("startBattle", () => {
   it("start battle", async () => {
-    const homeParty = toParty(homeData);
-    const visitorParty = toParty(visitorData);
-    const battle = await startBattle(battleRepository, dialogue)(homeParty, visitorParty, 4, 4, "v1");
+    const battle = await startBattle(battleRepository, dialogue)(units, "first", "second", 4, 4, "v1");
 
     expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
-    expect(battle.first_player_name).toBe("home");
-    expect(battle.second_player_name).toBe("visitor");
+    expect(battle.first_player_name).toBe("first");
+    expect(battle.second_player_name).toBe("second");
     expect(battle.stepBase).toBe(4);
     expect(battle.version).toBe("v1");
-    expect(battle.home.name).toBe("home");
-    expect(battle.visitor.name).toBe("visitor");
-    expect(battle.turns.length).toBe(2);
+    // step6: 先頭Turn(編成)のみ。WTのwait Turnは廃止。
+    expect(battle.turns.length).toBe(1);
+    expect(battle.turns[0].units.length).toBe(2);
+    expect(battle.turns[0].units[0].piece).toBe("king");
   });
 });

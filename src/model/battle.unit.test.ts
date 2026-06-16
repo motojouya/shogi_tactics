@@ -1,5 +1,5 @@
 import type { Battle } from "./battle";
-import type { Party } from "./party";
+import type { Unit } from "./unit";
 import type { Skill } from "./skill";
 import type { CharactorBattling } from "./charactor";
 import type { BattleJson } from "../store_schema/battle";
@@ -19,7 +19,6 @@ import {
   GameDraw,
 } from "./battle";
 import { toBattle } from "../store_schema/battle";
-import { toParty } from "../store_schema/party";
 import { format } from "date-fns";
 
 import { toCharactorBattling } from "../store_schema/charactor";
@@ -171,8 +170,6 @@ describe("Battle#toBattle", function () {
       expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
       expect(battle.first_player_name).toBe("home");
       expect(battle.second_player_name).toBe("visitor");
-      expect(battle.home.name).toBe("home");
-      expect(battle.visitor.name).toBe("visitor");
       expect(battle.turns.length).toBe(1);
       expect(formatDate(battle.turns[0].datetime)).toBe("2023-06-29T12:12:21");
       expect(battle.result).toBe(GameOngoing);
@@ -182,68 +179,21 @@ describe("Battle#toBattle", function () {
 
 describe("Battle#start", function () {
   it("ok", function () {
-    const homeParty = toParty({
-      name: "home",
-      charactors: [
-        {
-          name: "sam",
-          race: "human",
-          blessing: "earth",
-          clothing: "steelArmor",
-          weapon: "swordAndShield",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 120,
-        },
-        {
-          name: "john",
-          race: "human",
-          blessing: "earth",
-          clothing: "redRobe",
-          weapon: "rubyRod",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 115,
-        },
-      ],
-    }) as Party;
-    const visitorParty = toParty({
-      name: "visitor",
-      charactors: [
-        {
-          name: "tom",
-          race: "lizardman",
-          blessing: "earth",
-          clothing: "steelArmor",
-          weapon: "swordAndShield",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 130,
-        },
-        {
-          name: "chang",
-          race: "werewolf",
-          blessing: "earth",
-          clothing: "redRobe",
-          weapon: "rubyRod",
-          statuses: [],
-          hp: 100,
-          mp: 0,
-          restWt: 110,
-        },
-      ],
-    }) as Party;
-
-    const battle = createBattle("0191e000-0000-7000-8000-000000000000", homeParty, visitorParty, 4, 4, "v1");
+    // step6: createBattleはbattle骨格(turns=[])のみ。ロスターはstart()でunitsとして積む。
+    const battle = createBattle("0191e000-0000-7000-8000-000000000000", "first", "second", 4, 4, "v1");
     expect(battle.result).toBe(GameOngoing);
     expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
+    expect(battle.first_player_name).toBe("first");
+    expect(battle.second_player_name).toBe("second");
     expect(battle.stepBase).toBe(4);
     expect(battle.unitCount).toBe(4);
+    expect(battle.turns.length).toBe(0);
 
-    const turn = start(battle, new Date());
+    const units: Unit[] = [
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
+      { side: "SECOND", piece: "pawn", hp: 1, steps: 0, statuses: [] },
+    ];
+    const turn = start(units, new Date());
 
     expect(turn.action.type).toBe("TIME_PASSING");
     if (turn.action.type === "TIME_PASSING") {
@@ -251,15 +201,13 @@ describe("Battle#start", function () {
     } else {
       expect.unreachable("type should be TIME_PASSING");
     }
-    expect(turn.sortedCharactors.length).toBe(4);
-    expect(turn.sortedCharactors[0].name).toBe("sam");
-    expect(turn.sortedCharactors[0].isVisitor).toBe(false);
-    expect(turn.sortedCharactors[1].name).toBe("john");
-    expect(turn.sortedCharactors[1].isVisitor).toBe(false);
-    expect(turn.sortedCharactors[2].name).toBe("tom");
-    expect(turn.sortedCharactors[2].isVisitor).toBe(true);
-    expect(turn.sortedCharactors[3].name).toBe("chang");
-    expect(turn.sortedCharactors[3].isVisitor).toBe(true);
+    // step6: sortedCharactors/WTエンジンは残置(空シード)。ロスターはunitsが持つ。
+    expect(turn.sortedCharactors.length).toBe(0);
+    expect(turn.units.length).toBe(2);
+    expect(turn.units[0].side).toBe("FIRST");
+    expect(turn.units[0].piece).toBe("king");
+    expect(turn.units[1].side).toBe("SECOND");
+    expect(turn.units[1].piece).toBe("pawn");
   });
 });
 

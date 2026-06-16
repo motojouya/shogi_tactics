@@ -166,18 +166,6 @@ describe("Battle#createRepository", function () {
       expect(typedBattle.unitCount).toBe(4);
       expect(typedBattle.version).toBe("v1");
 
-      const home = typedBattle.home;
-      expect(home.name).toBe("home");
-      expect(home.charactors.length).toBe(2);
-      expect(home.charactors[0].name).toBe("sam");
-      expect(home.charactors[1].name).toBe("sara");
-
-      const visitor = typedBattle.visitor;
-      expect(visitor.name).toBe("visitor");
-      expect(visitor.charactors.length).toBe(2);
-      expect(visitor.charactors[0].name).toBe("john");
-      expect(visitor.charactors[1].name).toBe("noa");
-
       const turns = typedBattle.turns;
       expect(turns.length).toBe(1);
       expect(formatDate(turns[0].datetime)).toBe("2023-06-29T12:12:21");
