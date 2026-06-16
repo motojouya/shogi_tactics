@@ -184,6 +184,13 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 
 ### 9. 戦乱モードではなく、通常モードでplayer_nameだけ入力できるformを用意し、default値のunitsを適用
 
+#### 9の済み分（実装メモ）
+- `new.tsx`に通常/戦乱のモード選択(MUI select)を追加。通常モードはplayer名のみ入力(stepBase/unitCount入力欄は非表示)、戦乱モードは従来通りstepBase/unitCountを入力して編成画面へ。
+- 通常モードは`unitCount=7`/`stepBase=14`固定。`model/normal_mode.ts`に定数と`buildNormalUnits`を新設。
+- `buildNormalUnits`: note.mdの初期順番(飛->角->金->銀->桂->香->王)で、駒順ごとに先手->後手で**交互**にUnitを並べる(steps=0同点はindex決着なので、この並びが第1ラウンドの行動順)。leaderは`king`固定。hpは各pieceのMaxHP。piecegetterはDIで受け取りmodel層をstoreから独立に保つ。
+- 通常モードのbattle作成は`registerBattle`(14,7)→`buildNormalUnits`→`startBattle`を即時に連結し、編成画面を出さずそのまま先頭Turnまで積んで開始する。
+- colocation unit test: `model/normal_mode.unit.test.ts`。
+
 ### 10. battle画面のurlをversion番号に
 - 同一versionじゃないと表示できなく
 - 加えて、/newというpathをつくって、新規battleはそっちに流して、battle登録したら/v1とかのurlへ遷移する形へ
