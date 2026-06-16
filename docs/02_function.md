@@ -167,8 +167,9 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - `form/battle.ts`(DoActionForm: actionKey+receivers=`${side}:${piece}`)、`procedure/battle/act|simulate|surrender`をUnitReference/Action.actベースへ。`components/battle.tsx`はactor=units[0]・技=piece.actions・受け手=action.filter・行動順=sortedUnits表示に作り替え。act/simulate/surrenderの単体テストもunitsベースで復活。
 - **Skill系・party画面を削除**: `model/skill`,`store/skill`,`store_data/skill/*`,`components/charactor`,`components/party`,`form/party`,`procedure/party`,`subpage/party`,`pages/party`、vite party入口、partyRepositoryをIO contextから除去。
 
-#### 7の残（dead code。専用cleanup step or step14で処理）
-- 旧Ogre-Battle系のデータ層は**dead codeとして残置**（battle/UIからは未参照、testはpassのまま）: `model/charactor` `model/party` `model/physical` `model/charactor_status`、`store/charactor` `store/party` `store/charactor_status`、`store_schema/charactor` `store_schema/party` `store_schema/status`、`store_data/status/*`(旧)。partyRepositoryのstoreはIOから外したが`store/party`自体は残存。これらの物理削除はディレクトリ統廃合(step14)等で行う。
+#### 7の残（dead code削除済み）
+- 旧Ogre-Battle系のデータ層を**物理削除済み**: `model/charactor` `model/party` `model/physical` `model/charactor_status`、`store/charactor` `store/party` `store/charactor_status`、`store_schema/charactor` `store_schema/party` `store_schema/status`、`store_data/status/*`(旧)、`form/charactor`(各testも)。
+- 併せて生存コードの旧参照を切離: `subpage/battle/battle.tsx`の`CharactorDuplicationError`分岐除去、`io/indexed_database.ts`のpartyテーブル削除＋battleの主キーを`title`→`key`に修正。残るのはunits/Action/piece/status(新)系のみ。
 
 ### 8. characters->units移行
 - controller,presentationでのpiece,status,action store呼び出し

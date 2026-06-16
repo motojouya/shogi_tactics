@@ -5,8 +5,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 
 import { BattleContainer } from '../../components/battle';
 import { BattleFormation } from '../../components/formation';
-import { CharactorDuplicationError } from '../../model/party';
-import { JsonSchemaUnmatchError, DataNotFoundError } from '../../store_utility/schema';
+import { JsonSchemaUnmatchError } from '../../store_utility/schema';
 import { useIO } from '../../components/context';
 import { Container } from '../../components/utility';
 
@@ -14,11 +13,7 @@ export const BattleExsiting: FC<{ battleKey: string }> = ({ battleKey }) => {
   const { battleRepository } = useIO();
   const battle = useLiveQuery(() => battleRepository.get(battleKey), [battleKey]);
 
-  if (
-    battle instanceof DataNotFoundError ||
-    battle instanceof CharactorDuplicationError ||
-    battle instanceof JsonSchemaUnmatchError
-  ) {
+  if (battle instanceof JsonSchemaUnmatchError) {
     return (
       <Container backLink="/battle/">
         <Typography>{battle.message}</Typography>

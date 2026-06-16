@@ -2,29 +2,21 @@ import type { Save, List, Get, Remove, ExportJson, ImportJson, Database } from "
 
 import Dexie from "dexie";
 
-import type { PartyJson } from "../store_schema/party";
 import type { BattleJson } from "../store_schema/battle";
 
 class KniwDB extends Dexie {
-  party!: Dexie.Table<PartyJson, string>;
-
   battle!: Dexie.Table<BattleJson, string>;
 
   constructor() {
     super("KniwDB");
     this.version(1).stores({
-      party: "name",
-      battle: "title",
+      battle: "key",
     });
   }
 }
 
-// type GetTable = (db: Dexie, tableName: string) => Dexie.Table<PartyJson, string> | Dexie.Table<BattleJson, string>;
 type GetTable = (db: KniwDB, tableName: string) => Dexie.Table;
 const getTable: GetTable = (db, tableName) => {
-  if (tableName === "party") {
-    return db.party;
-  }
   if (tableName === "battle") {
     return db.battle;
   }
