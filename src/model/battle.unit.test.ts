@@ -237,7 +237,7 @@ describe("Battle#start", function () {
       ],
     }) as Party;
 
-    const battle = createBattle("0191e000-0000-7000-8000-000000000000", homeParty, visitorParty, 4, "v1");
+    const battle = createBattle("0191e000-0000-7000-8000-000000000000", homeParty, visitorParty, 4, 4, "v1");
     expect(battle.result).toBe(GameOngoing);
     expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
     expect(battle.stepBase).toBe(4);

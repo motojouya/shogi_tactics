@@ -22,11 +22,12 @@ export const BattleNew: FC = () => {
   const { battleRepository, dialogue } = useIO();
 
   const [message, setMessage] = useState<string>('');
+  // FIXME stepBaseとunitCountはまとめて構造体(メタパラメータ)にしたい。現段階では個別フィールドのまま。
   const {
     handleSubmit,
     register,
     formState: { errors }, //, isSubmitting
-  } = useForm<{ stepBase: string }>();
+  } = useForm<{ stepBase: string; unitCount: string }>();
   const [homeParty, setHomeParty] = useState<Party | null>(null);
   const [visitorParty, setVisitorParty] = useState<Party | null>(null);
 
@@ -42,6 +43,11 @@ export const BattleNew: FC = () => {
     if (!battleForm.stepBase || Number.isNaN(stepBase) || stepBase < 1) {
       messages.push('stepBaseは1以上の数値を入力してください');
     }
+    // unitCountはparty駒数との整合は見ず、入力値をそのまま採用する
+    const unitCount = Number(battleForm.unitCount);
+    if (!battleForm.unitCount || Number.isNaN(unitCount) || unitCount < 1) {
+      messages.push('unitCountは1以上の数値を入力してください');
+    }
     if (!homeParty) {
       messages.push('home partyを入力してください');
     }
@@ -54,7 +60,7 @@ export const BattleNew: FC = () => {
       return;
     }
 
-    const battle = await startBattle(battleRepository, dialogue)(homeParty as Party, visitorParty as Party, stepBase, version);
+    const battle = await startBattle(battleRepository, dialogue)(homeParty as Party, visitorParty as Party, stepBase, unitCount, version);
     transit(`/battle/?key=${battle.key}`);
   };
 
@@ -80,6 +86,19 @@ export const BattleNew: FC = () => {
               variant="outlined"
               {...register('stepBase')}
               helperText={errors.stepBase && errors.stepBase.message}
+              sx={{ width: '100%' }}
+            />
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextField
+              id="unitCount"
+              type="number"
+              error={!!errors.unitCount}
+              label="Unit Count"
+              placeholder="ユニット数(1以上)"
+              variant="outlined"
+              {...register('unitCount')}
+              helperText={errors.unitCount && errors.unitCount.message}
               sx={{ width: '100%' }}
             />
           </Box>

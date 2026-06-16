@@ -76,10 +76,18 @@ const sortByWT: SortByWT = (charactors) =>
       return 0;
     });
 
-// keyはuuid(provider経由)、stepBase/versionは登録フォームから受け取る。
-// player名は当面party名を流用する(home/visitorはstep6以降にunits化)。
-export type CreateBattle = (key: string, home: Party, visitor: Party, stepBase: number, version: string) => Battle;
-export const createBattle: CreateBattle = (key, home, visitor, stepBase, version) => {
+// keyはuuid(provider経由)、stepBase/unitCount/versionは登録フォームから受け取る。
+// unitCountはparty駒数との整合を取らず入力値をそのまま採用する(step6以降にunits化)。
+// player名は当面party名を流用する。
+export type CreateBattle = (
+  key: string,
+  home: Party,
+  visitor: Party,
+  stepBase: number,
+  unitCount: number,
+  version: string,
+) => Battle;
+export const createBattle: CreateBattle = (key, home, visitor, stepBase, unitCount, version) => {
   const homeBatting: PartyBattling = {
     name: home.name,
     charactors: home.charactors.map((charactor) => toBattleCharactor(charactor, false)),
@@ -88,7 +96,6 @@ export const createBattle: CreateBattle = (key, home, visitor, stepBase, version
     name: visitor.name,
     charactors: visitor.charactors.map((charactor) => toBattleCharactor(charactor, true)),
   };
-  const unitCount = homeBatting.charactors.length + visitorBatting.charactors.length;
   return {
     home: homeBatting,
     visitor: visitorBatting,
@@ -97,8 +104,8 @@ export const createBattle: CreateBattle = (key, home, visitor, stepBase, version
     key,
     first_player_name: home.name,
     second_player_name: visitor.name,
-    // stepBaseは1以上が必須。未指定/不正時はunit数(なければ1)にフォールバック
-    stepBase: stepBase >= 1 ? stepBase : unitCount > 0 ? unitCount : 1,
+    // stepBaseは1以上が必須。未指定/不正時はunitCountの2倍(最低1)にフォールバック
+    stepBase: stepBase >= 1 ? stepBase : Math.max(unitCount * 2, 1),
     unitCount,
     version,
   };

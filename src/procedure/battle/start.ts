@@ -5,14 +5,14 @@ import type { Dialogue } from "../../io/window_dialogue";
 
 import { wait, turnActor, createBattle, start } from "../../model/battle";
 
-// keyと日時はdialogue(provider)経由で供給する。stepBase/versionは登録フォームから受け取る。
+// keyと日時はdialogue(provider)経由で供給する。stepBase/unitCount/versionは登録フォームから受け取る。
 export type StartBattle = (
   battleRepository: BattleRepository,
   dialogue: Dialogue,
-) => (homeParty: Party, visitorParty: Party, stepBase: number, version: string) => Promise<Battle>;
+) => (homeParty: Party, visitorParty: Party, stepBase: number, unitCount: number, version: string) => Promise<Battle>;
 export const startBattle: StartBattle =
-  (battleRepository, dialogue) => async (homeParty, visitorParty, stepBase, version) => {
-    const battle = createBattle(dialogue.getUuid(), homeParty, visitorParty, stepBase, version);
+  (battleRepository, dialogue) => async (homeParty, visitorParty, stepBase, unitCount, version) => {
+    const battle = createBattle(dialogue.getUuid(), homeParty, visitorParty, stepBase, unitCount, version);
     const turn = start(battle, dialogue.now());
     battle.turns.push(turn);
 

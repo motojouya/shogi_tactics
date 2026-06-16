@@ -190,7 +190,7 @@ describe("startBattle", () => {
   it("start battle", async () => {
     const homeParty = toParty(homeData);
     const visitorParty = toParty(visitorData);
-    const battle = await startBattle(battleRepository, dialogue)(homeParty, visitorParty, 4, "v1");
+    const battle = await startBattle(battleRepository, dialogue)(homeParty, visitorParty, 4, 4, "v1");
 
     expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
     expect(battle.first_player_name).toBe("home");
