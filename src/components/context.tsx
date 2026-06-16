@@ -2,14 +2,12 @@
 import type { ReactNode } from "react";
 
 import type { Dialogue } from '../io/window_dialogue';
-import type { PartyRepository } from '../store/party';
 import type { BattleRepository } from '../store/battle';
 
 import { createContext, useContext } from "react";
 
 export type IO = {
   dialogue: Dialogue;
-  partyRepository: PartyRepository;
   battleRepository: BattleRepository;
 };
 

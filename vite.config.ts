@@ -32,7 +32,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         "": resolve(__dirname, "src/pages/index.html"),
-        party: resolve(__dirname, "src/pages/party/index.html"),
         battle: resolve(__dirname, "src/pages/battle/index.html"),
       },
       output: {
