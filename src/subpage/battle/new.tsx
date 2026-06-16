@@ -1,5 +1,4 @@
 import type { FC } from 'react';
-import type { Unit } from '../../model/unit';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -11,8 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 
-import { SelectUnits } from '../../components/unit';
-import { startBattle } from '../../procedure/battle/start';
+import { registerBattle } from '../../procedure/battle/start';
 import { useIO } from '../../components/context';
 import { transit } from '../../components/utility';
 import { Container } from '../../components/utility';
@@ -28,16 +26,14 @@ export const BattleNew: FC = () => {
     register,
     formState: { errors }, //, isSubmitting
   } = useForm<{ first_player_name: string; second_player_name: string; stepBase: string; unitCount: string }>();
-  // step6: party選択を廃止し、piece選択でside別にunitsを組む。
-  const [firstUnits, setFirstUnits] = useState<Unit[]>([]);
-  const [secondUnits, setSecondUnits] = useState<Unit[]>([]);
 
   // version v1では保存文字列のみ(ルール分岐は持たない)。default値として固定で付与する。
   const version = 'v1';
 
+  // step6: ここではbattleの骨格(turns=[])のみ登録する。unitsの選択は登録後のbattle画面(編成段階)で行う。
   // FIXME
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const start = async (battleForm: any) => {
+  const register_ = async (battleForm: any) => {
     const messages: string[] = [];
 
     const firstPlayerName = battleForm.first_player_name as string;
@@ -53,15 +49,10 @@ export const BattleNew: FC = () => {
     if (!battleForm.stepBase || Number.isNaN(stepBase) || stepBase < 1) {
       messages.push('stepBaseは1以上の数値を入力してください');
     }
-    // unitCountはparty駒数との整合は見ず、入力値をそのまま採用する
+    // unitCountは先手/後手それぞれの駒数。編成画面でこの数に達したら開始できる。
     const unitCount = Number(battleForm.unitCount);
     if (!battleForm.unitCount || Number.isNaN(unitCount) || unitCount < 1) {
       messages.push('unitCountは1以上の数値を入力してください');
-    }
-
-    const units = [...firstUnits, ...secondUnits];
-    if (units.length === 0) {
-      messages.push('駒を1つ以上選択してください');
     }
 
     if (messages.length > 0) {
@@ -69,8 +60,7 @@ export const BattleNew: FC = () => {
       return;
     }
 
-    const battle = await startBattle(battleRepository, dialogue)(
-      units,
+    const battle = await registerBattle(battleRepository, dialogue)(
       firstPlayerName,
       secondPlayerName,
       stepBase,
@@ -85,7 +75,7 @@ export const BattleNew: FC = () => {
   return (
     <Container backLink="/battle/">
       <Typography>Start The Battle</Typography>
-      <form onSubmit={handleSubmit(start)}>
+      <form onSubmit={handleSubmit(register_)}>
         <Stack>
           {message && (
             <Box sx={{ p: 1 }}>
@@ -135,7 +125,7 @@ export const BattleNew: FC = () => {
               type="number"
               error={!!errors.unitCount}
               label="Unit Count"
-              placeholder="ユニット数(1以上)"
+              placeholder="片側のユニット数(1以上)"
               variant="outlined"
               {...register('unitCount')}
               helperText={errors.unitCount && errors.unitCount.message}
@@ -143,13 +133,7 @@ export const BattleNew: FC = () => {
             />
           </Box>
           <Box sx={{ p: 1 }}>
-            <SelectUnits side="FIRST" label="先手の駒" units={firstUnits} setUnits={setFirstUnits} />
-          </Box>
-          <Box sx={{ p: 1 }}>
-            <SelectUnits side="SECOND" label="後手の駒" units={secondUnits} setUnits={setSecondUnits} />
-          </Box>
-          <Box sx={{ p: 1 }}>
-            <Button variant="contained" type="submit">Start Battle</Button>
+            <Button variant="contained" type="submit">Register Battle</Button>
           </Box>
         </Stack>
       </form>

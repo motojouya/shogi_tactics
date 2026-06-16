@@ -4,6 +4,7 @@ import { Typography } from '@mui/material';
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { BattleContainer } from '../../components/battle';
+import { BattleFormation } from '../../components/formation';
 import { CharactorDuplicationError } from '../../model/party';
 import { JsonSchemaUnmatchError, DataNotFoundError } from '../../store_utility/schema';
 import { useIO } from '../../components/context';
@@ -31,6 +32,11 @@ export const BattleExsiting: FC<{ battleKey: string }> = ({ battleKey }) => {
         <Typography>{`${battleKey}というbattleは見つかりません`}</Typography>
       </Container>
     );
+  }
+
+  // turns.length===0は編成段階。units選択が終わって先頭Turnが積まれたら戦闘画面へ。
+  if (battle.turns.length === 0) {
+    return (<BattleFormation battle={battle} />);
   }
 
   return (<BattleContainer battle={battle} />);

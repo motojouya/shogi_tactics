@@ -3,27 +3,38 @@ import type { Unit } from "../../model/unit";
 import type { BattleRepository } from "../../store/battle";
 import type { Dialogue } from "../../io/window_dialogue";
 
-import { createBattle, start } from "../../model/battle";
+import { copyBattle, createBattle, start } from "../../model/battle";
 
-// keyと日時はdialogue(provider)経由で供給する。player名/stepBase/unitCount/versionは登録フォームから受け取る。
-// step6: ロスターはpiece選択から組んだunitsを受け取り、先頭Turn.unitsとして登録する。
-export type StartBattle = (
+// step6: battle登録は2段階。
+// 1) registerBattle: player名/stepBase/unitCount/versionを受け取り、編成前の骨格(turns=[])を保存する。
+//    keyと日時はdialogue(provider)経由。unitsはこの時点では未選択(turns.length===0=編成段階)。
+export type RegisterBattle = (
   battleRepository: BattleRepository,
   dialogue: Dialogue,
 ) => (
-  units: Unit[],
   firstPlayerName: string,
   secondPlayerName: string,
   stepBase: number,
   unitCount: number,
   version: string,
 ) => Promise<Battle>;
-export const startBattle: StartBattle =
-  (battleRepository, dialogue) => async (units, firstPlayerName, secondPlayerName, stepBase, unitCount, version) => {
+export const registerBattle: RegisterBattle =
+  (battleRepository, dialogue) => async (firstPlayerName, secondPlayerName, stepBase, unitCount, version) => {
     const battle = createBattle(dialogue.getUuid(), firstPlayerName, secondPlayerName, stepBase, unitCount, version);
-    battle.turns.push(start(units, dialogue.now()));
-
     await battleRepository.save(battle);
-
     return battle;
   };
+
+// 2) startBattle: 編成画面で選んだunitsで先頭Turnを積み、戦闘を開始する(同keyへ上書き保存)。
+export type StartBattle = (
+  battleRepository: BattleRepository,
+  dialogue: Dialogue,
+) => (battle: Battle, units: Unit[]) => Promise<Battle>;
+export const startBattle: StartBattle = (battleRepository, dialogue) => async (battle, units) => {
+  const newBattle = copyBattle(battle);
+  newBattle.turns.push(start(units, dialogue.now()));
+
+  await battleRepository.save(newBattle);
+
+  return newBattle;
+};

@@ -6,7 +6,7 @@ import { describe, it, expect } from "vitest";
 import type { Unit } from "../../model/unit";
 
 import { toBattle } from "../../store_schema/battle";
-import { startBattle } from "./start";
+import { registerBattle, startBattle } from "./start";
 import { GameOngoing } from "../../model/battle";
 
 const battleData = {
@@ -152,16 +152,31 @@ const units: Unit[] = [
   { side: "SECOND", piece: "pawn", hp: 1, steps: 0, statuses: [] },
 ];
 
-describe("startBattle", () => {
-  it("start battle", async () => {
-    const battle = await startBattle(battleRepository, dialogue)(units, "first", "second", 4, 4, "v1");
+describe("registerBattle", () => {
+  it("register battle", async () => {
+    const battle = await registerBattle(battleRepository, dialogue)("first", "second", 4, 4, "v1");
 
     expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
     expect(battle.first_player_name).toBe("first");
     expect(battle.second_player_name).toBe("second");
     expect(battle.stepBase).toBe(4);
+    expect(battle.unitCount).toBe(4);
     expect(battle.version).toBe("v1");
-    // step6: 先頭Turn(編成)のみ。WTのwait Turnは廃止。
+    expect(battle.result).toBe(GameOngoing);
+    // step6: 登録時点は編成段階。turnsは空(units未選択)。
+    expect(battle.turns.length).toBe(0);
+  });
+});
+
+describe("startBattle", () => {
+  it("start battle", async () => {
+    const registered = await registerBattle(battleRepository, dialogue)("first", "second", 4, 4, "v1");
+    const battle = await startBattle(battleRepository, dialogue)(registered, units);
+
+    expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
+    expect(battle.first_player_name).toBe("first");
+    expect(battle.second_player_name).toBe("second");
+    // step6: 編成確定で先頭Turn(units入り)が1つ積まれる。
     expect(battle.turns.length).toBe(1);
     expect(battle.turns[0].units.length).toBe(2);
     expect(battle.turns[0].units[0].piece).toBe("king");
