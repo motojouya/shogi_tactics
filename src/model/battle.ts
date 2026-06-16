@@ -154,7 +154,9 @@ export const spendTurn: SpendTurn = (battle, actor, doAction, getDatetime) => {
 
   // 3. 行動駒のstepsを加算(stepBase + cost。何もしない=0)。
   const cost = doAction ? doAction.action.cost : 0;
-  units = units.map((unit) => (sameUnit(unit, actor) ? { ...unit, steps: unit.steps + newBattle.stepBase + cost } : unit));
+  units = units.map((unit) =>
+    sameUnit(unit, actor) ? { ...unit, steps: unit.steps + newBattle.stepBase + cost } : unit,
+  );
 
   // 4. 死亡除外 → steps昇順に並べ替え。
   const newTurn: Turn = { datetime: getDatetime(), order, units };

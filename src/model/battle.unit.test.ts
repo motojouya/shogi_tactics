@@ -107,7 +107,12 @@ describe("Battle#spendTurn", function () {
       { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
       { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
     ]);
-    const result = spendTurn(battle, ref("FIRST", "king"), { action: attack, receivers: [ref("SECOND", "pawn")] }, () => new Date());
+    const result = spendTurn(
+      battle,
+      ref("FIRST", "king"),
+      { action: attack, receivers: [ref("SECOND", "pawn")] },
+      () => new Date(),
+    );
 
     const last = getLastTurn(result);
     expect(last.order.type).toBe("DO_SKILL");
@@ -125,7 +130,12 @@ describe("Battle#spendTurn", function () {
       { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
       { side: "SECOND", piece: "pawn", hp: 2, steps: 0, statuses: [] },
     ]);
-    const result = spendTurn(battle, ref("FIRST", "king"), { action: attack, receivers: [ref("SECOND", "pawn")] }, () => new Date());
+    const result = spendTurn(
+      battle,
+      ref("FIRST", "king"),
+      { action: attack, receivers: [ref("SECOND", "pawn")] },
+      () => new Date(),
+    );
 
     const last = getLastTurn(result);
     expect(last.units.length).toBe(1);
