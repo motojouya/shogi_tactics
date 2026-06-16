@@ -160,6 +160,16 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - `datetime`はTurnの履歴用に残す。
 - この時点ではaction/skillの解決はstep6から引き継いだ過渡的な形のままでよく、順序エンジンをsteps化してgreenに戻す。key参照への寄せはstep8で行う。
 
+#### 7の済み分（実装メモ）
+- `model/turn.ts`: `Order = Formation | DoAction(DO_SKILL: actionKey/actor/receivers=UnitReference) | DoNothing | Surrender`。`Turn`は`{datetime, order, units}`。`sortedCharactors`/`TimePassing`廃止。
+- `model/battle.ts`: WT/restWtエンジンを全廃しsteps化。`sortedUnits`(steps昇順・同点はindex=安定ソート)、`nextActor`、`spendTurn`(actorの持続statusクリア→Act適用→steps+=stepBase+cost→死亡除外→並べ替え→勝敗判定)、`surrender`、`isSettlement`(side FIRST/SECOND)。`GameResult`を`HOME/VISITOR`→`FIRST/SECOND`に。
+- `store_schema/turn.ts`: `orderSchema`(unitReference)・`units`へ。`store_schema/unit.ts`に`unitReferenceSchema`。`store_schema/battle.ts`はresult enum FIRST/SECOND、Charactor系エラー除去。
+- `form/battle.ts`(DoActionForm: actionKey+receivers=`${side}:${piece}`)、`procedure/battle/act|simulate|surrender`をUnitReference/Action.actベースへ。`components/battle.tsx`はactor=units[0]・技=piece.actions・受け手=action.filter・行動順=sortedUnits表示に作り替え。act/simulate/surrenderの単体テストもunitsベースで復活。
+- **Skill系・party画面を削除**: `model/skill`,`store/skill`,`store_data/skill/*`,`components/charactor`,`components/party`,`form/party`,`procedure/party`,`subpage/party`,`pages/party`、vite party入口、partyRepositoryをIO contextから除去。
+
+#### 7の残（dead code。専用cleanup step or step14で処理）
+- 旧Ogre-Battle系のデータ層は**dead codeとして残置**（battle/UIからは未参照、testはpassのまま）: `model/charactor` `model/party` `model/physical` `model/charactor_status`、`store/charactor` `store/party` `store/charactor_status`、`store_schema/charactor` `store_schema/party` `store_schema/status`、`store_data/status/*`(旧)。partyRepositoryのstoreはIOから外したが`store/party`自体は残存。これらの物理削除はディレクトリ統廃合(step14)等で行う。
+
 ### 8. characters->units移行
 - controller,presentationでのpiece,status,action store呼び出し
 - ダメージ計算は主にActionのact関数に閉じているので、Action keyを受け付けて呼び出せるように切り替える
@@ -169,6 +179,7 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 
 ### 10. battle画面のurlをversion番号に
 - 同一versionじゃないと表示できなく
+- 加えて、/newというpathをつくって、新規battleはそっちに流して、battle登録したら/v1とかのurlへ遷移する形へ
 
 ### 11. 一覧画面のurlをlistに
 - battleが指定されたら、versionをみて、当該のversion画面に遷移
