@@ -19,13 +19,12 @@ export const GameVisitor: GameResult = "VISITOR";
 export const GameDraw: GameResult = "DRAW";
 
 export type Battle = {
-  title: string;
   home: PartyBattling;
   visitor: PartyBattling;
   turns: Turn[];
   result: GameResult;
-  // step2で追加した新フィールド(types.md準拠)。実際の供給・差し替えはstep5以降
-  key: string;
+  // types.md準拠のbattle基礎項目(step5で供給)
+  key: string; // uuid v7。画面に表示されないkey(provider経由で供給)
   first_player_name: string;
   second_player_name: string;
   stepBase: number; // 順番ポイントのBASE(=開始時の総駒数)。1以上
@@ -35,7 +34,6 @@ export type Battle = {
 
 export type CopyBattle = (battle: Battle) => Battle;
 export const copyBattle: CopyBattle = (battle) => ({
-  title: battle.title,
   home: copyPartyBattling(battle.home),
   visitor: copyPartyBattling(battle.visitor),
   turns: battle.turns.map(copyTurn),
@@ -78,8 +76,10 @@ const sortByWT: SortByWT = (charactors) =>
       return 0;
     });
 
-export type CreateBattle = (title: string, home: Party, visitor: Party) => Battle;
-export const createBattle: CreateBattle = (title, home, visitor) => {
+// keyはuuid(provider経由)、stepBase/versionは登録フォームから受け取る。
+// player名は当面party名を流用する(home/visitorはstep6以降にunits化)。
+export type CreateBattle = (key: string, home: Party, visitor: Party, stepBase: number, version: string) => Battle;
+export const createBattle: CreateBattle = (key, home, visitor, stepBase, version) => {
   const homeBatting: PartyBattling = {
     name: home.name,
     charactors: home.charactors.map((charactor) => toBattleCharactor(charactor, false)),
@@ -90,18 +90,17 @@ export const createBattle: CreateBattle = (title, home, visitor) => {
   };
   const unitCount = homeBatting.charactors.length + visitorBatting.charactors.length;
   return {
-    title,
     home: homeBatting,
     visitor: visitorBatting,
     turns: [],
     result: GameOngoing,
-    // step2: 新フィールドのプレースホルダ初期値。uuid/version供給・stepBase確定はstep5以降
-    key: "",
+    key,
     first_player_name: home.name,
     second_player_name: visitor.name,
-    stepBase: unitCount > 0 ? unitCount : 1,
+    // stepBaseは1以上が必須。未指定/不正時はunit数(なければ1)にフォールバック
+    stepBase: stepBase >= 1 ? stepBase : unitCount > 0 ? unitCount : 1,
     unitCount,
-    version: "v1",
+    version,
   };
 };
 

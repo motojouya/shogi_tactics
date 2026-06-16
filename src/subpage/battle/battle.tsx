@@ -9,9 +9,9 @@ import { JsonSchemaUnmatchError, DataNotFoundError } from '../../store_utility/s
 import { useIO } from '../../components/context';
 import { Container } from '../../components/utility';
 
-export const BattleExsiting: FC<{ battleTitle: string }> = ({ battleTitle }) => {
+export const BattleExsiting: FC<{ battleKey: string }> = ({ battleKey }) => {
   const { battleRepository } = useIO();
-  const battle = useLiveQuery(() => battleRepository.get(battleTitle), [battleTitle]);
+  const battle = useLiveQuery(() => battleRepository.get(battleKey), [battleKey]);
 
   if (
     battle instanceof DataNotFoundError ||
@@ -28,7 +28,7 @@ export const BattleExsiting: FC<{ battleTitle: string }> = ({ battleTitle }) => 
   if (!battle) {
     return (
       <Container backLink="/battle/">
-        <Typography>{`${battleTitle}というbattleは見つかりません`}</Typography>
+        <Typography>{`${battleKey}というbattleは見つかりません`}</Typography>
       </Container>
     );
   }

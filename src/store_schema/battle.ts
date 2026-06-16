@@ -12,21 +12,31 @@ import { GameDraw, GameHome, GameOngoing, GameVisitor } from "../model/battle";
 import { CharactorDuplicationError } from "../model/party";
 
 export const battleSchema = z.object({
-  title: z.string(),
+  key: z.string(),
+  first_player_name: z.string(),
+  second_player_name: z.string(),
+  stepBase: z.number(),
+  unitCount: z.number(),
   home: partyBattlingSchema,
   visitor: partyBattlingSchema,
   turns: z.array(turnSchema),
   result: z.enum([GameOngoing, GameHome, GameVisitor, GameDraw]),
+  version: z.string(),
 });
 export type BattleSchema = typeof battleSchema;
 export type BattleJson = z.infer<BattleSchema>;
 
 export const toBattleJson: ToJson<Battle, BattleJson> = (battle) => ({
-  title: battle.title,
+  key: battle.key,
+  first_player_name: battle.first_player_name,
+  second_player_name: battle.second_player_name,
+  stepBase: battle.stepBase,
+  unitCount: battle.unitCount,
   home: toPartyBattlingJson(battle.home),
   visitor: toPartyBattlingJson(battle.visitor),
   turns: battle.turns.map(toTurnJson),
   result: battle.result,
+  version: battle.version,
 });
 
 export type ToBattle = ToModel<
@@ -35,7 +45,7 @@ export type ToBattle = ToModel<
   DataNotFoundError | CharactorDuplicationError | JsonSchemaUnmatchError
 >;
 export const toBattle: ToBattle = (battleJson) => {
-  const { title } = battleJson;
+  const { key, first_player_name, second_player_name, stepBase, unitCount, version } = battleJson;
 
   const home = toPartyBattling(battleJson.home);
   if (home instanceof DataNotFoundError || home instanceof CharactorDuplicationError) {
@@ -59,17 +69,15 @@ export const toBattle: ToBattle = (battleJson) => {
   const { result } = battleJson;
 
   return {
-    title,
+    key,
+    first_player_name,
+    second_player_name,
+    stepBase,
+    unitCount,
     home,
     visitor,
     turns,
     result,
-    // step2: プレースホルダ初期値。schema(battleSchema/BattleJson)への反映・供給はstep5以降
-    key: "",
-    first_player_name: home.name,
-    second_player_name: visitor.name,
-    stepBase: 1,
-    unitCount: 0,
-    version: "v1",
+    version,
   };
 };

@@ -17,7 +17,7 @@ import { getSearchParams } from '../../components/utility';
 
 export const App: FC = () => {
   const searchParams = getSearchParams();
-  const title = searchParams.get('title');
+  const key = searchParams.get('key');
 
   const [repositories, setRepositories] = useState<{ partyRepository: PartyRepository, battleRepository: BattleRepository } | null>(null);
   useEffect(() => {
@@ -39,17 +39,17 @@ export const App: FC = () => {
     dialogue,
   };
 
-  if (!title) {
+  if (!key) {
     return (<IOProvider io={io}><BattleList/></IOProvider>);
   }
 
-  if (title === '__new') {
+  if (key === '__new') {
     return (<IOProvider io={io}><BattleNew/></IOProvider>);
   }
 
   return (
     <IOProvider io={io}>
-      <BattleExsiting battleTitle={title}/>
+      <BattleExsiting battleKey={key}/>
     </IOProvider>
   );
 };

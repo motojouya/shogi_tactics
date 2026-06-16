@@ -19,25 +19,28 @@ import { Container } from '../../components/utility';
 
 export const BattleNew: FC = () => {
 
-  const { battleRepository } = useIO();
+  const { battleRepository, dialogue } = useIO();
 
   const [message, setMessage] = useState<string>('');
   const {
     handleSubmit,
     register,
     formState: { errors }, //, isSubmitting
-  } = useForm<{ title: string }>();
+  } = useForm<{ stepBase: string }>();
   const [homeParty, setHomeParty] = useState<Party | null>(null);
   const [visitorParty, setVisitorParty] = useState<Party | null>(null);
 
+  // version v1では保存文字列のみ(ルール分岐は持たない)。default値として固定で付与する。
+  const version = 'v1';
+
   // FIXME
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const start = async (battleTitle: any) => {
+  const start = async (battleForm: any) => {
     const messages: string[] = [];
 
-    const { title } = battleTitle;
-    if (!title) {
-      messages.push('titleを入力してください');
+    const stepBase = Number(battleForm.stepBase);
+    if (!battleForm.stepBase || Number.isNaN(stepBase) || stepBase < 1) {
+      messages.push('stepBaseは1以上の数値を入力してください');
     }
     if (!homeParty) {
       messages.push('home partyを入力してください');
@@ -51,8 +54,8 @@ export const BattleNew: FC = () => {
       return;
     }
 
-    const battle = await startBattle(battleRepository)(title as string, homeParty as Party, visitorParty as Party, new Date());
-    transit(`/battle/?title=${battle.title}`);
+    const battle = await startBattle(battleRepository, dialogue)(homeParty as Party, visitorParty as Party, stepBase, version);
+    transit(`/battle/?key=${battle.key}`);
   };
 
   // FIXME messageの表示で以前はFormErrorMessageを使っていたがchakra v3ではなくなったため、一旦Textで代用
@@ -69,13 +72,14 @@ export const BattleNew: FC = () => {
           )}
           <Box sx={{ p: 1 }}>
             <TextField
-              id="title"
-              error={!!errors.title}
-              label="Battle Title"
-              placeholder="Title"
+              id="stepBase"
+              type="number"
+              error={!!errors.stepBase}
+              label="Step Base"
+              placeholder="基礎コスト(1以上)"
               variant="outlined"
-              {...register('title')}
-              helperText={errors.title && errors.title.message}
+              {...register('stepBase')}
+              helperText={errors.stepBase && errors.stepBase.message}
               sx={{ width: '100%' }}
             />
           </Box>

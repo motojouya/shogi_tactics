@@ -8,7 +8,7 @@ import { toBattleJson, toBattle, battleSchema } from "../store_schema/battle";
 import { createRepository as createRepositoryBase } from "../store_utility/disk_repository";
 
 export const NAMESPACE = "battle";
-export const SCHEMA_KEY = "title";
+export const SCHEMA_KEY = "key";
 
 export type BattleRepository = Repository<
   Battle,
