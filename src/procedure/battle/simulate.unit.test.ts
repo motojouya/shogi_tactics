@@ -33,8 +33,8 @@ describe("simulate", () => {
   it("simulate", () => {
     const turn = start(
       [
-        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
-        { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+        { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
       ],
       new Date("2024-01-01T00:00:00"),
     );
@@ -46,8 +46,8 @@ describe("simulate", () => {
   it("simulate not survive", () => {
     const turn = start(
       [
-        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
-        { side: "SECOND", piece: "pawn", hp: 2, steps: 0, statuses: [] },
+        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+        { side: "SECOND", piece: "pawn", hp: 2, steps: 0, statuses: [], leader: true },
       ],
       new Date("2024-01-01T00:00:00"),
     );

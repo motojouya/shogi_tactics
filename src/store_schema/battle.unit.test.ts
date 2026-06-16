@@ -15,8 +15,8 @@ const testData = {
       datetime: "2023-06-29T12:12:21",
       order: { type: "FORMATION" },
       units: [
-        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
-        { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+        { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
       ],
     },
     {
@@ -28,8 +28,8 @@ const testData = {
         receivers: [{ side: "SECOND", piece: "pawn" }],
       },
       units: [
-        { side: "SECOND", piece: "pawn", hp: 2, steps: 0, statuses: [] },
-        { side: "FIRST", piece: "king", hp: 2, steps: 6, statuses: [] },
+        { side: "SECOND", piece: "pawn", hp: 2, steps: 0, statuses: [], leader: true },
+        { side: "FIRST", piece: "king", hp: 2, steps: 6, statuses: [], leader: true },
       ],
     },
   ],

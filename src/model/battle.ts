@@ -96,17 +96,18 @@ export const isSettlement: IsSettlement = (battle) => {
     return lastTurn.order.actor.side === "FIRST" ? GameSecond : GameFirst;
   }
 
-  const first = lastTurn.units.filter((unit) => unit.side === "FIRST" && unit.hp >= 1);
-  const second = lastTurn.units.filter((unit) => unit.side === "SECOND" && unit.hp >= 1);
+  // leaderのhpが0になった陣営は敗北。編成時に各陣営ちょうど1体leaderが居る前提。
+  const firstLeaderAlive = lastTurn.units.some((unit) => unit.side === "FIRST" && unit.leader && unit.hp >= 1);
+  const secondLeaderAlive = lastTurn.units.some((unit) => unit.side === "SECOND" && unit.leader && unit.hp >= 1);
 
-  if (first.length === 0 && second.length === 0) {
+  if (!firstLeaderAlive && !secondLeaderAlive) {
     return GameDraw;
   }
-  if (first.length > 0 && second.length === 0) {
-    return GameFirst;
-  }
-  if (first.length === 0 && second.length > 0) {
+  if (!firstLeaderAlive) {
     return GameSecond;
+  }
+  if (!secondLeaderAlive) {
+    return GameFirst;
   }
   return GameOngoing;
 };

@@ -28,6 +28,7 @@ export const unitSchema = z.object({
   hp: z.number(),
   steps: z.number(),
   statuses: z.array(z.string()),
+  leader: z.boolean(),
 });
 export type UnitSchema = typeof unitSchema;
 export type UnitJson = z.infer<UnitSchema>;
@@ -38,6 +39,7 @@ export const toUnitJson: ToJson<Unit, UnitJson> = (unit) => ({
   hp: unit.hp,
   steps: unit.steps,
   statuses: [...unit.statuses],
+  leader: unit.leader,
 });
 
 // UnitとUnitJsonは同形。piece実体の検証はstep8(key参照寄せ)で扱うため、ここでは素直に写す。
@@ -47,4 +49,5 @@ export const toUnit: ToModel<Unit, UnitJson, never> = (unitJson) => ({
   hp: unitJson.hp,
   steps: unitJson.steps,
   statuses: [...unitJson.statuses],
+  leader: unitJson.leader,
 });

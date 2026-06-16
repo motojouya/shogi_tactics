@@ -9,6 +9,7 @@ export type Unit = {
   hp: number; // 体力
   steps: number; // 順番ポイント(初期0)。小さいほど先に行動
   statuses: string[]; // 状態異常キーの配列
+  leader: boolean; // 大将。先手/後手それぞれ1体。hp=0でその陣営は敗北
 };
 
 export type UnitReference = {

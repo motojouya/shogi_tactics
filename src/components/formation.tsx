@@ -10,6 +10,8 @@ import {
   Box,
   Stack,
   Typography,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material';
 
 import { pieceRepository } from '../store/piece';
@@ -28,10 +30,13 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
 
   const [units, setUnits] = useState<Unit[]>([]);
   const [selected, setSelected] = useState<string>(pieces[0] ? pieces[0].key : '');
+  const [leader, setLeader] = useState<boolean>(false);
 
   const unitCount = battle.unitCount;
   const firstCount = units.filter((unit) => unit.side === 'FIRST').length;
   const secondCount = units.filter((unit) => unit.side === 'SECOND').length;
+  const firstLeaderCount = units.filter((unit) => unit.side === 'FIRST' && unit.leader).length;
+  const secondLeaderCount = units.filter((unit) => unit.side === 'SECOND' && unit.leader).length;
 
   // 先手が先。先手と後手の数が揃っていれば次は先手、先手が1多ければ次は後手。
   // 双方がunitCountに達したらnull(=選択完了)。
@@ -39,7 +44,15 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
     firstCount === secondCount
       ? (firstCount < unitCount ? 'FIRST' : null)
       : (secondCount < unitCount ? 'SECOND' : null);
-  const done = firstCount === unitCount && secondCount === unitCount;
+  // currentSide陣営が既にleaderを持っているか。各陣営leaderは1体まで。
+  const currentSideHasLeader =
+    currentSide === 'FIRST' ? firstLeaderCount > 0 : currentSide === 'SECOND' ? secondLeaderCount > 0 : false;
+  // 双方unitCountに達し、かつ各陣営ちょうど1体leaderが居ればStart可能。
+  const done =
+    firstCount === unitCount &&
+    secondCount === unitCount &&
+    firstLeaderCount === 1 &&
+    secondLeaderCount === 1;
 
   const playerName = (side: Side): string =>
     side === 'FIRST' ? battle.first_player_name : battle.second_player_name;
@@ -52,7 +65,13 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
     if (!piece) {
       return;
     }
-    setUnits([...units, { side: currentSide, piece: piece.key, hp: piece.MaxHP, steps: 0, statuses: [] }]);
+    // leaderは陣営1体まで。既に居る場合は強制的にfalse。
+    const asLeader = leader && !currentSideHasLeader;
+    setUnits([
+      ...units,
+      { side: currentSide, piece: piece.key, hp: piece.MaxHP, steps: 0, statuses: [], leader: asLeader },
+    ]);
+    setLeader(false);
   };
 
   const undo = () => setUnits(units.slice(0, -1));
@@ -87,6 +106,16 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
                 <Button variant="contained" type="button" onClick={addUnit}>この駒を追加</Button>
               </Box>
             </Stack>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={leader && !currentSideHasLeader}
+                  disabled={currentSideHasLeader}
+                  onChange={(e) => setLeader(e.target.checked)}
+                />
+              }
+              label={currentSideHasLeader ? '大将は選択済み' : '大将にする'}
+            />
           </Stack>
         )}
 
@@ -99,7 +128,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
                 direction="row"
                 sx={{ alignItems: 'center', justifyContent: 'space-between', py: 0.5 }}
               >
-                <Typography>{`${sideLabel(unit.side)}: ${piece ? piece.name : unit.piece}`}</Typography>
+                <Typography>{`${sideLabel(unit.side)}: ${piece ? piece.name : unit.piece}${unit.leader ? ' [大将]' : ''}`}</Typography>
                 {index === units.length - 1 && (
                   <Button variant="outlined" type="button" onClick={undo}>取消</Button>
                 )}
@@ -107,6 +136,12 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
             );
           })}
         </Stack>
+
+        {firstCount === unitCount && secondCount === unitCount && !done && (
+          <Typography sx={{ pt: 2 }} color="error">
+            各陣営とも大将を1体ずつ指定してください
+          </Typography>
+        )}
 
         {done && (
           <Box sx={{ pt: 2 }}>

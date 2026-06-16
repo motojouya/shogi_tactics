@@ -65,8 +65,8 @@ describe("Battle#start", function () {
   it("編成unitsから先頭TurnをFORMATIONで生成する", function () {
     const turn = start(
       [
-        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
-        { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+        { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+        { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
       ],
       new Date("2024-01-01T00:00:00"),
     );
@@ -79,9 +79,9 @@ describe("Battle#sortedUnits / nextActor", function () {
   it("steps昇順、同点はindex(初期順)で並ぶ", function () {
     const turn = start(
       [
-        { side: "FIRST", piece: "a", hp: 1, steps: 5, statuses: [] },
-        { side: "SECOND", piece: "b", hp: 1, steps: 2, statuses: [] },
-        { side: "FIRST", piece: "c", hp: 1, steps: 2, statuses: [] },
+        { side: "FIRST", piece: "a", hp: 1, steps: 5, statuses: [], leader: false },
+        { side: "SECOND", piece: "b", hp: 1, steps: 2, statuses: [], leader: false },
+        { side: "FIRST", piece: "c", hp: 1, steps: 2, statuses: [], leader: false },
       ],
       new Date("2024-01-01T00:00:00"),
     );
@@ -92,8 +92,8 @@ describe("Battle#sortedUnits / nextActor", function () {
   it("死亡駒(hp0)は除外する", function () {
     const turn = start(
       [
-        { side: "FIRST", piece: "a", hp: 0, steps: 1, statuses: [] },
-        { side: "SECOND", piece: "b", hp: 1, steps: 2, statuses: [] },
+        { side: "FIRST", piece: "a", hp: 0, steps: 1, statuses: [], leader: false },
+        { side: "SECOND", piece: "b", hp: 1, steps: 2, statuses: [], leader: false },
       ],
       new Date("2024-01-01T00:00:00"),
     );
@@ -104,8 +104,8 @@ describe("Battle#sortedUnits / nextActor", function () {
 describe("Battle#spendTurn", function () {
   it("DO_SKILL: ダメージ適用・actorのsteps加算・steps昇順並べ替え", function () {
     const battle = makeBattle([
-      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
-      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
     ]);
     const result = spendTurn(
       battle,
@@ -127,8 +127,8 @@ describe("Battle#spendTurn", function () {
 
   it("死亡駒は除外し、片側全滅で決着する", function () {
     const battle = makeBattle([
-      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
-      { side: "SECOND", piece: "pawn", hp: 2, steps: 0, statuses: [] },
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "SECOND", piece: "pawn", hp: 2, steps: 0, statuses: [], leader: true },
     ]);
     const result = spendTurn(
       battle,
@@ -145,8 +145,8 @@ describe("Battle#spendTurn", function () {
 
   it("DO_NOTHING: 自分の持続statusをクリアしsteps加算(cost0)", function () {
     const battle = makeBattle([
-      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: ["interception"] },
-      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: ["interception"], leader: true },
+      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
     ]);
     const result = spendTurn(battle, ref("FIRST", "king"), null, () => new Date());
 
@@ -161,8 +161,8 @@ describe("Battle#spendTurn", function () {
 describe("Battle#surrender / isSettlement", function () {
   it("surrenderしたsideが負ける", function () {
     const battle = makeBattle([
-      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
-      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
     ]);
     battle.turns.push(surrender(battle, ref("FIRST", "king"), new Date()));
     expect(getLastTurn(battle).order.type).toBe("SURRENDER");
@@ -171,16 +171,16 @@ describe("Battle#surrender / isSettlement", function () {
 
   it("両側生存ならONGOING", function () {
     const battle = makeBattle([
-      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
-      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [] },
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
     ]);
     expect(isSettlement(battle)).toBe(GameOngoing);
   });
 
   it("両側全滅ならDRAW", function () {
     const battle = makeBattle([
-      { side: "FIRST", piece: "king", hp: 0, steps: 0, statuses: [] },
-      { side: "SECOND", piece: "pawn", hp: 0, steps: 0, statuses: [] },
+      { side: "FIRST", piece: "king", hp: 0, steps: 0, statuses: [], leader: true },
+      { side: "SECOND", piece: "pawn", hp: 0, steps: 0, statuses: [], leader: true },
     ]);
     expect(isSettlement(battle)).toBe(GameDraw);
   });

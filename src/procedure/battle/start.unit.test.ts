@@ -148,8 +148,8 @@ const dialogue: Dialogue = {
 };
 
 const units: Unit[] = [
-  { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [] },
-  { side: "SECOND", piece: "pawn", hp: 1, steps: 0, statuses: [] },
+  { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+  { side: "SECOND", piece: "pawn", hp: 1, steps: 0, statuses: [], leader: true },
 ];
 
 describe("registerBattle", () => {
