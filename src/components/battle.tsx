@@ -60,7 +60,7 @@ import { useIO } from './context';
 import { Container } from './utility';
 
 const GameStatus: FC<{ battle: Battle }> = ({ battle }) => {
-  const card = `${battle.home.name}(HOME) vs ${battle.visitor.name}(VISITOR)`;
+  const card = `${battle.first_player_name}(先手) vs ${battle.second_player_name}(後手)`;
   // FIXME Actionを終えるとbattle.turnsは更新されるので、Turn Noは次の値になってしまう。これはNext Turnボタンを押しても変わらないので違和感があるはず
   switch (battle.result) {
     case GameHome: return <Typography>{`${card} HOMEの勝利`}</Typography>;

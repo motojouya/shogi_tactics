@@ -1,5 +1,6 @@
 import type { Turn, Order } from "../model/turn";
 import type { CharactorBattling } from "../model/charactor";
+import type { Unit } from "../model/unit";
 import type { ToModel, ToJson } from "../store_utility/schema";
 
 import { parse, format } from "date-fns";
@@ -10,6 +11,7 @@ import { z } from "zod";
 import { skillRepository } from "../store/skill";
 import { JsonSchemaUnmatchError, DataNotFoundError } from "../store_utility/schema";
 import { toCharactorBattling, toCharactorBattlingJson, charactorBattlingSchema } from "./charactor";
+import { toUnit, toUnitJson, unitSchema } from "./unit";
 
 export const surrenderSchema = z.object({
   type: z.literal("SURRENDER"),
@@ -49,6 +51,8 @@ export const turnSchema = z.object({
   datetime: z.string().datetime({ local: true }),
   action: actionSchema,
   sortedCharactors: z.array(charactorBattlingSchema),
+  // step6で追加。既存データ(units無し)も読めるようdefault[]。step7でsortedCharactorsを廃止しunits本線へ。
+  units: z.array(unitSchema).default([]),
 });
 export type TurnSchema = typeof turnSchema;
 export type TurnJson = z.infer<TurnSchema>;
@@ -90,6 +94,7 @@ export const toTurnJson: ToJson<Turn, TurnJson> = (turn) => ({
   datetime: formatDate(turn.datetime),
   action: toActionJson(turn.action),
   sortedCharactors: turn.sortedCharactors.map(toCharactorBattlingJson),
+  units: turn.units.map(toUnitJson),
 });
 
 export const toAction: ToModel<Order, ActionJson, DataNotFoundError> = (actionJson) => {
@@ -172,10 +177,13 @@ export const toTurn: ToModel<Turn, TurnJson, DataNotFoundError | JsonSchemaUnmat
     sortedCharactors.push(charactor);
   }
 
+  // zod default適用前(toBattleなどschemaを通さない経路)でもunits欠落を許容する
+  const units: Unit[] = (turnJson.units ?? []).map(toUnit);
+
   return {
     datetime,
     action,
     sortedCharactors,
-    units: [], // step2: プレースホルダ。schema(turnSchema/TurnJson)へのunits反映はstep5以降
+    units,
   };
 };

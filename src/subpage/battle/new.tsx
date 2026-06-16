@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import type { Party } from '../../model/party';
+import type { Unit } from '../../model/unit';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 
-import { ImportParty } from '../../components/party';
+import { SelectUnits } from '../../components/unit';
 import { startBattle } from '../../procedure/battle/start';
 import { useIO } from '../../components/context';
 import { transit } from '../../components/utility';
@@ -27,9 +27,10 @@ export const BattleNew: FC = () => {
     handleSubmit,
     register,
     formState: { errors }, //, isSubmitting
-  } = useForm<{ stepBase: string; unitCount: string }>();
-  const [homeParty, setHomeParty] = useState<Party | null>(null);
-  const [visitorParty, setVisitorParty] = useState<Party | null>(null);
+  } = useForm<{ first_player_name: string; second_player_name: string; stepBase: string; unitCount: string }>();
+  // step6: party選択を廃止し、piece選択でside別にunitsを組む。
+  const [firstUnits, setFirstUnits] = useState<Unit[]>([]);
+  const [secondUnits, setSecondUnits] = useState<Unit[]>([]);
 
   // version v1では保存文字列のみ(ルール分岐は持たない)。default値として固定で付与する。
   const version = 'v1';
@@ -38,6 +39,15 @@ export const BattleNew: FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const start = async (battleForm: any) => {
     const messages: string[] = [];
+
+    const firstPlayerName = battleForm.first_player_name as string;
+    const secondPlayerName = battleForm.second_player_name as string;
+    if (!firstPlayerName) {
+      messages.push('先手のプレイヤー名を入力してください');
+    }
+    if (!secondPlayerName) {
+      messages.push('後手のプレイヤー名を入力してください');
+    }
 
     const stepBase = Number(battleForm.stepBase);
     if (!battleForm.stepBase || Number.isNaN(stepBase) || stepBase < 1) {
@@ -48,11 +58,10 @@ export const BattleNew: FC = () => {
     if (!battleForm.unitCount || Number.isNaN(unitCount) || unitCount < 1) {
       messages.push('unitCountは1以上の数値を入力してください');
     }
-    if (!homeParty) {
-      messages.push('home partyを入力してください');
-    }
-    if (!visitorParty) {
-      messages.push('visitor partyを入力してください');
+
+    const units = [...firstUnits, ...secondUnits];
+    if (units.length === 0) {
+      messages.push('駒を1つ以上選択してください');
     }
 
     if (messages.length > 0) {
@@ -60,7 +69,14 @@ export const BattleNew: FC = () => {
       return;
     }
 
-    const battle = await startBattle(battleRepository, dialogue)(homeParty as Party, visitorParty as Party, stepBase, unitCount, version);
+    const battle = await startBattle(battleRepository, dialogue)(
+      units,
+      firstPlayerName,
+      secondPlayerName,
+      stepBase,
+      unitCount,
+      version,
+    );
     transit(`/battle/?key=${battle.key}`);
   };
 
@@ -76,6 +92,30 @@ export const BattleNew: FC = () => {
               <Typography>{message}</Typography>
             </Box>
           )}
+          <Box sx={{ p: 1 }}>
+            <TextField
+              id="first_player_name"
+              error={!!errors.first_player_name}
+              label="First Player Name"
+              placeholder="先手の名前"
+              variant="outlined"
+              {...register('first_player_name')}
+              helperText={errors.first_player_name && errors.first_player_name.message}
+              sx={{ width: '100%' }}
+            />
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextField
+              id="second_player_name"
+              error={!!errors.second_player_name}
+              label="Second Player Name"
+              placeholder="後手の名前"
+              variant="outlined"
+              {...register('second_player_name')}
+              helperText={errors.second_player_name && errors.second_player_name.message}
+              sx={{ width: '100%' }}
+            />
+          </Box>
           <Box sx={{ p: 1 }}>
             <TextField
               id="stepBase"
@@ -103,10 +143,10 @@ export const BattleNew: FC = () => {
             />
           </Box>
           <Box sx={{ p: 1 }}>
-            <ImportParty type='HOME' party={homeParty} setParty={setHomeParty}/>
+            <SelectUnits side="FIRST" label="先手の駒" units={firstUnits} setUnits={setFirstUnits} />
           </Box>
           <Box sx={{ p: 1 }}>
-            <ImportParty type='VISITOR' party={visitorParty} setParty={setVisitorParty}/>
+            <SelectUnits side="SECOND" label="後手の駒" units={secondUnits} setUnits={setSecondUnits} />
           </Box>
           <Box sx={{ p: 1 }}>
             <Button variant="contained" type="submit">Start Battle</Button>

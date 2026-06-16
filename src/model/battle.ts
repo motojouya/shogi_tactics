@@ -1,10 +1,9 @@
-import type { Party, PartyBattling } from "./party";
 import type { CharactorBattling } from "./charactor";
 import type { Skill } from "./skill";
 import type { Turn } from "./turn";
+import type { Unit } from "./unit";
 
-import { copyPartyBattling } from "./party";
-import { getPhysical, toBattleCharactor, copyCharactorBattling } from "./charactor";
+import { getPhysical, copyCharactorBattling } from "./charactor";
 import { copyTurn } from "./turn";
 
 import { acid, quick, sleep, slow } from "../store_data/status/index";
@@ -18,10 +17,9 @@ export const GameHome: GameResult = "HOME";
 export const GameVisitor: GameResult = "VISITOR";
 export const GameDraw: GameResult = "DRAW";
 
+// step6: home/visitor(PartyBattling)を廃止。ロスターは先頭Turnのunitsが持つ(types.md準拠)。
 export type Battle = {
-  home: PartyBattling;
-  visitor: PartyBattling;
-  turns: Turn[];
+  turns: Turn[]; // turns.length===0は編成段階。先頭Turn.unitsがロスター
   result: GameResult;
   // types.md準拠のbattle基礎項目(step5で供給)
   key: string; // uuid v7。画面に表示されないkey(provider経由で供給)
@@ -34,8 +32,6 @@ export type Battle = {
 
 export type CopyBattle = (battle: Battle) => Battle;
 export const copyBattle: CopyBattle = (battle) => ({
-  home: copyPartyBattling(battle.home),
-  visitor: copyPartyBattling(battle.visitor),
   turns: battle.turns.map(copyTurn),
   result: battle.result,
   key: battle.key,
@@ -76,53 +72,40 @@ const sortByWT: SortByWT = (charactors) =>
       return 0;
     });
 
-// keyはuuid(provider経由)、stepBase/unitCount/versionは登録フォームから受け取る。
-// unitCountはparty駒数との整合を取らず入力値をそのまま採用する(step6以降にunits化)。
-// player名は当面party名を流用する。
+// keyはuuid(provider経由)、player名/stepBase/unitCount/versionは登録フォームから受け取る。
+// step6: home/visitorは廃止。createBattleはbattle骨格(turns=[])のみ生成し、ロスターはstart()でunitsとして積む。
+// unitCountはparty駒数との整合を取らず入力値をそのまま採用する。
 export type CreateBattle = (
   key: string,
-  home: Party,
-  visitor: Party,
+  firstPlayerName: string,
+  secondPlayerName: string,
   stepBase: number,
   unitCount: number,
   version: string,
 ) => Battle;
-export const createBattle: CreateBattle = (key, home, visitor, stepBase, unitCount, version) => {
-  const homeBatting: PartyBattling = {
-    name: home.name,
-    charactors: home.charactors.map((charactor) => toBattleCharactor(charactor, false)),
-  };
-  const visitorBatting: PartyBattling = {
-    name: visitor.name,
-    charactors: visitor.charactors.map((charactor) => toBattleCharactor(charactor, true)),
-  };
-  return {
-    home: homeBatting,
-    visitor: visitorBatting,
-    turns: [],
-    result: GameOngoing,
-    key,
-    first_player_name: home.name,
-    second_player_name: visitor.name,
-    // stepBaseは1以上が必須。未指定/不正時はunitCountの2倍(最低1)にフォールバック
-    stepBase: stepBase >= 1 ? stepBase : Math.max(unitCount * 2, 1),
-    unitCount,
-    version,
-  };
-};
+export const createBattle: CreateBattle = (key, firstPlayerName, secondPlayerName, stepBase, unitCount, version) => ({
+  turns: [],
+  result: GameOngoing,
+  key,
+  first_player_name: firstPlayerName,
+  second_player_name: secondPlayerName,
+  // stepBaseは1以上が必須。未指定/不正時はunitCountの2倍(最低1)にフォールバック
+  stepBase: stepBase >= 1 ? stepBase : Math.max(unitCount * 2, 1),
+  unitCount,
+  version,
+});
 
-export type Start = (battle: Battle, datetime: Date) => Turn;
-export const start: Start = (battle, datetime) => ({
+// step6: 先頭Turnを編成済みunitsから生成する。
+// NOTE: sortedCharactors/WTエンジンはstep7まで残置のため空シード。units消費の順序エンジン化はstep7。
+export type Start = (units: Unit[], datetime: Date) => Turn;
+export const start: Start = (units, datetime) => ({
   datetime,
   action: {
     type: "TIME_PASSING",
     wt: 0,
   },
-  sortedCharactors: sortByWT([
-    ...battle.home.charactors.map(copyCharactorBattling),
-    ...battle.visitor.charactors.map(copyCharactorBattling),
-  ]),
-  units: [],
+  sortedCharactors: [],
+  units: units.map(copyUnit),
 });
 
 export type Stay = (battle: Battle, actor: CharactorBattling, datetime: Date) => Turn;
