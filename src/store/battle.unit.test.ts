@@ -8,7 +8,12 @@ import { createRepository } from "./battle";
 import { format } from "date-fns";
 
 const testData = {
-  title: "first-title",
+  key: "0191e000-0000-7000-8000-000000000000",
+  first_player_name: "home",
+  second_player_name: "visitor",
+  stepBase: 4,
+  unitCount: 4,
+  version: "v1",
   home: {
     name: "home",
     charactors: [
@@ -154,7 +159,12 @@ describe("Battle#createRepository", function () {
     const battle = await repository.get("2023-06-29T12:12:12");
     const typedBattle = battle as Battle;
     if (typedBattle) {
-      expect(typedBattle.title).toBe("first-title");
+      expect(typedBattle.key).toBe("0191e000-0000-7000-8000-000000000000");
+      expect(typedBattle.first_player_name).toBe("home");
+      expect(typedBattle.second_player_name).toBe("visitor");
+      expect(typedBattle.stepBase).toBe(4);
+      expect(typedBattle.unitCount).toBe(4);
+      expect(typedBattle.version).toBe("v1");
 
       const home = typedBattle.home;
       expect(home.name).toBe("home");

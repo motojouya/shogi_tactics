@@ -4,7 +4,12 @@ import type { Battle } from "../model/battle";
 import { toBattle } from "./battle";
 
 const testData = {
-  title: "first-title",
+  key: "0191e000-0000-7000-8000-000000000000",
+  first_player_name: "light",
+  second_player_name: "dark",
+  stepBase: 4,
+  unitCount: 4,
+  version: "v1",
   home: {
     name: "light",
     charactors: [
@@ -185,7 +190,11 @@ const testData = {
 describe("Battle#toBattle", function () {
   it("toBattle", async () => {
     const battle = toBattle(testData) as Battle;
-    console.log(battle);
-    expect(battle.title).toBe("first-title");
+    expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
+    expect(battle.first_player_name).toBe("light");
+    expect(battle.second_player_name).toBe("dark");
+    expect(battle.stepBase).toBe(4);
+    expect(battle.unitCount).toBe(4);
+    expect(battle.version).toBe("v1");
   });
 });

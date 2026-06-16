@@ -28,7 +28,12 @@ import { JsonSchemaUnmatchError, DataNotFoundError } from "../store_utility/sche
 import { skillRepository } from "../store/skill";
 
 const testData = {
-  title: "first-title",
+  key: "0191e000-0000-7000-8000-000000000000",
+  first_player_name: "home",
+  second_player_name: "visitor",
+  stepBase: 4,
+  unitCount: 4,
+  version: "v1",
   home: {
     name: "home",
     charactors: [
@@ -163,7 +168,9 @@ describe("Battle#toBattle", function () {
     ) {
       expect.unreachable("battle is value");
     } else {
-      expect(battle.title).toBe("first-title");
+      expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
+      expect(battle.first_player_name).toBe("home");
+      expect(battle.second_player_name).toBe("visitor");
       expect(battle.home.name).toBe("home");
       expect(battle.visitor.name).toBe("visitor");
       expect(battle.turns.length).toBe(1);
@@ -230,8 +237,11 @@ describe("Battle#start", function () {
       ],
     }) as Party;
 
-    const battle = createBattle("first-title", homeParty, visitorParty);
+    const battle = createBattle("0191e000-0000-7000-8000-000000000000", homeParty, visitorParty, 4, "v1");
     expect(battle.result).toBe(GameOngoing);
+    expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
+    expect(battle.stepBase).toBe(4);
+    expect(battle.unitCount).toBe(4);
 
     const turn = start(battle, new Date());
 

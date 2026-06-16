@@ -1,4 +1,5 @@
 import type { BattleRepository } from "../../store/battle";
+import type { Dialogue } from "../../io/window_dialogue";
 
 import { describe, it, expect } from "vitest";
 
@@ -178,13 +179,24 @@ const battleRepository: BattleRepository = {
   exportJson: (_obj, _fileName) => new Promise((resolve, _reject) => resolve(null)),
 };
 
+const dialogue: Dialogue = {
+  confirm: (_message) => true,
+  notice: (_message) => {},
+  getUuid: () => "0191e000-0000-7000-8000-000000000000",
+  now: () => new Date("2023-06-29T12:12:21"),
+};
+
 describe("startBattle", () => {
   it("start battle", async () => {
     const homeParty = toParty(homeData);
     const visitorParty = toParty(visitorData);
-    const battle = await startBattle(battleRepository)("title", homeParty, visitorParty, new Date());
+    const battle = await startBattle(battleRepository, dialogue)(homeParty, visitorParty, 4, "v1");
 
-    expect(battle.title).toBe("title");
+    expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
+    expect(battle.first_player_name).toBe("home");
+    expect(battle.second_player_name).toBe("visitor");
+    expect(battle.stepBase).toBe(4);
+    expect(battle.version).toBe("v1");
     expect(battle.home.name).toBe("home");
     expect(battle.visitor.name).toBe("visitor");
     expect(battle.turns.length).toBe(2);
