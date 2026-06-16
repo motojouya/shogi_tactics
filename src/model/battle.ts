@@ -1,21 +1,17 @@
-import type { CharactorBattling } from "./charactor";
-import type { Skill } from "./skill";
-import type { Turn } from "./turn";
-import type { Unit } from "./unit";
+import type { Turn, Order } from "./turn";
+import type { Unit, UnitReference } from "./unit";
+import type { Action } from "./action";
 
-import { getPhysical, copyCharactorBattling } from "./charactor";
 import { copyTurn } from "./turn";
-import { copyUnit } from "./unit";
-
-import { acid, quick, sleep, slow } from "../store_data/status/index";
-import { underStatus } from "./charactor_status";
+import { copyUnit, sameUnit } from "./unit";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
 
-export type GameResult = "ONGOING" | "HOME" | "VISITOR" | "DRAW";
+// types.md準拠。先手=FIRST, 後手=SECOND。
+export type GameResult = "ONGOING" | "FIRST" | "SECOND" | "DRAW";
 export const GameOngoing: GameResult = "ONGOING";
-export const GameHome: GameResult = "HOME";
-export const GameVisitor: GameResult = "VISITOR";
+export const GameFirst: GameResult = "FIRST";
+export const GameSecond: GameResult = "SECOND";
 export const GameDraw: GameResult = "DRAW";
 
 // step6: home/visitor(PartyBattling)を廃止。ロスターは先頭Turnのunitsが持つ(types.md準拠)。
@@ -46,35 +42,24 @@ export const copyBattle: CopyBattle = (battle) => ({
 export type GetLastTurn = (battle: Battle) => Turn;
 export const getLastTurn: GetLastTurn = (battle) => arrayLast(battle.turns);
 
-export type NextActor = (battle: Battle) => CharactorBattling;
-export const nextActor: NextActor = (battle) => arrayLast(battle.turns).sortedCharactors[0];
-export type TurnActor = (turn: Turn) => CharactorBattling;
-export const turnActor: TurnActor = (turn) => turn.sortedCharactors[0];
+// step7: 行動ポイント方式。steps最小の駒が次に行動。同点はTurn.unitsのindex(初期順)で決着。
+// Array.prototype.sortは安定なので、steps同点は元配列の順序(=前ターンまでの並び)を保つ。
+export type SortedUnits = (turn: Turn) => Unit[];
+export const sortedUnits: SortedUnits = (turn) =>
+  turn.units
+    .filter((unit) => unit.hp >= 1)
+    .slice()
+    .sort((left, right) => left.steps - right.steps);
 
-type SortByWT = (charactors: CharactorBattling[]) => CharactorBattling[];
-const sortByWT: SortByWT = (charactors) =>
-  charactors
-    .filter((charactor) => charactor.hp > 0)
-    .sort((left, right) => {
-      const wtDiff = left.restWt - right.restWt;
-      if (wtDiff !== 0) {
-        return wtDiff;
-      }
-      const hpDiff = left.hp - right.hp;
-      if (hpDiff !== 0) {
-        return hpDiff;
-      }
-      const statusDiff = left.statuses.length - right.statuses.length;
-      if (statusDiff !== 0) {
-        return statusDiff;
-      }
-      // FIXME 最終的に元の並び順という感じだが、これで嫌な挙動した際は対策が必要
-      // battleごとにseedを決定しつつ、CharactorBattlingをhash値になおして比較がいいんじゃないかな。
-      return 0;
-    });
+// 次に行動するunit(生存かつsteps最小)。いなければnull。
+export type NextActor = (turn: Turn) => Unit | null;
+export const nextActor: NextActor = (turn) => {
+  const alive = sortedUnits(turn);
+  return alive.length > 0 ? alive[0] : null;
+};
 
 // keyはuuid(provider経由)、player名/stepBase/unitCount/versionは登録フォームから受け取る。
-// step6: home/visitorは廃止。createBattleはbattle骨格(turns=[])のみ生成し、ロスターはstart()でunitsとして積む。
+// step6: createBattleはbattle骨格(turns=[])のみ生成し、ロスターはstart()でunitsとして積む。
 // unitCountはparty駒数との整合を取らず入力値をそのまま採用する。
 export type CreateBattle = (
   key: string,
@@ -96,240 +81,86 @@ export const createBattle: CreateBattle = (key, firstPlayerName, secondPlayerNam
   version,
 });
 
-// step6: 先頭Turnを編成済みunitsから生成する。
-// NOTE: sortedCharactors/WTエンジンはstep7まで残置のため空シード。units消費の順序エンジン化はstep7。
+// step6/7: 編成済みunitsから先頭Turnを生成する。初期stepsは0なので並びは編成順。
 export type Start = (units: Unit[], datetime: Date) => Turn;
 export const start: Start = (units, datetime) => ({
   datetime,
-  action: {
-    type: "TIME_PASSING",
-    wt: 0,
-  },
-  sortedCharactors: [],
+  order: { type: "FORMATION" },
   units: units.map(copyUnit),
 });
 
-export type Stay = (battle: Battle, actor: CharactorBattling, datetime: Date) => Turn;
-export const stay: Stay = (battle, actor, datetime) => {
-  const lastTurn = arrayLast(battle.turns);
-  const newTurn: Turn = {
-    datetime,
-    action: {
-      type: "DO_NOTHING",
-      actor,
-    },
-    sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    units: [],
-  };
-
-  newTurn.sortedCharactors = newTurn.sortedCharactors.map((charactor) => {
-    const newCharactor = {
-      ...charactor,
-      statuses: [...charactor.statuses.map((attachedStatus) => ({ ...attachedStatus }))],
-    };
-    if (actor.isVisitor === charactor.isVisitor && actor.name === charactor.name) {
-      newCharactor.restWt = getPhysical(charactor).WT;
-    }
-    return newCharactor;
-  });
-  newTurn.sortedCharactors = sortByWT(newTurn.sortedCharactors);
-
-  return newTurn;
-};
-
-type UpdateCharactor = (receivers: CharactorBattling[]) => (charactor: CharactorBattling) => CharactorBattling;
-const updateCharactor: UpdateCharactor = (receivers) => (charactor) => {
-  const foundReceiver = receivers.find((receiver) => charactor.name === receiver.name);
-  if (foundReceiver) {
-    return foundReceiver;
-  }
-  return charactor;
-};
-
-export type ActToCharactor = (
-  battle: Battle,
-  actor: CharactorBattling,
-  skill: Skill,
-  receivers: CharactorBattling[],
-  datetime: Date,
-) => Turn;
-export const actToCharactor: ActToCharactor = (battle, actor, skill, receivers, datetime) => {
-  if (underStatus(sleep, actor)) {
-    return stay(battle, actor, datetime);
-  }
-
-  const lastTurn = arrayLast(battle.turns);
-  const newTurn: Turn = {
-    datetime,
-    action: {
-      type: "DO_SKILL",
-      actor,
-      skill,
-      receivers,
-    },
-    sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    units: [],
-  };
-
-  const resultReceivers = receivers.map((receiver) => skill.action(skill, actor, receiver));
-  newTurn.sortedCharactors = newTurn.sortedCharactors
-    .map(updateCharactor(resultReceivers))
-    .filter((charactor) => charactor.hp > 0);
-
-  newTurn.sortedCharactors = newTurn.sortedCharactors.map((charactor) => {
-    const newCharactor = {
-      ...charactor,
-      statuses: [...charactor.statuses.map((attachedStatus) => ({ ...attachedStatus }))],
-    };
-    if (actor.isVisitor === charactor.isVisitor && actor.name === charactor.name) {
-      newCharactor.restWt = getPhysical(charactor).WT + skill.additionalWt;
-    }
-    return newCharactor;
-  });
-  newTurn.sortedCharactors = sortByWT(newTurn.sortedCharactors);
-
-  return newTurn;
-};
-
-export type Surrender = (battle: Battle, actor: CharactorBattling, datetime: Date) => Turn;
-export const surrender: Surrender = (battle, actor, datetime) => {
-  const lastTurn = arrayLast(battle.turns);
-  return {
-    datetime,
-    action: {
-      type: "SURRENDER",
-      actor,
-    },
-    sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    units: [],
-  };
-};
-
-type WaitCharactor = (charactor: CharactorBattling, wt: number) => CharactorBattling;
-const waitCharactor: WaitCharactor = (charactor, wt) => {
-  const newCharactor: CharactorBattling = {
-    ...charactor,
-    statuses: [...charactor.statuses.map((attachedStatus) => ({ ...attachedStatus }))],
-  };
-
-  // prettier-ignore
-  const wtRate = underStatus(quick, newCharactor) ? 1.5
-    : underStatus(slow, newCharactor) ? 0.75
-    : 1;
-
-  newCharactor.restWt = Math.max(newCharactor.restWt - wt * wtRate, 0);
-
-  if (underStatus(acid, newCharactor)) {
-    newCharactor.hp = Math.max(newCharactor.hp - wt / 10, 0);
-  }
-
-  newCharactor.statuses = newCharactor.statuses
-    .map((attachedStatus) => {
-      const restWt = attachedStatus.restWt - wt;
-      return {
-        ...attachedStatus,
-        restWt,
-      };
-    })
-    .filter((attachedStatus) => attachedStatus.restWt > 0);
-
-  return newCharactor;
-};
-
-export type Wait = (battle: Battle, wt: number, datetime: Date) => Turn;
-export const wait: Wait = (battle, wt, datetime) => {
-  const lastTurn = arrayLast(battle.turns);
-  const newTurn: Turn = {
-    datetime,
-    action: {
-      type: "TIME_PASSING",
-      wt,
-    },
-    sortedCharactors: lastTurn.sortedCharactors.map(copyCharactorBattling),
-    units: [],
-  };
-  newTurn.sortedCharactors = newTurn.sortedCharactors.map((charactor) => waitCharactor(charactor, wt));
-
-  return newTurn;
-};
-
 export type IsSettlement = (battle: Battle) => GameResult;
 export const isSettlement: IsSettlement = (battle) => {
-  const lastestTurn = arrayLast(battle.turns);
-  if (lastestTurn.action.type === "SURRENDER") {
-    if (lastestTurn.action.actor.isVisitor) {
-      return GameHome;
-    } else {
-      return GameVisitor;
-    }
+  const lastTurn = arrayLast(battle.turns);
+  if (lastTurn.order.type === "SURRENDER") {
+    return lastTurn.order.actor.side === "FIRST" ? GameSecond : GameFirst;
   }
 
-  const homeCharactors = lastestTurn.sortedCharactors.filter((charactor) => !charactor.isVisitor && charactor.hp);
-  const visitorCharactors = lastestTurn.sortedCharactors.filter((charactor) => charactor.isVisitor && charactor.hp);
+  const first = lastTurn.units.filter((unit) => unit.side === "FIRST" && unit.hp >= 1);
+  const second = lastTurn.units.filter((unit) => unit.side === "SECOND" && unit.hp >= 1);
 
-  if (homeCharactors.length === 0 && visitorCharactors.length === 0) {
+  if (first.length === 0 && second.length === 0) {
     return GameDraw;
   }
-  if (homeCharactors.length > 0 && visitorCharactors.length === 0) {
-    return GameHome;
+  if (first.length > 0 && second.length === 0) {
+    return GameFirst;
   }
-  if (homeCharactors.length === 0 && visitorCharactors.length > 0) {
-    return GameVisitor;
+  if (first.length === 0 && second.length > 0) {
+    return GameSecond;
   }
   return GameOngoing;
 };
 
-// TODO battleを引き回して更新しているので、同じ名前空間に前後のbattleがあっても値が同じになってしまう。
-// web procedure/act関数のtestが通ってしまっているが、実態として正しいテストになってない。
-// spendTurnに限らず、この問題はありそう。
-export type Action = {
-  skill: Skill;
-  receivers: CharactorBattling[];
+export type ModelSurrender = (battle: Battle, actor: UnitReference, datetime: Date) => Turn;
+export const surrender: ModelSurrender = (battle, actor, datetime) => {
+  const lastTurn = arrayLast(battle.turns);
+  return {
+    datetime,
+    order: { type: "SURRENDER", actor },
+    units: lastTurn.units.map(copyUnit),
+  };
 };
+
+// 行動内容。null=何もしない。
+export type DoActionInput = { action: Action; receivers: UnitReference[] };
+
+// step7: spendTurnを「行動適用→死亡除外→steps更新→並べ替え→勝敗判定」に簡素化。
+// WT/restWtの仮想時間・二重Turn・sleepループは廃止。actorはUnitReferenceで受け取る。
 export type SpendTurn = (
   battle: Battle,
-  actor: CharactorBattling,
-  action: Action | null,
+  actor: UnitReference,
+  doAction: DoActionInput | null,
   getDatetime: () => Date,
 ) => Battle;
-export const spendTurn: SpendTurn = (battle, actor, action, getDatetime) => {
+export const spendTurn: SpendTurn = (battle, actor, doAction, getDatetime) => {
   const newBattle = copyBattle(battle);
+  const lastTurn = arrayLast(newBattle.turns);
 
-  if (action === null) {
-    newBattle.turns.push(stay(newBattle, actor, getDatetime()));
+  // 1. 作業用units。actorの持続statusは「次の自分の行動まで」有効なので、自分の行動時にクリアする。
+  let units: Unit[] = lastTurn.units.map((unit) =>
+    sameUnit(unit, actor) ? { ...copyUnit(unit), statuses: [] } : copyUnit(unit),
+  );
+
+  let order: Order;
+  if (doAction === null) {
+    order = { type: "DO_NOTHING", actor };
   } else {
-    const selectedSkill = action.skill;
-    const newTurn = actToCharactor(newBattle, actor, selectedSkill, action.receivers, getDatetime());
-    newBattle.turns.push(newTurn);
+    // 2. 技の効果を適用(Act経由でTurn.unitsを更新)。
+    const working: Turn = { datetime: getDatetime(), order: { type: "FORMATION" }, units };
+    const acted = doAction.action.act(actor, doAction.receivers, working);
+    units = acted.units;
+    order = { type: "DO_SKILL", actionKey: doAction.action.key, actor, receivers: doAction.receivers };
   }
 
+  // 3. 行動駒のstepsを加算(stepBase + cost。何もしない=0)。
+  const cost = doAction ? doAction.action.cost : 0;
+  units = units.map((unit) => (sameUnit(unit, actor) ? { ...unit, steps: unit.steps + newBattle.stepBase + cost } : unit));
+
+  // 4. 死亡除外 → steps昇順に並べ替え。
+  const newTurn: Turn = { datetime: getDatetime(), order, units };
+  newTurn.units = sortedUnits(newTurn);
+
+  newBattle.turns.push(newTurn);
   newBattle.result = isSettlement(newBattle);
-  if (newBattle.result !== GameOngoing) {
-    return newBattle;
-  }
-
-  let firstWaiting = nextActor(newBattle);
-  newBattle.turns.push(wait(newBattle, firstWaiting.restWt, getDatetime()));
-
-  newBattle.result = isSettlement(newBattle);
-  if (newBattle.result !== GameOngoing) {
-    return newBattle;
-  }
-
-  while (underStatus(sleep, firstWaiting)) {
-    newBattle.turns.push(stay(newBattle, firstWaiting, getDatetime()));
-    newBattle.result = isSettlement(newBattle);
-    if (newBattle.result !== GameOngoing) {
-      return newBattle;
-    }
-
-    firstWaiting = nextActor(newBattle);
-    newBattle.turns.push(wait(newBattle, firstWaiting.restWt, getDatetime()));
-    newBattle.result = isSettlement(newBattle);
-    if (newBattle.result !== GameOngoing) {
-      return newBattle;
-    }
-  }
-
   return newBattle;
 };

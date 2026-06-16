@@ -6,9 +6,8 @@ import { z } from "zod";
 
 import { toTurn, toTurnJson, turnSchema } from "./turn";
 
-import { JsonSchemaUnmatchError, DataNotFoundError } from "../store_utility/schema";
-import { GameDraw, GameHome, GameOngoing, GameVisitor } from "../model/battle";
-import { CharactorDuplicationError } from "../model/party";
+import { JsonSchemaUnmatchError } from "../store_utility/schema";
+import { GameDraw, GameFirst, GameOngoing, GameSecond } from "../model/battle";
 
 // step6: home/visitorを廃止。ロスターは先頭Turn.unitsが持つ。
 export const battleSchema = z.object({
@@ -18,7 +17,7 @@ export const battleSchema = z.object({
   stepBase: z.number(),
   unitCount: z.number(),
   turns: z.array(turnSchema),
-  result: z.enum([GameOngoing, GameHome, GameVisitor, GameDraw]),
+  result: z.enum([GameOngoing, GameFirst, GameSecond, GameDraw]),
   version: z.string(),
 });
 export type BattleSchema = typeof battleSchema;
@@ -35,18 +34,14 @@ export const toBattleJson: ToJson<Battle, BattleJson> = (battle) => ({
   version: battle.version,
 });
 
-export type ToBattle = ToModel<
-  Battle,
-  BattleJson,
-  DataNotFoundError | CharactorDuplicationError | JsonSchemaUnmatchError
->;
+export type ToBattle = ToModel<Battle, BattleJson, JsonSchemaUnmatchError>;
 export const toBattle: ToBattle = (battleJson) => {
   const { key, first_player_name, second_player_name, stepBase, unitCount, version } = battleJson;
 
   const turns: Turn[] = [];
   for (const turnJson of battleJson.turns) {
     const turn = toTurn(turnJson);
-    if (turn instanceof DataNotFoundError || turn instanceof JsonSchemaUnmatchError) {
+    if (turn instanceof JsonSchemaUnmatchError) {
       return turn;
     }
     turns.push(turn);

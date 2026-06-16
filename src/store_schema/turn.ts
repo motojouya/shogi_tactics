@@ -1,89 +1,75 @@
 import type { Turn, Order } from "../model/turn";
-import type { CharactorBattling } from "../model/charactor";
 import type { Unit } from "../model/unit";
 import type { ToModel, ToJson } from "../store_utility/schema";
 
 import { parse, format } from "date-fns";
-// import ja from 'date-fns/locale/ja'
 
 import { z } from "zod";
 
-import { skillRepository } from "../store/skill";
-import { JsonSchemaUnmatchError, DataNotFoundError } from "../store_utility/schema";
-import { toCharactorBattling, toCharactorBattlingJson, charactorBattlingSchema } from "./charactor";
-import { toUnit, toUnitJson, unitSchema } from "./unit";
+import { JsonSchemaUnmatchError } from "../store_utility/schema";
+import { toUnit, toUnitJson, unitSchema, toUnitReference, toUnitReferenceJson, unitReferenceSchema } from "./unit";
 
-export const surrenderSchema = z.object({
-  type: z.literal("SURRENDER"),
-  actor: charactorBattlingSchema,
+export const formationSchema = z.object({
+  type: z.literal("FORMATION"),
 });
-export type SurrenderSchema = typeof surrenderSchema;
-export type SurrenderJson = z.infer<SurrenderSchema>;
 
-export const doSkillSchema = z.object({
+export const doActionSchema = z.object({
   type: z.literal("DO_SKILL"),
-  actor: charactorBattlingSchema,
-  skill: z.string(),
-  receivers: z.array(charactorBattlingSchema),
+  actionKey: z.string(),
+  actor: unitReferenceSchema,
+  receivers: z.array(unitReferenceSchema),
 });
-export type DoSkillSchema = typeof doSkillSchema;
-export type DoSkillJson = z.infer<DoSkillSchema>;
 
 export const doNothingSchema = z.object({
   type: z.literal("DO_NOTHING"),
-  actor: charactorBattlingSchema,
+  actor: unitReferenceSchema,
 });
-export type DoNothingSchema = typeof doNothingSchema;
-export type DoNothingJson = z.infer<DoNothingSchema>;
 
-export const timePassingSchema = z.object({
-  type: z.literal("TIME_PASSING"),
-  wt: z.number().int(),
+export const surrenderSchema = z.object({
+  type: z.literal("SURRENDER"),
+  actor: unitReferenceSchema,
 });
-export type TimePassingSchema = typeof timePassingSchema;
-export type TimePassingJson = z.infer<TimePassingSchema>;
 
-const actionSchema = z.discriminatedUnion("type", [doSkillSchema, doNothingSchema, timePassingSchema, surrenderSchema]);
-export type ActionSchema = typeof actionSchema;
-export type ActionJson = z.infer<ActionSchema>;
+export const orderSchema = z.discriminatedUnion("type", [
+  formationSchema,
+  doActionSchema,
+  doNothingSchema,
+  surrenderSchema,
+]);
+export type OrderSchema = typeof orderSchema;
+export type OrderJson = z.infer<OrderSchema>;
 
 export const turnSchema = z.object({
   datetime: z.string().datetime({ local: true }),
-  action: actionSchema,
-  sortedCharactors: z.array(charactorBattlingSchema),
-  // step6で追加。既存データ(units無し)も読めるようdefault[]。step7でsortedCharactorsを廃止しunits本線へ。
-  units: z.array(unitSchema).default([]),
+  order: orderSchema,
+  units: z.array(unitSchema),
 });
 export type TurnSchema = typeof turnSchema;
 export type TurnJson = z.infer<TurnSchema>;
 
-export const toActionJson: ToJson<Order, ActionJson> = (action) => {
-  if (action.type === "DO_SKILL") {
+export const toOrderJson: ToJson<Order, OrderJson> = (order) => {
+  if (order.type === "DO_SKILL") {
     return {
       type: "DO_SKILL",
-      actor: toCharactorBattlingJson(action.actor),
-      skill: action.skill.name,
-      receivers: action.receivers.map(toCharactorBattlingJson),
+      actionKey: order.actionKey,
+      actor: toUnitReferenceJson(order.actor),
+      receivers: order.receivers.map(toUnitReferenceJson),
     };
   }
-
-  if (action.type === "SURRENDER") {
-    return {
-      type: "SURRENDER",
-      actor: toCharactorBattlingJson(action.actor),
-    };
-  }
-
-  if (action.type === "DO_NOTHING") {
+  if (order.type === "DO_NOTHING") {
     return {
       type: "DO_NOTHING",
-      actor: toCharactorBattlingJson(action.actor),
+      actor: toUnitReferenceJson(order.actor),
     };
   }
-
+  if (order.type === "SURRENDER") {
+    return {
+      type: "SURRENDER",
+      actor: toUnitReferenceJson(order.actor),
+    };
+  }
   return {
-    type: "TIME_PASSING",
-    wt: action.wt,
+    type: "FORMATION",
   };
 };
 
@@ -92,70 +78,38 @@ const formatDate: FormatDate = (date) => format(date, "yyyy-MM-dd'T'HH:mm:ss");
 
 export const toTurnJson: ToJson<Turn, TurnJson> = (turn) => ({
   datetime: formatDate(turn.datetime),
-  action: toActionJson(turn.action),
-  sortedCharactors: turn.sortedCharactors.map(toCharactorBattlingJson),
+  order: toOrderJson(turn.order),
   units: turn.units.map(toUnitJson),
 });
 
-export const toAction: ToModel<Order, ActionJson, DataNotFoundError> = (actionJson) => {
-  if (actionJson.type === "DO_SKILL") {
-    const skillActor = toCharactorBattling(actionJson.actor);
-    if (skillActor instanceof DataNotFoundError) {
-      return skillActor;
-    }
-
-    const receivers: CharactorBattling[] = [];
-    for (const receiverJson of actionJson.receivers) {
-      const receiver = toCharactorBattling(receiverJson);
-      if (receiver instanceof DataNotFoundError) {
-        return receiver;
-      }
-      receivers.push(receiver);
-    }
-
-    const skill = skillRepository.get(actionJson.skill);
-    if (!skill) {
-      return new DataNotFoundError(actionJson.skill, "skill", `${actionJson.skill}というskillは存在しません`);
-    }
-
+// step7: actionKey/actor/receiversは過渡的にキー/参照のみ保持。Action実体の解決はpresentation(step8)。
+export const toOrder: ToModel<Order, OrderJson, never> = (orderJson) => {
+  if (orderJson.type === "DO_SKILL") {
     return {
       type: "DO_SKILL",
-      actor: skillActor,
-      skill,
-      receivers,
+      actionKey: orderJson.actionKey,
+      actor: toUnitReference(orderJson.actor),
+      receivers: orderJson.receivers.map(toUnitReference),
     };
   }
-
-  if (actionJson.type === "SURRENDER") {
-    const surrenderActor = toCharactorBattling(actionJson.actor);
-    if (surrenderActor instanceof DataNotFoundError) {
-      return surrenderActor;
-    }
-    return {
-      type: "SURRENDER",
-      actor: surrenderActor,
-    };
-  }
-
-  if (actionJson.type === "DO_NOTHING") {
-    const nothingActor = toCharactorBattling(actionJson.actor);
-    if (nothingActor instanceof DataNotFoundError) {
-      return nothingActor;
-    }
+  if (orderJson.type === "DO_NOTHING") {
     return {
       type: "DO_NOTHING",
-      actor: nothingActor,
+      actor: toUnitReference(orderJson.actor),
     };
   }
-
+  if (orderJson.type === "SURRENDER") {
+    return {
+      type: "SURRENDER",
+      actor: toUnitReference(orderJson.actor),
+    };
+  }
   return {
-    type: "TIME_PASSING",
-    wt: 0 + actionJson.wt,
+    type: "FORMATION",
   };
 };
 
-export const toTurn: ToModel<Turn, TurnJson, DataNotFoundError | JsonSchemaUnmatchError> = (turnJson) => {
-  // TODO date parse不要では？JsonSchemaUnmatchErrorも
+export const toTurn: ToModel<Turn, TurnJson, JsonSchemaUnmatchError> = (turnJson) => {
   let datetime;
   try {
     datetime = parse(turnJson.datetime, "yyyy-MM-dd'T'HH:mm:ss", new Date());
@@ -163,27 +117,12 @@ export const toTurn: ToModel<Turn, TurnJson, DataNotFoundError | JsonSchemaUnmat
     return new JsonSchemaUnmatchError(e, "日付が間違っています");
   }
 
-  const action = toAction(turnJson.action);
-  if (action instanceof DataNotFoundError) {
-    return action;
-  }
-
-  const sortedCharactors: CharactorBattling[] = [];
-  for (const charactorJson of turnJson.sortedCharactors) {
-    const charactor = toCharactorBattling(charactorJson);
-    if (charactor instanceof DataNotFoundError) {
-      return charactor;
-    }
-    sortedCharactors.push(charactor);
-  }
-
-  // zod default適用前(toBattleなどschemaを通さない経路)でもunits欠落を許容する
-  const units: Unit[] = (turnJson.units ?? []).map(toUnit);
+  const order = toOrder(turnJson.order);
+  const units: Unit[] = turnJson.units.map(toUnit);
 
   return {
     datetime,
-    action,
-    sortedCharactors,
+    order,
     units,
   };
 };

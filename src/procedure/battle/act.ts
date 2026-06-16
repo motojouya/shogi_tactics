@@ -1,8 +1,7 @@
 import type { Battle } from "../../model/battle";
-import type { Turn } from "../../model/turn";
-import type { CharactorBattling } from "../../model/charactor";
+import type { UnitReference } from "../../model/unit";
 import type { BattleRepository } from "../../store/battle";
-import type { DoSkillForm } from "../../form/battle";
+import type { DoActionForm } from "../../form/battle";
 import type { Dialogue } from "../../io/window_dialogue";
 
 import { spendTurn } from "../../model/battle";
@@ -15,13 +14,12 @@ export type Act = (
   repository: BattleRepository,
 ) => (
   battle: Battle,
-  actor: CharactorBattling,
-  doSkillForm: DoSkillForm,
-  lastTurn: Turn,
+  actor: UnitReference,
+  doActionForm: DoActionForm,
   getDate: () => Date,
 ) => Promise<Battle | DataNotFoundError | ReceiverDuplicationError | UserCancel>;
-export const act: Act = (dialogue, repository) => async (battle, actor, doSkillForm, lastTurn, getDate) => {
-  const doAction = toAction(doSkillForm, lastTurn.sortedCharactors);
+export const act: Act = (dialogue, repository) => async (battle, actor, doActionForm, getDate) => {
+  const doAction = toAction(doActionForm);
   if (doAction instanceof DataNotFoundError || doAction instanceof ReceiverDuplicationError) {
     return doAction;
   }

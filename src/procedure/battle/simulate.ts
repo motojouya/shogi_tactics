@@ -1,37 +1,21 @@
-import type { CharactorBattling } from "../../model/charactor";
-import type { Battle } from "../../model/battle";
 import type { Turn } from "../../model/turn";
-import type { Skill } from "../../model/skill";
+import type { Unit, UnitReference } from "../../model/unit";
+import type { Action } from "../../model/action";
 
-import { actToCharactor } from "../../model/battle";
-import { toReceiver } from "../../form/battle";
-import { DataNotFoundError } from "../../store_utility/schema";
+import { copyTurn } from "../../model/turn";
+import { sameUnit, toUnitReference } from "../../model/unit";
 
-export type Simulated = { survive: boolean; receiver: CharactorBattling };
+// 技を1人のreceiverに適用した結果を予測する(実行前の表示用)。死亡除外はせずhpの変化を見る。
+export type Simulated = { survive: boolean; unit: Unit | null };
 
-export type Simulate = (
-  battle: Battle,
-  actor: CharactorBattling,
-  skill: Skill,
-  receiverWithIsVisitor: string,
-  lastTurn: Turn,
-  actionDate: Date,
-) => Simulated | DataNotFoundError;
-export const simulate: Simulate = (battle, actor, skill, receiverWithIsVisitor, lastTurn, actionDate) => {
-  const receiver = toReceiver(receiverWithIsVisitor, lastTurn.sortedCharactors);
-  if (receiver instanceof DataNotFoundError) {
-    return receiver;
-  }
-
-  const newTurn = actToCharactor(battle, actor, skill, [receiver], actionDate);
-  const survivedReceiver = newTurn.sortedCharactors.find(
-    (charactor) => charactor.isVisitor === receiver.isVisitor && charactor.name === receiver.name,
-  );
-
-  const survive = !!survivedReceiver;
+export type Simulate = (action: Action, actor: UnitReference, receiver: UnitReference, lastTurn: Turn) => Simulated;
+export const simulate: Simulate = (action, actor, receiver, lastTurn) => {
+  const working = copyTurn(lastTurn);
+  const acted = action.act(actor, [receiver], working);
+  const found = acted.units.find((unit) => sameUnit(toUnitReference(unit), receiver));
 
   return {
-    receiver: survive ? survivedReceiver : receiver,
-    survive,
+    survive: !!found && found.hp >= 1,
+    unit: found ?? null,
   };
 };

@@ -1,9 +1,26 @@
-import type { Unit, Side } from "../model/unit";
+import type { Unit, UnitReference, Side } from "../model/unit";
 import type { ToModel, ToJson } from "../store_utility/schema";
 
 import { z } from "zod";
 
 const sideValues: [Side, Side] = ["FIRST", "SECOND"];
+
+export const unitReferenceSchema = z.object({
+  side: z.enum(sideValues),
+  piece: z.string(),
+});
+export type UnitReferenceSchema = typeof unitReferenceSchema;
+export type UnitReferenceJson = z.infer<UnitReferenceSchema>;
+
+export const toUnitReferenceJson: ToJson<UnitReference, UnitReferenceJson> = (reference) => ({
+  side: reference.side,
+  piece: reference.piece,
+});
+
+export const toUnitReference: ToModel<UnitReference, UnitReferenceJson, never> = (referenceJson) => ({
+  side: referenceJson.side,
+  piece: referenceJson.piece,
+});
 
 export const unitSchema = z.object({
   side: z.enum(sideValues),

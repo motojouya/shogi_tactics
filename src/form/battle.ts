@@ -1,16 +1,17 @@
-import type { CharactorBattling } from "../model/charactor";
-import type { Action } from "../model/battle";
+import type { UnitReference } from "../model/unit";
+import type { DoActionInput } from "../model/battle";
 import type { SelectOption } from "../io/dialogue";
-import type { Skill } from "../model/skill";
 
 import { z } from "zod";
 
 import { DataNotFoundError } from "../store_utility/schema";
-import { isVisitorString } from "../model/charactor";
-import { skillRepository } from "../store/skill";
-import { ACTION_DO_NOTHING } from "../model/turn";
+import { selectUnit } from "../model/unit";
+import { actionRepository } from "../store/action";
+import { pieceRepository } from "../store/piece";
+import { ORDER_DO_NOTHING } from "../model/turn";
 
-export const DO_NOTHING = "NOTHING";
+// 何もしないを表すフォーム値(actionKeyとして使用)
+export const DO_NOTHING = ORDER_DO_NOTHING;
 
 export class ReceiverDuplicationError {
   readonly message: string;
@@ -19,89 +20,51 @@ export class ReceiverDuplicationError {
   }
 }
 
-export const doSkillFormSchema = z.object({
-  skillName: z.string().min(1),
-  receiversWithIsVisitor: z.array(z.object({ value: z.string().min(1).optional() }).optional()),
+export const doActionFormSchema = z.object({
+  actionKey: z.string().min(1),
+  receivers: z.array(z.object({ value: z.string().min(1).optional() }).optional()),
 });
-export type DoSkillForm = z.infer<typeof doSkillFormSchema>;
+export type DoActionForm = z.infer<typeof doActionFormSchema>;
 
-export type ToSkill = (skillName: string) => Skill | null;
-export const toSkill: ToSkill = (skillName) => {
-  if (skillName === ACTION_DO_NOTHING) {
+const sideLabel = (reference: UnitReference): string => (reference.side === "FIRST" ? "先" : "後");
+
+// UnitReferenceを受け手選択肢に変換する。value形式は `${side}:${piece}` (model/unit.selectUnit互換)。
+export type ReceiverSelectOption = (reference: UnitReference) => SelectOption;
+export const receiverSelectOption: ReceiverSelectOption = (reference) => {
+  const piece = pieceRepository.get(reference.piece);
+  return {
+    value: `${reference.side}:${reference.piece}`,
+    label: `${sideLabel(reference)}:${piece ? piece.name : reference.piece}`,
+  };
+};
+
+// フォーム値(actionKey + receivers)をspendTurnのDoActionInputへ変換する。
+// 何もしない=null。actionKey不正=DataNotFoundError。受け手重複=ReceiverDuplicationError。
+export type ToAction = (form: DoActionForm) => DoActionInput | null | DataNotFoundError | ReceiverDuplicationError;
+export const toAction: ToAction = (form) => {
+  const { actionKey } = form;
+  if (actionKey === DO_NOTHING) {
     return null;
   }
 
-  return skillRepository.get(skillName);
-};
-
-export type ReceiverSelectOption = (receiver: CharactorBattling) => SelectOption;
-export const receiverSelectOption: ReceiverSelectOption = (receiver) => ({
-  value: `${receiver.name}__${isVisitorString(receiver.isVisitor)}`,
-  label: `${receiver.name}(${isVisitorString(receiver.isVisitor)})`,
-});
-
-export type ToReceiver = (receiver: string, candidates: CharactorBattling[]) => CharactorBattling | DataNotFoundError;
-export const toReceiver: ToReceiver = (receiver, candidates) => {
-  const matches = receiver.match(/^(.*)__(HOME|VISITOR)$/);
-
-  if (!matches) {
-    throw new Error(`no match`);
+  const action = actionRepository.get(actionKey);
+  if (!action) {
+    return new DataNotFoundError(actionKey, "action", `${actionKey}というactionは存在しません`);
   }
 
-  const name = matches[1];
-  if (!name) {
-    throw new Error(`no name`);
-  }
-
-  const isVisitorStr = matches[2];
-  if (isVisitorStr !== "HOME" && isVisitorStr !== "VISITOR") {
-    throw new Error(`isVisitorStr must be HOME or VISITOR. (${isVisitorStr})`);
-  }
-  const isVisitor = isVisitorStr === "VISITOR";
-
-  const willReceiver = candidates.find((candidate) => candidate.name === name && candidate.isVisitor === isVisitor);
-  if (!willReceiver) {
-    return new DataNotFoundError(name, "charactor", `${name}というcharactorは存在しません`);
-  }
-  return willReceiver;
-};
-
-export type ToAction = (
-  doSkillForm: DoSkillForm,
-  candidates: CharactorBattling[],
-) => Action | null | DataNotFoundError | ReceiverDuplicationError;
-export const toAction: ToAction = (doSkillForm, candidates) => {
-  const { skillName } = doSkillForm;
-  if (skillName === ACTION_DO_NOTHING) {
-    return null;
-  }
-
-  const skill = skillRepository.get(skillName);
-  if (!skill) {
-    return new DataNotFoundError(skillName, "skill", `${skillName}というskillは存在しません`);
-  }
-
-  const receiverValues = doSkillForm.receiversWithIsVisitor
+  const receiverValues = form.receivers
     .filter((receiver) => !!receiver)
     .map((receiver) => receiver.value)
-    .filter((receiverValue) => !!receiverValue);
+    .filter((value): value is string => !!value);
 
   if (new Set(receiverValues).size !== receiverValues.length) {
-    return new ReceiverDuplicationError("同じキャラクターを複数回えらべません");
+    return new ReceiverDuplicationError("同じunitを複数回えらべません");
   }
 
-  const receivers: CharactorBattling[] = [];
-  for (const receiverValue of receiverValues) {
-    // @ts-expect-error receiverValueはfilterしてるのでundefinedにならない
-    const receiver = toReceiver(receiverValue, candidates);
-    if (receiver instanceof DataNotFoundError) {
-      return receiver;
-    }
-    receivers.push(receiver);
-  }
+  const receivers: UnitReference[] = receiverValues.map(selectUnit);
 
   return {
-    skill,
+    action,
     receivers,
   };
 };
