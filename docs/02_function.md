@@ -176,6 +176,12 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - ダメージ計算は主にActionのact関数に閉じているので、Action keyを受け付けて呼び出せるように切り替える
 - step7で確定したsteps順序エンジンとTurn/act契約に対して、参照解決をkeyベースへ配線する。
 
+#### 追加仕様: leader(大将)
+- `Unit`に`leader: boolean`を追加(`store_schema/unit`のzod schema・toUnit/toUnitJsonも対応)。
+- 編成画面(`components/formation.tsx`)で各unit追加時に「大将にする」を選択可能。先手/後手それぞれ**ちょうど1体**leader必須で、揃わないとStart不可。
+- `model/battle.ts`の`isSettlement`を**leader生存判定**に変更: leader(hp>=1)が居なくなった陣営は敗北。両陣営leader消失でDRAW。surrender判定は従来通り優先。
+- 旧「片側全滅で敗北」ロジックは置換(各陣営にleaderが居る前提なので、leader死=敗北で包含)。
+
 ### 9. 戦乱モードではなく、通常モードでplayer_nameだけ入力できるformを用意し、default値のunitsを適用
 
 ### 10. battle画面のurlをversion番号に
