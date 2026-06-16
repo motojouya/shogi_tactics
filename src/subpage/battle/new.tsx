@@ -5,20 +5,28 @@ import { useForm } from 'react-hook-form';
 import {
   Button,
   TextField,
+  MenuItem,
   Box,
   Stack,
   Typography,
 } from '@mui/material';
 
-import { registerBattle } from '../../procedure/battle/start';
+import { pieceRepository } from '../../store/piece';
+import { registerBattle, startBattle } from '../../procedure/battle/start';
+import { buildNormalUnits, NORMAL_STEP_BASE, NORMAL_UNIT_COUNT } from '../../model/normal_mode';
 import { useIO } from '../../components/context';
 import { transit } from '../../components/utility';
 import { Container } from '../../components/utility';
+
+// 通常モード: unitCount=7/stepBase=14固定、units(飛->角->金->銀->桂->香->王、leader=king)もbattle作成時に登録し、編成画面を出さずそのまま開始。
+// 戦乱モード: stepBase/unitCountを入力し、登録後の編成画面でunitsを選択する。
+type Mode = 'normal' | 'war';
 
 export const BattleNew: FC = () => {
 
   const { battleRepository, dialogue } = useIO();
 
+  const [mode, setMode] = useState<Mode>('normal');
   const [message, setMessage] = useState<string>('');
   // FIXME stepBaseとunitCountはまとめて構造体(メタパラメータ)にしたい。現段階では個別フィールドのまま。
   const {
@@ -30,8 +38,6 @@ export const BattleNew: FC = () => {
   // version v1では保存文字列のみ(ルール分岐は持たない)。default値として固定で付与する。
   const version = 'v1';
 
-  // step6: ここではbattleの骨格(turns=[])のみ登録する。unitsの選択は登録後のbattle画面(編成段階)で行う。
-  // FIXME
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const register_ = async (battleForm: any) => {
     const messages: string[] = [];
@@ -45,6 +51,26 @@ export const BattleNew: FC = () => {
       messages.push('後手のプレイヤー名を入力してください');
     }
 
+    if (mode === 'normal') {
+      if (messages.length > 0) {
+        setMessage(messages.join('\n'));
+        return;
+      }
+      // 通常モード: 固定パラメータでbattleを作り、default unitsで先頭Turnまで積んでそのまま開始する。
+      const battle = await registerBattle(battleRepository, dialogue)(
+        firstPlayerName,
+        secondPlayerName,
+        NORMAL_STEP_BASE,
+        NORMAL_UNIT_COUNT,
+        version,
+      );
+      const units = buildNormalUnits((key) => pieceRepository.get(key));
+      await startBattle(battleRepository, dialogue)(battle, units);
+      transit(`/battle/?key=${battle.key}`);
+      return;
+    }
+
+    // 戦乱モード: stepBase/unitCountを入力で受け取り、登録後の編成画面でunitsを選択する。
     const stepBase = Number(battleForm.stepBase);
     if (!battleForm.stepBase || Number.isNaN(stepBase) || stepBase < 1) {
       messages.push('stepBaseは1以上の数値を入力してください');
@@ -84,6 +110,19 @@ export const BattleNew: FC = () => {
           )}
           <Box sx={{ p: 1 }}>
             <TextField
+              select
+              id="mode"
+              label="Mode"
+              value={mode}
+              onChange={(e) => setMode(e.target.value as Mode)}
+              sx={{ width: '100%' }}
+            >
+              <MenuItem value="normal">通常モード(7駒固定)</MenuItem>
+              <MenuItem value="war">戦乱モード(駒数自由)</MenuItem>
+            </TextField>
+          </Box>
+          <Box sx={{ p: 1 }}>
+            <TextField
               id="first_player_name"
               error={!!errors.first_player_name}
               label="First Player Name"
@@ -106,34 +145,40 @@ export const BattleNew: FC = () => {
               sx={{ width: '100%' }}
             />
           </Box>
+          {mode === 'war' && (
+            <>
+              <Box sx={{ p: 1 }}>
+                <TextField
+                  id="stepBase"
+                  type="number"
+                  error={!!errors.stepBase}
+                  label="Step Base"
+                  placeholder="基礎コスト(1以上)"
+                  variant="outlined"
+                  {...register('stepBase')}
+                  helperText={errors.stepBase && errors.stepBase.message}
+                  sx={{ width: '100%' }}
+                />
+              </Box>
+              <Box sx={{ p: 1 }}>
+                <TextField
+                  id="unitCount"
+                  type="number"
+                  error={!!errors.unitCount}
+                  label="Unit Count"
+                  placeholder="片側のユニット数(1以上)"
+                  variant="outlined"
+                  {...register('unitCount')}
+                  helperText={errors.unitCount && errors.unitCount.message}
+                  sx={{ width: '100%' }}
+                />
+              </Box>
+            </>
+          )}
           <Box sx={{ p: 1 }}>
-            <TextField
-              id="stepBase"
-              type="number"
-              error={!!errors.stepBase}
-              label="Step Base"
-              placeholder="基礎コスト(1以上)"
-              variant="outlined"
-              {...register('stepBase')}
-              helperText={errors.stepBase && errors.stepBase.message}
-              sx={{ width: '100%' }}
-            />
-          </Box>
-          <Box sx={{ p: 1 }}>
-            <TextField
-              id="unitCount"
-              type="number"
-              error={!!errors.unitCount}
-              label="Unit Count"
-              placeholder="片側のユニット数(1以上)"
-              variant="outlined"
-              {...register('unitCount')}
-              helperText={errors.unitCount && errors.unitCount.message}
-              sx={{ width: '100%' }}
-            />
-          </Box>
-          <Box sx={{ p: 1 }}>
-            <Button variant="contained" type="submit">Register Battle</Button>
+            <Button variant="contained" type="submit">
+              {mode === 'normal' ? 'Start Battle' : 'Register Battle'}
+            </Button>
           </Box>
         </Stack>
       </form>
