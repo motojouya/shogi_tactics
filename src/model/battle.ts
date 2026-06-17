@@ -2,30 +2,34 @@ import type { Turn, Order } from "./turn";
 import type { Unit, UnitReference } from "./unit";
 import type { Action } from "./action";
 
-import { copyTurn } from "./turn";
+import { z } from "zod";
+
+import { copyTurn, turnSchema } from "./turn";
 import { copyUnit, sameUnit } from "./unit";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
 
-// types.md準拠。先手=FIRST, 後手=SECOND。
-export type GameResult = "ONGOING" | "FIRST" | "SECOND" | "DRAW";
+// types.md準拠。先手=FIRST, 後手=SECOND。step12: zod schemaから型導出。
+export const gameResultSchema = z.enum(["ONGOING", "FIRST", "SECOND", "DRAW"]);
+export type GameResult = z.infer<typeof gameResultSchema>;
 export const GameOngoing: GameResult = "ONGOING";
 export const GameFirst: GameResult = "FIRST";
 export const GameSecond: GameResult = "SECOND";
 export const GameDraw: GameResult = "DRAW";
 
 // step6: home/visitor(PartyBattling)を廃止。ロスターは先頭Turnのunitsが持つ(types.md準拠)。
-export type Battle = {
-  turns: Turn[]; // turns.length===0は編成段階。先頭Turn.unitsがロスター
-  result: GameResult;
+export const battleSchema = z.object({
+  turns: z.array(turnSchema), // turns.length===0は編成段階。先頭Turn.unitsがロスター
+  result: gameResultSchema,
   // types.md準拠のbattle基礎項目(step5で供給)
-  key: string; // uuid v7。画面に表示されないkey(provider経由で供給)
-  first_player_name: string;
-  second_player_name: string;
-  stepBase: number; // 順番ポイントのBASE(=開始時の総駒数)。1以上
-  unitCount: number;
-  version: string;
-};
+  key: z.string(), // uuid v7。画面に表示されないkey(provider経由で供給)
+  first_player_name: z.string(),
+  second_player_name: z.string(),
+  stepBase: z.number(), // 順番ポイントのBASE(=開始時の総駒数)。1以上
+  unitCount: z.number(),
+  version: z.string(),
+});
+export type Battle = z.infer<typeof battleSchema>;
 
 export type CopyBattle = (battle: Battle) => Battle;
 export const copyBattle: CopyBattle = (battle) => ({

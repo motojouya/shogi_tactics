@@ -1,21 +1,27 @@
 import type { SelectOption } from "../io/dialogue";
 import type { Piece } from "./piece";
 
-export type Side = "FIRST" | "SECOND";
+import { z } from "zod";
 
-export type Unit = {
-  side: Side;
-  piece: string; // 駒種キー
-  hp: number; // 体力
-  steps: number; // 順番ポイント(初期0)。小さいほど先に行動
-  statuses: string[]; // 状態異常キーの配列
-  leader: boolean; // 大将。先手/後手それぞれ1体。hp=0でその陣営は敗北
-};
+// step12: modelの型はzod schemaから導出する(型の単一の真実)。保存値はすべてキー参照(piece/status)なのでmodelとjsonの形はdatetime以外一致する。
+export const sideSchema = z.enum(["FIRST", "SECOND"]);
+export type Side = z.infer<typeof sideSchema>;
 
-export type UnitReference = {
-  side: Side;
-  piece: string;
-};
+export const unitSchema = z.object({
+  side: sideSchema,
+  piece: z.string(), // 駒種キー
+  hp: z.number(), // 体力
+  steps: z.number(), // 順番ポイント(初期0)。小さいほど先に行動
+  statuses: z.array(z.string()), // 状態異常キーの配列
+  leader: z.boolean(), // 大将。先手/後手それぞれ1体。hp=0でその陣営は敗北
+});
+export type Unit = z.infer<typeof unitSchema>;
+
+export const unitReferenceSchema = z.object({
+  side: sideSchema,
+  piece: z.string(),
+});
+export type UnitReference = z.infer<typeof unitReferenceSchema>;
 
 export type CopyUnit = (unit: Unit) => Unit;
 export const copyUnit: CopyUnit = (unit) => ({
