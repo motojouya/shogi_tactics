@@ -1,7 +1,7 @@
-import type { Database } from "../io/database";
+import type { Database } from "./database";
 
 import { z } from "zod";
-import { CopyFailError } from "../io/database";
+import { CopyFailError } from "./database";
 import { parseJson, JsonSchemaUnmatchError } from "./schema";
 
 // model型(=zod schema)をそのまま保存・取得する。datetimeはz.coerce.date()でDate統一済みのためconverterは不要。

@@ -1,4 +1,4 @@
-import type { SelectOption } from "../io/dialogue";
+import type { SelectOption } from "../store/dialogue";
 import type { Piece } from "./piece";
 
 import { z } from "zod";

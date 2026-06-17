@@ -1,5 +1,5 @@
 import type { BattleRepository } from "../../store/battle";
-import type { Dialogue } from "../../io/window_dialogue";
+import type { Dialogue } from "../../store/window_dialogue";
 
 import { describe, it, expect } from "vitest";
 

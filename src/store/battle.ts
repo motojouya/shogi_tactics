@@ -1,8 +1,8 @@
 import type { Battle } from "../model/battle";
-import type { Repository } from "../store_utility/disk_repository";
+import type { Repository } from "./disk_repository";
 
 import { battleSchema } from "../model/battle";
-import { createRepository as createRepositoryBase } from "../store_utility/disk_repository";
+import { createRepository as createRepositoryBase } from "./disk_repository";
 
 export const NAMESPACE = "battle";
 export const SCHEMA_KEY = "key";

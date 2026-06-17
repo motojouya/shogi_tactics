@@ -1,4 +1,4 @@
-import type { Save, List, Get, Remove, ExportJson, ImportJson, Database } from "../io/database";
+import type { Save, List, Get, Remove, ExportJson, ImportJson, Database } from "./database";
 
 import Dexie from "dexie";
 

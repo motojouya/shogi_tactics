@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import type { Database } from "../io/database";
+import type { Database } from "./database";
 import type { Battle } from "../model/battle";
 import { GameOngoing, battleSchema } from "../model/battle";
 import { createRepository } from "./battle";

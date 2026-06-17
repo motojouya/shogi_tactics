@@ -1,7 +1,7 @@
 import type { Battle } from "../../model/battle";
 import type { Unit } from "../../model/unit";
 import type { BattleRepository } from "../../store/battle";
-import type { Dialogue } from "../../io/window_dialogue";
+import type { Dialogue } from "../../store/window_dialogue";
 
 import { copyBattle, createBattle, start } from "../../model/battle";
 

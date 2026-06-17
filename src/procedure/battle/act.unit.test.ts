@@ -1,14 +1,14 @@
 import { describe, it, expect } from "vitest";
 
 import type { BattleRepository } from "../../store/battle";
-import type { Dialogue } from "../../io/window_dialogue";
+import type { Dialogue } from "../../store/window_dialogue";
 import type { Battle } from "../../model/battle";
 import type { DoActionForm } from "../../form/battle";
 
 import { createBattle, start, getLastTurn } from "../../model/battle";
 import { act } from "./act";
-import { DataNotFoundError } from "../../store_utility/schema";
-import { UserCancel } from "../../io/window_dialogue";
+import { DataNotFoundError } from "../../store/schema";
+import { UserCancel } from "../../store/window_dialogue";
 
 const makeBattle = (): Battle => {
   const battle = createBattle("key", "first", "second", 2, 2, "v1");

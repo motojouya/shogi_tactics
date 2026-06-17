@@ -5,8 +5,8 @@ import { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 
 import { createRepository as createBattleRepository } from '../store/battle';
-import { createDatabase } from '../io/indexed_database';
-import { dialogue } from '../io/window_dialogue';
+import { createDatabase } from '../store/indexed_database';
+import { dialogue } from '../store/window_dialogue';
 import { IOProvider } from './context';
 
 // new/list/v1の各ページで共通のrepository初期化とIOProvider配線をまとめる。

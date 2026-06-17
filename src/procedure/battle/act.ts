@@ -2,12 +2,12 @@ import type { Battle } from "../../model/battle";
 import type { UnitReference } from "../../model/unit";
 import type { BattleRepository } from "../../store/battle";
 import type { DoActionForm } from "../../form/battle";
-import type { Dialogue } from "../../io/window_dialogue";
+import type { Dialogue } from "../../store/window_dialogue";
 
 import { spendTurn } from "../../model/battle";
 import { toAction, ReceiverDuplicationError } from "../../form/battle";
-import { DataNotFoundError } from "../../store_utility/schema";
-import { UserCancel } from "../../io/window_dialogue";
+import { DataNotFoundError } from "../../store/schema";
+import { UserCancel } from "../../store/window_dialogue";
 
 export type Act = (
   dialogue: Dialogue,
