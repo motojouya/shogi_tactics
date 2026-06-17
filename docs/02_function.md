@@ -282,6 +282,12 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - `BattleRepository`型は同形(save/list/get/remove/importJson/exportJson)を維持したため、consumer(context/battle_io/controller)・テストmockは無変更。`NAMESPACE`はbattle.ts内のlocal constへ、`SCHEMA_KEY`は`battle.key`直参照に置換。
 - `memory_repository`(action/piece/statusの3箇所で利用)は本当に再利用されているためgenericのまま据え置き。
 
+#### 14-2の済み分（indexed_databaseのbattle統合・Database抽象廃止）
+- BattleRepositoryはschema変換が無く(zod型チェックのみ)battle固有ロジックも無いため、`Database`抽象(差し替え/mock用interface)が過剰。**`indexed_database`のDexie実装を`repository/battle.ts`へ直接インライン**し、`createRepository`内で`new KniwDB()`してテーブル操作・file pickerを直に実装。namespace抽象も廃止(battleテーブルのみ)。
+- **削除**: `repository/database.ts`(Database型/Save・Get等のIO型/KeyValue)、`repository/indexed_database.ts`。`CopyFailError`はexportJsonの戻り型として残すため`repository/battle.ts`へ移設。
+- **BattleRepositoryの単体テスト(`repository/battle.unit.test.ts`)を削除**: Database mockを差し込んで検証していたが、変換ロジックが消えDexie直結になったため、test対象は実質Dexie/zodのみで自前テストの価値がない(110->106テスト)。
+- `createRepository`は引数なし(`() => Promise<BattleRepository>`)に変更。`battle_io.tsx`は`createDatabase()`を廃し`createBattleRepository()`を直接呼ぶ。`BattleRepository`の6メソッド形は不変なのでcontroller/contextやcontrollerテストのmockは無変更。
+
 ### 15. 内部構造の精査
 精査してからタスクが出てくる
 featureは不要かも。pagesを丁寧に定義したので。その代わりcomponent側に移すコードもあるはず。

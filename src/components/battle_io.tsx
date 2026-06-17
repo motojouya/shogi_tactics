@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 
 import { createRepository as createBattleRepository } from '../repository/battle';
-import { createDatabase } from '../repository/indexed_database';
 import { dialogue } from '../repository/window_dialogue';
 import { IOProvider } from './context';
 
@@ -14,8 +13,7 @@ export const BattleIO: FC<{ children: ReactNode }> = ({ children }) => {
   const [repositories, setRepositories] = useState<{ battleRepository: BattleRepository } | null>(null);
   useEffect(() => {
     (async () => {
-      const indexedDatabase = await createDatabase();
-      const battleRepository = await createBattleRepository(indexedDatabase);
+      const battleRepository = await createBattleRepository();
       setRepositories({ battleRepository });
     })();
   }, []);
