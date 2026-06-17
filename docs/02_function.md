@@ -288,6 +288,20 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - **BattleRepositoryの単体テスト(`repository/battle.unit.test.ts`)を削除**: Database mockを差し込んで検証していたが、変換ロジックが消えDexie直結になったため、test対象は実質Dexie/zodのみで自前テストの価値がない(110->106テスト)。
 - `createRepository`は引数なし(`() => Promise<BattleRepository>`)に変更。`battle_io.tsx`は`createDatabase()`を廃し`createBattleRepository()`を直接呼ぶ。`BattleRepository`の6メソッド形は不変なのでcontroller/contextやcontrollerテストのmockは無変更。
 
+#### 14-3の済み分（repository内のファイル整理）
+- DexieのDB class名を`KniwDB` -> **`BattleDB`** にrename(DexieのDB名`super("KniwDB")`は既存IndexedDBデータ互換のため据え置き)。
+- `BattleDB`以外のclass構文はすべてエラー表現なので **`repository/error.ts`** に集約: `JsonSchemaUnmatchError`/`DataNotFoundError`/`DataExistError`(旧schema.ts)、`CopyFailError`(旧battle.ts)、`UserCancel`/`EmptyParameter`(旧window_dialogue.ts)。
+- 残った非class内容を **`repository/utility.ts`** に集約: `parseJson`(旧schema.ts)、`createMemoryRepository`/`MemoryRepository`(旧memory_repository.ts)、`SelectOption`(旧dialogue.ts)。`schema.ts`/`memory_repository.ts`/`dialogue.ts`は削除。
+- `window_dialogue.ts`はエラー2classを除いた残り(Confirm/Notice/GetUuid/Now/Dialogue/dialogue)を保持。
+- importer付け替え: error symbol -> `repository/error`、SelectOption/createMemoryRepository -> `repository/utility`。`window_dialogue`は`Dialogue`型が残るためUserCancel行のみ個別に変更。
+- repository構成(現在): `action / battle / error / piece / status / utility / window_dialogue`。
+
+#### 14-4の済み分（window_dialogue -> local rename）
+- `window_dialogue.ts` -> **`local.ts`** にrename。中の`Dialogue`型 -> **`Local`**、`dialogue`変数 -> **`local`** に変更(confirm/notice/getUuid/nowを束ねるローカル環境providerの意味)。
+- `local`の衝突確認: ブラウザglobalに`local`は無く(`localStorage`はあるが`local`単体は無し)、ESMのmoduleトップレベル宣言はglobalThisに漏れない(仮に同名globalがあってもmodule内でshadowするのみ)。型`Local`は実行時に消えるため無関係。よって安全。
+- importer付け替え: 型`Dialogue` -> `Local`(context/controller各所のparam型注釈)、パス`window_dialogue` -> `local`。const`local`は`battle_io`のみ利用で、IO contextのproperty名`dialogue`は据え置き(`{ ...repositories, dialogue: local }`)。controllerのparam名や`useIO()`のdestructure名`dialogue`も据え置き(型のみLocalに変更)。
+- repository構成(現在): `action / battle / error / local / piece / status / utility`。
+
 ### 15. 内部構造の精査
 精査してからタスクが出てくる
 featureは不要かも。pagesを丁寧に定義したので。その代わりcomponent側に移すコードもあるはず。

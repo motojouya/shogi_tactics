@@ -1,14 +1,14 @@
 import type { Battle } from "../model/battle";
 import type { UnitReference } from "../model/unit";
 import type { BattleRepository } from "../repository/battle";
-import type { Dialogue } from "../repository/window_dialogue";
+import type { Local } from "../repository/local";
 
 import { GameFirst, GameSecond, copyBattle, surrender as modelSurrender } from "../model/battle";
 import { UserCancel } from "../repository/error";
 
 export type Surrender = (
   battleRepository: BattleRepository,
-  dialogue: Dialogue,
+  dialogue: Local,
 ) => (battle: Battle, actor: UnitReference, actionDate: Date) => Promise<null | UserCancel>;
 export const surrender: Surrender = (battleRepository, dialogue) => async (battle, actor, actionDate) => {
   if (!dialogue.confirm("降参してもよいですか？")) {

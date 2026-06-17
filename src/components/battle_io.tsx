@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 
 import { createRepository as createBattleRepository } from '../repository/battle';
-import { dialogue } from '../repository/window_dialogue';
+import { local } from '../repository/local';
 import { IOProvider } from './context';
 
 // new/list/v1の各ページで共通のrepository初期化とIOProvider配線をまとめる。
@@ -24,7 +24,7 @@ export const BattleIO: FC<{ children: ReactNode }> = ({ children }) => {
 
   const io = {
     ...repositories,
-    dialogue,
+    dialogue: local,
   };
 
   return (<IOProvider io={io}>{children}</IOProvider>);

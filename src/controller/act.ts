@@ -2,14 +2,14 @@ import type { Battle } from "../model/battle";
 import type { UnitReference } from "../model/unit";
 import type { BattleRepository } from "../repository/battle";
 import type { DoActionForm } from "../form/battle";
-import type { Dialogue } from "../repository/window_dialogue";
+import type { Local } from "../repository/local";
 
 import { spendTurn } from "../model/battle";
 import { toAction, ReceiverDuplicationError } from "../form/battle";
 import { DataNotFoundError, UserCancel } from "../repository/error";
 
 export type Act = (
-  dialogue: Dialogue,
+  dialogue: Local,
   repository: BattleRepository,
 ) => (
   battle: Battle,

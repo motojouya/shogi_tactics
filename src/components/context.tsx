@@ -1,13 +1,13 @@
 /* eslint react-refresh/only-export-components: 0 */
 import type { ReactNode } from "react";
 
-import type { Dialogue } from '../repository/window_dialogue';
+import type { Local } from '../repository/local';
 import type { BattleRepository } from '../repository/battle';
 
 import { createContext, useContext } from "react";
 
 export type IO = {
-  dialogue: Dialogue;
+  dialogue: Local;
   battleRepository: BattleRepository;
 };
 

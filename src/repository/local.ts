@@ -14,13 +14,13 @@ export const getUuid: GetUuid = () => uuidv7();
 export type Now = () => Date;
 export const now: Now = () => new Date();
 
-export type Dialogue = {
+export type Local = {
   confirm: Confirm;
   notice: Notice;
   getUuid: GetUuid;
   now: Now;
 };
-export const dialogue: Dialogue = {
+export const local: Local = {
   confirm,
   notice,
   getUuid,

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import type { BattleRepository } from "../repository/battle";
-import type { Dialogue } from "../repository/window_dialogue";
+import type { Local } from "../repository/local";
 import type { Battle } from "../model/battle";
 import type { DoActionForm } from "../form/battle";
 
@@ -32,7 +32,7 @@ const battleRepository: BattleRepository = {
   exportJson: async () => null,
 };
 
-const dialogue = (confirm: boolean): Dialogue => ({
+const dialogue = (confirm: boolean): Local => ({
   confirm: () => confirm,
   notice: () => {},
   getUuid: () => "key",

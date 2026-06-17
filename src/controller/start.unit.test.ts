@@ -1,5 +1,5 @@
 import type { BattleRepository } from "../repository/battle";
-import type { Dialogue } from "../repository/window_dialogue";
+import type { Local } from "../repository/local";
 
 import { describe, it, expect } from "vitest";
 
@@ -18,7 +18,7 @@ const battleRepository: BattleRepository = {
   exportJson: (_obj, _fileName) => new Promise((resolve, _reject) => resolve(null)),
 };
 
-const dialogue: Dialogue = {
+const dialogue: Local = {
   confirm: (_message) => true,
   notice: (_message) => {},
   getUuid: () => "0191e000-0000-7000-8000-000000000000",

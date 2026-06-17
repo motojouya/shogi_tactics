@@ -1,7 +1,7 @@
 import type { Battle } from "../model/battle";
 import type { Unit } from "../model/unit";
 import type { BattleRepository } from "../repository/battle";
-import type { Dialogue } from "../repository/window_dialogue";
+import type { Local } from "../repository/local";
 
 import { copyBattle, createBattle, start } from "../model/battle";
 
@@ -10,7 +10,7 @@ import { copyBattle, createBattle, start } from "../model/battle";
 //    keyと日時はdialogue(provider)経由。unitsはこの時点では未選択(turns.length===0=編成段階)。
 export type RegisterBattle = (
   battleRepository: BattleRepository,
-  dialogue: Dialogue,
+  dialogue: Local,
 ) => (
   firstPlayerName: string,
   secondPlayerName: string,
@@ -28,7 +28,7 @@ export const registerBattle: RegisterBattle =
 // 2) startBattle: 編成画面で選んだunitsで先頭Turnを積み、戦闘を開始する(同keyへ上書き保存)。
 export type StartBattle = (
   battleRepository: BattleRepository,
-  dialogue: Dialogue,
+  dialogue: Local,
 ) => (battle: Battle, units: Unit[]) => Promise<Battle>;
 export const startBattle: StartBattle = (battleRepository, dialogue) => async (battle, units) => {
   const newBattle = copyBattle(battle);
