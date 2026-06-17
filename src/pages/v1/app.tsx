@@ -14,7 +14,7 @@ import { Container, getSearchParams } from '../../components/utility';
 export const VERSION = 'v1';
 
 const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey, version }) => {
-  const { battleRepository } = useIO();
+  const { battle: battleRepository } = useIO();
   const battle = useLiveQuery(() => battleRepository.get(battleKey), [battleKey]);
 
   if (battle instanceof JsonSchemaUnmatchError) {

@@ -4,6 +4,7 @@ import type { Unit, UnitReference } from '../model/unit';
 import type { Turn } from '../model/turn';
 import type { Action } from '../model/action';
 import type { DoActionForm } from '../form/battle';
+import type { Repository } from '../repository';
 import type { SelectChangeEvent } from '@mui/material';
 
 import { useState, useCallback } from 'react';
@@ -47,9 +48,6 @@ import {
   ReceiverDuplicationError,
   DO_NOTHING,
 } from '../form/battle';
-import { pieceRepository } from '../repository/piece';
-import { statusRepository } from '../repository/status';
-
 import { DataNotFoundError } from '../repository/error';
 import { act } from '../controller/act';
 import { surrender } from '../controller/surrender';
@@ -60,11 +58,11 @@ import { Container } from './utility';
 
 const sideLabel = (side: 'FIRST' | 'SECOND'): string => (side === 'FIRST' ? '先手' : '後手');
 // step8: battleはkeyしか持たないので、presentationでstore参照してpiece/statusを解決する。
-const pieceName = (pieceKey: string): string => {
+const pieceName = (pieceRepository: Repository['piece'], pieceKey: string): string => {
   const piece = pieceRepository.get(pieceKey);
   return piece ? piece.name : pieceKey;
 };
-const statusName = (statusKey: string): string => {
+const statusName = (statusRepository: Repository['status'], statusKey: string): string => {
   const status = statusRepository.get(statusKey);
   return status ? status.name : statusKey;
 };
@@ -102,16 +100,19 @@ const getReceiverError: GetReceiverError = (errors, i, property) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type HookOnChange = (e: any) => void;
 
-const UnitStatus: FC<{ unit: Unit }> = ({ unit }) => (
-  <Stack direction="row" sx={{ justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap' }}>
-    <Box sx={{ pr: 1 }}><Typography>{`${sideLabel(unit.side)}: ${pieceName(unit.piece)}`}</Typography></Box>
-    <Box sx={{ pr: 1 }}><Typography>{`HP ${unit.hp}`}</Typography></Box>
-    <Box sx={{ pr: 1 }}><Typography>{`steps ${unit.steps}`}</Typography></Box>
-    {unit.statuses.length > 0 && (
-      <Box sx={{ pr: 1 }}><Typography>{`状態: ${unit.statuses.map(statusName).join(', ')}`}</Typography></Box>
-    )}
-  </Stack>
-);
+const UnitStatus: FC<{ unit: Unit }> = ({ unit }) => {
+  const { piece, status } = useIO();
+  return (
+    <Stack direction="row" sx={{ justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap' }}>
+      <Box sx={{ pr: 1 }}><Typography>{`${sideLabel(unit.side)}: ${pieceName(piece, unit.piece)}`}</Typography></Box>
+      <Box sx={{ pr: 1 }}><Typography>{`HP ${unit.hp}`}</Typography></Box>
+      <Box sx={{ pr: 1 }}><Typography>{`steps ${unit.steps}`}</Typography></Box>
+      {unit.statuses.length > 0 && (
+        <Box sx={{ pr: 1 }}><Typography>{`状態: ${unit.statuses.map((statusKey) => statusName(status, statusKey)).join(', ')}`}</Typography></Box>
+      )}
+    </Stack>
+  );
+};
 
 const ReceiverSelect: FC<{
   action: Action,
@@ -123,6 +124,8 @@ const ReceiverSelect: FC<{
   addReceiver: () => void,
 }> = ({ action, actor, lastTurn, index, errors, control, addReceiver }) => {
 
+  const { piece } = useIO();
+
   const formItemName = `receivers.${index}.value` as const;
   const error = getReceiverError(errors, index, 'value');
 
@@ -131,7 +134,7 @@ const ReceiverSelect: FC<{
     addReceiver();
   };
 
-  const receiverOptions = action.filter(actor, lastTurn).map(receiverSelectOption);
+  const receiverOptions = action.filter(actor, lastTurn).map(receiverSelectOption(piece));
 
   return (
     <Controller
@@ -162,8 +165,8 @@ const ReceiverSelect: FC<{
 };
 
 const SurrenderButton: FC<{ battle: Battle, actor: UnitReference }> = ({ battle, actor }) => {
-  const { battleRepository, dialogue } = useIO();
-  const doSurrender = () => surrender(battleRepository, dialogue)(battle, actor, new Date());
+  const { battle: battleRepository, local } = useIO();
+  const doSurrender = () => surrender(battleRepository, local)(battle, actor, new Date());
   return <Button variant='outlined' type="button" onClick={doSurrender}>降参</Button>;
 };
 
@@ -230,7 +233,7 @@ export const BattleTurn: FC<{
   reload: (battle: Battle) => void,
 }> = ({ battle, lastTurn, reload }) => {
 
-  const { battleRepository, dialogue } = useIO();
+  const { battle: battleRepository, local, piece, action } = useIO();
 
   const {
     handleSubmit,
@@ -247,7 +250,7 @@ export const BattleTurn: FC<{
 
   const actorUnit = nextActor(lastTurn);
   const actor = actorUnit ? toUnitReference(actorUnit) : null;
-  const actorPiece = actorUnit ? pieceRepository.get(actorUnit.piece) : null;
+  const actorPiece = actorUnit ? piece.get(actorUnit.piece) : null;
   const actorActions = actorPiece ? actorPiece.actions : [];
 
   const onSelectAction = (action: Action | null) => {
@@ -266,7 +269,7 @@ export const BattleTurn: FC<{
       return;
     }
 
-    const result = await act(dialogue, battleRepository)(battle, actor, form, () => new Date());
+    const result = await act(local, battleRepository, action)(battle, actor, form, () => new Date());
 
     if (result instanceof DataNotFoundError) {
       setMessage('入力してください');
@@ -330,7 +333,7 @@ export const BattleTurn: FC<{
             <form onSubmit={handleSubmit(doAct)}>
               {message && (<Typography>{message}</Typography>)}
               <Box sx={{ py: 1 }}>
-                <Typography sx={{ display: "inline-block", pr: 1 }}>{`${pieceName(actorUnit.piece)}のターン`}</Typography>
+                <Typography sx={{ display: "inline-block", pr: 1 }}>{`${pieceName(piece, actorUnit.piece)}のターン`}</Typography>
                 <Chip variant="outlined" color='primary' label={sideLabel(actorUnit.side)} />
               </Box>
               <Stack>

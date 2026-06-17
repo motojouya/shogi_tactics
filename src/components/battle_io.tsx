@@ -1,31 +1,25 @@
 import type { FC, ReactNode } from 'react';
-import type { BattleRepository } from '../repository/battle';
+import type { Repository } from '../repository';
 
 import { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 
-import { createRepository as createBattleRepository } from '../repository/battle';
-import { local } from '../repository/local';
+import { createRepository } from '../repository';
 import { IOProvider } from './context';
 
 // new/list/v1の各ページで共通のrepository初期化とIOProvider配線をまとめる。
+// 全repositoryをcreateRepositoryで束ねて生成し、そのままcontextに載せる。
 export const BattleIO: FC<{ children: ReactNode }> = ({ children }) => {
-  const [repositories, setRepositories] = useState<{ battleRepository: BattleRepository } | null>(null);
+  const [repository, setRepository] = useState<Repository | null>(null);
   useEffect(() => {
     (async () => {
-      const battleRepository = await createBattleRepository();
-      setRepositories({ battleRepository });
+      setRepository(await createRepository());
     })();
   }, []);
 
-  if (!repositories) {
+  if (!repository) {
     return (<Box><Typography>loading...</Typography></Box>);
   }
 
-  const io = {
-    ...repositories,
-    dialogue: local,
-  };
-
-  return (<IOProvider io={io}>{children}</IOProvider>);
+  return (<IOProvider io={repository}>{children}</IOProvider>);
 };

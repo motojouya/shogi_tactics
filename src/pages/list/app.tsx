@@ -18,7 +18,7 @@ import { Container, Link, ButtonLink } from '../../components/utility';
 type BattleSummary = { key: string; battle: Battle };
 
 const BattleList: FC = () => {
-  const { battleRepository } = useIO();
+  const { battle: battleRepository } = useIO();
   const battles = useLiveQuery(async () => {
     const keys = await battleRepository.list();
     const loaded = await Promise.all(keys.map((key) => battleRepository.get(key)));

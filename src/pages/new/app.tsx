@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 
 import { BattleIO } from '../../components/battle_io';
-import { pieceRepository } from '../../repository/piece';
 import { registerBattle, startBattle } from '../../controller/start';
 import { buildNormalUnits, NORMAL_STEP_BASE, NORMAL_UNIT_COUNT } from '../../model/normal_mode';
 import { useIO } from '../../components/context';
@@ -24,7 +23,7 @@ type Mode = 'normal' | 'war';
 
 const BattleNew: FC = () => {
 
-  const { battleRepository, dialogue } = useIO();
+  const { battle: battleRepository, local, piece: pieceRepository } = useIO();
 
   const [mode, setMode] = useState<Mode>('normal');
   const [message, setMessage] = useState<string>('');
@@ -57,7 +56,7 @@ const BattleNew: FC = () => {
         return;
       }
       // 通常モード: 固定パラメータでbattleを作り、default unitsで先頭Turnまで積んでそのまま開始する。
-      const battle = await registerBattle(battleRepository, dialogue)(
+      const battle = await registerBattle(battleRepository, local)(
         firstPlayerName,
         secondPlayerName,
         NORMAL_STEP_BASE,
@@ -65,7 +64,7 @@ const BattleNew: FC = () => {
         version,
       );
       const units = buildNormalUnits((key) => pieceRepository.get(key));
-      await startBattle(battleRepository, dialogue)(battle, units);
+      await startBattle(battleRepository, local)(battle, units);
       transit(`/v1/?key=${battle.key}`);
       return;
     }
@@ -86,7 +85,7 @@ const BattleNew: FC = () => {
       return;
     }
 
-    const battle = await registerBattle(battleRepository, dialogue)(
+    const battle = await registerBattle(battleRepository, local)(
       firstPlayerName,
       secondPlayerName,
       stepBase,

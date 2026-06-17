@@ -302,6 +302,17 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - importer付け替え: 型`Dialogue` -> `Local`(context/controller各所のparam型注釈)、パス`window_dialogue` -> `local`。const`local`は`battle_io`のみ利用で、IO contextのproperty名`dialogue`は据え置き(`{ ...repositories, dialogue: local }`)。controllerのparam名や`useIO()`のdestructure名`dialogue`も据え置き(型のみLocalに変更)。
 - repository構成(現在): `action / battle / error / local / piece / status / utility`。
 
+#### 14-5の済み分（目的②: repositoryを1オブジェクトに束ねてcontext参照）
+- **`repository/index.ts`** を新設。`type Repository = { battle, piece, action, status, local }`(piece/action/statusは`typeof xxxRepository`で型導出)と、それを生成する`createRepository(): Promise<Repository>`(battleのみDexie初期化のため非同期)を定義。
+- `components/context.tsx`: context値を`IO`型から**`Repository`型**へ。`useIO(): Repository`。`battle_io.tsx`は`createRepository()`を呼んで束ねたオブジェクトをそのままcontextに載せる(個別のbattle/local配線を廃止)。
+- **memory repository(piece/action/status)の直接importを全廃**し、利用箇所をcontext/DI経由に統一(ユーザ選択: 完全DI化):
+  - React component(`battle.tsx`/`formation.tsx`/`pages/{new,list,v1}`)は`useIO()`から取得。`battle: Battle` propとの名前衝突を避けるため`const { battle: battleRepository, local, piece } = useIO()`のようにalias。
+  - 非Reactの`form/battle.ts`(`receiverSelectOption`/`toAction`)はrepositoryを引数で受け取るcurry形に変更(`receiverSelectOption(piece)(reference)`、`toAction(action)(form)`)。型は`Repository["piece"]`/`Repository["action"]`。
+  - `battle.tsx`のmodule-level helper`pieceName`/`statusName`も引数でrepositoryを受け取る形に。`UnitStatus`/`ReceiverSelect`はcomponentなので`useIO()`で取得して渡す。
+  - `toAction`を呼ぶ`controller/act`に`action: Repository["action"]`引数を追加(`act(local, battleRepository, action)`)。memory repoを使わない`surrender`/`start` controllerは無変更。act単体テストは実`actionRepository`をimportして渡す。
+- contextのproperty名が`local`になったため、component側の`dialogue`参照は`local`に統一。controllerのparam名`dialogue`は据え置き(positional。値は`local`が渡る。14-4の方針と整合)。
+- repository構成(現在): `action / battle / error / index / local / piece / status / utility`。
+
 ### 15. 内部構造の精査
 精査してからタスクが出てくる
 featureは不要かも。pagesを丁寧に定義したので。その代わりcomponent側に移すコードもあるはず。
