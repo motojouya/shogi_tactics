@@ -26,19 +26,3 @@ export const dialogue: Dialogue = {
   getUuid,
   now,
 };
-
-export class UserCancel {
-  readonly message: string;
-  constructor(message: string) {
-    this.message = message;
-  }
-}
-
-export class EmptyParameter {
-  readonly name: string;
-  readonly message: string;
-  constructor(name: string, message: string) {
-    this.name = name;
-    this.message = message;
-  }
-}

@@ -1,4 +1,4 @@
 import * as pieces from "../data/piece/index";
-import { createMemoryRepository } from "./memory_repository";
+import { createMemoryRepository } from "./utility";
 
 export const pieceRepository = createMemoryRepository(pieces);

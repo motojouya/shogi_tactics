@@ -7,8 +7,7 @@ import type { DoActionForm } from "../form/battle";
 
 import { createBattle, start, getLastTurn } from "../model/battle";
 import { act } from "./act";
-import { DataNotFoundError } from "../repository/schema";
-import { UserCancel } from "../repository/window_dialogue";
+import { DataNotFoundError, UserCancel } from "../repository/error";
 
 const makeBattle = (): Battle => {
   const battle = createBattle("key", "first", "second", 2, 2, "v1");

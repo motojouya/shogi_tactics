@@ -50,11 +50,11 @@ import {
 import { pieceRepository } from '../repository/piece';
 import { statusRepository } from '../repository/status';
 
-import { DataNotFoundError } from '../repository/schema';
+import { DataNotFoundError } from '../repository/error';
 import { act } from '../controller/act';
 import { surrender } from '../controller/surrender';
 import { simulate } from '../controller/simulate';
-import { UserCancel } from '../repository/window_dialogue';
+import { UserCancel } from '../repository/error';
 import { useIO } from './context';
 import { Container } from './utility';
 

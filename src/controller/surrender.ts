@@ -4,7 +4,7 @@ import type { BattleRepository } from "../repository/battle";
 import type { Dialogue } from "../repository/window_dialogue";
 
 import { GameFirst, GameSecond, copyBattle, surrender as modelSurrender } from "../model/battle";
-import { UserCancel } from "../repository/window_dialogue";
+import { UserCancel } from "../repository/error";
 
 export type Surrender = (
   battleRepository: BattleRepository,

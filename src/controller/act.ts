@@ -6,8 +6,7 @@ import type { Dialogue } from "../repository/window_dialogue";
 
 import { spendTurn } from "../model/battle";
 import { toAction, ReceiverDuplicationError } from "../form/battle";
-import { DataNotFoundError } from "../repository/schema";
-import { UserCancel } from "../repository/window_dialogue";
+import { DataNotFoundError, UserCancel } from "../repository/error";
 
 export type Act = (
   dialogue: Dialogue,

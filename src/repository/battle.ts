@@ -3,25 +3,8 @@ import type { Battle } from "../model/battle";
 import Dexie from "dexie";
 
 import { battleSchema } from "../model/battle";
-import { parseJson, JsonSchemaUnmatchError } from "./schema";
-
-// export(file system access API)に失敗した場合のエラー。
-export class CopyFailError {
-  readonly fileName: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readonly exception: any;
-  readonly message: string;
-  constructor(
-    fileName: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    exception: any,
-    message: string,
-  ) {
-    this.fileName = fileName;
-    this.exception = exception;
-    this.message = message;
-  }
-}
+import { parseJson } from "./utility";
+import { CopyFailError, JsonSchemaUnmatchError } from "./error";
 
 // battle専用のrepository。schema変換が無くなりbattle固有のロジックも無いため、Database抽象を廃しDexieを直接使う。
 // model型(Battle)をそのまま保存・取得し、取得時はbattleSchemaで検証(parseJson)するだけ。
@@ -35,7 +18,7 @@ export type BattleRepository = {
 };
 
 // keyを主キーとするbattleテーブルのみ。IndexedDB(Dexie)はDateを構造化クローンでネイティブ保存する。
-class KniwDB extends Dexie {
+class BattleDB extends Dexie {
   battle!: Dexie.Table<Battle, string>;
 
   constructor() {
@@ -60,7 +43,7 @@ const pickerOpts = {
 
 export type CreateRepository = () => Promise<BattleRepository>;
 export const createRepository: CreateRepository = async () => {
-  const db = new KniwDB();
+  const db = new BattleDB();
   return {
     save: async (battle) => {
       await db.battle.put(battle);

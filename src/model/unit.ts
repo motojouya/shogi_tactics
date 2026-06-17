@@ -1,4 +1,4 @@
-import type { SelectOption } from "../repository/dialogue";
+import type { SelectOption } from "../repository/utility";
 import type { Piece } from "./piece";
 
 import { z } from "zod";

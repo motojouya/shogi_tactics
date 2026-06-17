@@ -1,10 +1,10 @@
 import type { UnitReference } from "../model/unit";
 import type { DoActionInput } from "../model/battle";
-import type { SelectOption } from "../repository/dialogue";
+import type { SelectOption } from "../repository/utility";
 
 import { z } from "zod";
 
-import { DataNotFoundError } from "../repository/schema";
+import { DataNotFoundError } from "../repository/error";
 import { selectUnit } from "../model/unit";
 import { actionRepository } from "../repository/action";
 import { pieceRepository } from "../repository/piece";
