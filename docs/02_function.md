@@ -263,6 +263,12 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - 外部consumer付け替え: `components/*`・`form/battle`・`model/unit`の`../store/*` -> `../repository/*`、`components/*`の`../procedure/battle/*` -> `../controller/*`、`pages/{list,new,v1}/app.tsx`の`../../subpage/battle/*` -> `../../feature/battle/*`。`mv`(dir rename)+Editで実施(sed不使用)。
 - これで13(ディレクトリ統廃合)のmodel/store/io/store_utility/store_schema/procedure/subpageの再配置は完了(責務移動は別途)。
 
+#### 13-3の追加対応: featureディレクトリ廃止（step15「featureは不要かも」を先行）
+- 1つのpathをquery stringで出し分けていた旧構成は10/11で解消済みで、各pageが独立path(`/list/` `/new/` `/v1/`)を持つ。`pages/*/app.tsx`は`feature`コンポーネントを`BattleIO`で包むだけの薄いwrapperだった。
+- `feature/battle/{list,new,battle}.tsx`の中身を対応する`pages/{list,new,v1}/app.tsx`へ取り込み、**`feature/`を削除**。
+- `useIO()`はIOProvider(`BattleIO`)の内側で呼ぶ必要があるため、旧featureコンポーネントは**app.tsx内のローカルコンポーネント**(`BattleList`/`BattleNew`/`BattleExsiting`、非export)として残し、`export const App`が`<BattleIO>`で包む構造にした。`pages/*`と`feature/battle/*`は同じ深さ2だったため相対importはそのまま流用。
+- `v1/app.tsx`は`VERSION`定数とkey取り出し/early-returnを`App`に保持し、`BattleExsiting`をローカル化。
+
 ### 14. repositoryの初期化はすべて一緒に行う
 - 初期化が必要なのはbattle tableぐらいで毎回使うので
 - context.IOに入れる値を、そもそもrepositoryで作ってしまう感じ。そしたら簡単なので。あるいはbattleRepositoryだけ別にして、ほかは全部でもいい
