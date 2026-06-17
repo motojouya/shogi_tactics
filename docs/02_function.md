@@ -273,6 +273,15 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - 初期化が必要なのはbattle tableぐらいで毎回使うので
 - context.IOに入れる値を、そもそもrepositoryで作ってしまう感じ。そしたら簡単なので。あるいはbattleRepositoryだけ別にして、ほかは全部でもいい
 
+#### 目的（2点）
+1. **過剰な抽象化の解消**: repository配下に色々なinterface/genericが入り込んで変に抽象化されている状態をほどく。
+2. **repository一括化 + context参照**: repository全体を1つのオブジェクトに固め、react contextでどこからも参照できるようにする。
+
+#### 14-1の済み分（disk_repositoryのde-abstraction）
+- `disk_repository`(generic `createRepository<S, M>`)は`repository/battle`からしか使われていなかったため、**generic抽象を廃止**。型引数を畳んで`repository/battle.ts`にBattle専用として素直に実装し、**`disk_repository.ts`を削除**。
+- `BattleRepository`型は同形(save/list/get/remove/importJson/exportJson)を維持したため、consumer(context/battle_io/controller)・テストmockは無変更。`NAMESPACE`はbattle.ts内のlocal constへ、`SCHEMA_KEY`は`battle.key`直参照に置換。
+- `memory_repository`(action/piece/statusの3箇所で利用)は本当に再利用されているためgenericのまま据え置き。
+
 ### 15. 内部構造の精査
 精査してからタスクが出てくる
 featureは不要かも。pagesを丁寧に定義したので。その代わりcomponent側に移すコードもあるはず。
