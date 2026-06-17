@@ -310,7 +310,7 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
   - 非Reactの`form/battle.ts`(`receiverSelectOption`/`toAction`)はrepositoryを引数で受け取るcurry形に変更(`receiverSelectOption(piece)(reference)`、`toAction(action)(form)`)。型は`Repository["piece"]`/`Repository["action"]`。
   - `battle.tsx`のmodule-level helper`pieceName`/`statusName`も引数でrepositoryを受け取る形に。`UnitStatus`/`ReceiverSelect`はcomponentなので`useIO()`で取得して渡す。
   - `toAction`を呼ぶ`controller/act`に`action: Repository["action"]`引数を追加(`act(local, battleRepository, action)`)。memory repoを使わない`surrender`/`start` controllerは無変更。act単体テストは実`actionRepository`をimportして渡す。
-- contextのproperty名が`local`になったため、component側の`dialogue`参照は`local`に統一。controllerのparam名`dialogue`は据え置き(positional。値は`local`が渡る。14-4の方針と整合)。
+- contextのproperty名が`local`になったため、component側の`dialogue`参照は`local`に統一。**controllerのparam名・テストのlocal変数も`dialogue`->`local`にrename**し、`dialogue`識別子を全廃(`utility.ts`の「旧dialogue.ts」コメントのみ旧ファイル名の史実として残置)。
 - repository構成(現在): `action / battle / error / index / local / piece / status / utility`。
 
 ### 15. 内部構造の精査

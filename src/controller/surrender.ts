@@ -8,10 +8,10 @@ import { UserCancel } from "../repository/error";
 
 export type Surrender = (
   battleRepository: BattleRepository,
-  dialogue: Local,
+  local: Local,
 ) => (battle: Battle, actor: UnitReference, actionDate: Date) => Promise<null | UserCancel>;
-export const surrender: Surrender = (battleRepository, dialogue) => async (battle, actor, actionDate) => {
-  if (!dialogue.confirm("降参してもよいですか？")) {
+export const surrender: Surrender = (battleRepository, local) => async (battle, actor, actionDate) => {
+  if (!local.confirm("降参してもよいですか？")) {
     return new UserCancel("降参していません");
   }
 

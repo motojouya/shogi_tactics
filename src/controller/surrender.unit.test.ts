@@ -34,7 +34,7 @@ const battleRepository: BattleRepository = {
   exportJson: async () => null,
 };
 
-const dialogue = (confirm: boolean): Local => ({
+const local = (confirm: boolean): Local => ({
   confirm: () => confirm,
   notice: () => {},
   getUuid: () => "key",
@@ -45,11 +45,7 @@ describe("surrender", () => {
   it("first surrender", async () => {
     saved = null;
     const battle = makeBattle();
-    const result = await surrender(battleRepository, dialogue(true))(
-      battle,
-      { side: "FIRST", piece: "king" },
-      new Date(),
-    );
+    const result = await surrender(battleRepository, local(true))(battle, { side: "FIRST", piece: "king" }, new Date());
     expect(result).toBe(null);
     expect(saved?.result).toBe(GameSecond); // 先手が降参 → 後手の勝ち
   });
@@ -57,7 +53,7 @@ describe("surrender", () => {
   it("second surrender", async () => {
     saved = null;
     const battle = makeBattle();
-    const result = await surrender(battleRepository, dialogue(true))(
+    const result = await surrender(battleRepository, local(true))(
       battle,
       { side: "SECOND", piece: "pawn" },
       new Date(),
@@ -69,7 +65,7 @@ describe("surrender", () => {
   it("cancel", async () => {
     saved = null;
     const battle = makeBattle();
-    const result = await surrender(battleRepository, dialogue(false))(
+    const result = await surrender(battleRepository, local(false))(
       battle,
       { side: "FIRST", piece: "king" },
       new Date(),

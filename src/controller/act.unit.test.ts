@@ -33,7 +33,7 @@ const battleRepository: BattleRepository = {
   exportJson: async () => null,
 };
 
-const dialogue = (confirm: boolean): Local => ({
+const local = (confirm: boolean): Local => ({
   confirm: () => confirm,
   notice: () => {},
   getUuid: () => "key",
@@ -47,7 +47,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(dialogue(true), battleRepository, actionRepository)(
+    const result = await act(local(true), battleRepository, actionRepository)(
       battle,
       actor,
       form,
@@ -65,7 +65,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "noSuchAction", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(dialogue(true), battleRepository, actionRepository)(
+    const result = await act(local(true), battleRepository, actionRepository)(
       battle,
       actor,
       form,
@@ -78,7 +78,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(dialogue(false), battleRepository, actionRepository)(
+    const result = await act(local(false), battleRepository, actionRepository)(
       battle,
       actor,
       form,

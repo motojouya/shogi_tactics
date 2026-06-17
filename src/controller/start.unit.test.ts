@@ -18,7 +18,7 @@ const battleRepository: BattleRepository = {
   exportJson: (_obj, _fileName) => new Promise((resolve, _reject) => resolve(null)),
 };
 
-const dialogue: Local = {
+const local: Local = {
   confirm: (_message) => true,
   notice: (_message) => {},
   getUuid: () => "0191e000-0000-7000-8000-000000000000",
@@ -32,7 +32,7 @@ const units: Unit[] = [
 
 describe("registerBattle", () => {
   it("register battle", async () => {
-    const battle = await registerBattle(battleRepository, dialogue)("first", "second", 4, 4, "v1");
+    const battle = await registerBattle(battleRepository, local)("first", "second", 4, 4, "v1");
 
     expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
     expect(battle.first_player_name).toBe("first");
@@ -48,8 +48,8 @@ describe("registerBattle", () => {
 
 describe("startBattle", () => {
   it("start battle", async () => {
-    const registered = await registerBattle(battleRepository, dialogue)("first", "second", 4, 4, "v1");
-    const battle = await startBattle(battleRepository, dialogue)(registered, units);
+    const registered = await registerBattle(battleRepository, local)("first", "second", 4, 4, "v1");
+    const battle = await startBattle(battleRepository, local)(registered, units);
 
     expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
     expect(battle.first_player_name).toBe("first");

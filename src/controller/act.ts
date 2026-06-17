@@ -10,7 +10,7 @@ import { toAction, ReceiverDuplicationError } from "../form/battle";
 import { DataNotFoundError, UserCancel } from "../repository/error";
 
 export type Act = (
-  dialogue: Local,
+  local: Local,
   repository: BattleRepository,
   action: Repository["action"],
 ) => (
@@ -19,13 +19,13 @@ export type Act = (
   doActionForm: DoActionForm,
   getDate: () => Date,
 ) => Promise<Battle | DataNotFoundError | ReceiverDuplicationError | UserCancel>;
-export const act: Act = (dialogue, repository, action) => async (battle, actor, doActionForm, getDate) => {
+export const act: Act = (local, repository, action) => async (battle, actor, doActionForm, getDate) => {
   const doAction = toAction(action)(doActionForm);
   if (doAction instanceof DataNotFoundError || doAction instanceof ReceiverDuplicationError) {
     return doAction;
   }
 
-  if (!dialogue.confirm("実行していいですか？")) {
+  if (!local.confirm("実行していいですか？")) {
     return new UserCancel("Cancelされました");
   }
 
