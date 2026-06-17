@@ -66,7 +66,7 @@ export const BattleNew: FC = () => {
       );
       const units = buildNormalUnits((key) => pieceRepository.get(key));
       await startBattle(battleRepository, dialogue)(battle, units);
-      transit(`/battle/?key=${battle.key}`);
+      transit(`/v1/?key=${battle.key}`);
       return;
     }
 
@@ -93,13 +93,13 @@ export const BattleNew: FC = () => {
       unitCount,
       version,
     );
-    transit(`/battle/?key=${battle.key}`);
+    transit(`/v1/?key=${battle.key}`);
   };
 
   // FIXME messageの表示で以前はFormErrorMessageを使っていたがchakra v3ではなくなったため、一旦Textで代用
   // FIXME Button loading={isSubmitting} loadingText="Starting Battle..." としたかったがloadingがエラーになる
   return (
-    <Container backLink="/battle/">
+    <Container backLink="/list/">
       <Typography>Start The Battle</Typography>
       <form onSubmit={handleSubmit(register_)}>
         <Stack>

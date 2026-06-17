@@ -310,7 +310,7 @@ export const BattleTurn: FC<{
   };
 
   return (
-    <Container backLink="/battle/">
+    <Container backLink="/list/">
       <Stack>
         <Stack sx={{ pb: 1 }}>
           <Stack direction="row" sx={{ justifyContent: "space-between", width: '100%', pb: 1 }}>

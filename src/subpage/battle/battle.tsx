@@ -9,13 +9,13 @@ import { JsonSchemaUnmatchError } from '../../store_utility/schema';
 import { useIO } from '../../components/context';
 import { Container } from '../../components/utility';
 
-export const BattleExsiting: FC<{ battleKey: string }> = ({ battleKey }) => {
+export const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey, version }) => {
   const { battleRepository } = useIO();
   const battle = useLiveQuery(() => battleRepository.get(battleKey), [battleKey]);
 
   if (battle instanceof JsonSchemaUnmatchError) {
     return (
-      <Container backLink="/battle/">
+      <Container backLink="/list/">
         <Typography>{battle.message}</Typography>
       </Container>
     );
@@ -23,8 +23,17 @@ export const BattleExsiting: FC<{ battleKey: string }> = ({ battleKey }) => {
 
   if (!battle) {
     return (
-      <Container backLink="/battle/">
+      <Container backLink="/list/">
         <Typography>{`${battleKey}というbattleは見つかりません`}</Typography>
+      </Container>
+    );
+  }
+
+  // 表示ページのversionとbattleのversionが一致しないと表示しない(step10)。
+  if (battle.version !== version) {
+    return (
+      <Container backLink="/list/">
+        <Typography>{`このbattleはversion ${battle.version} のため、${version} の画面では表示できません`}</Typography>
       </Container>
     );
   }

@@ -37,13 +37,13 @@ export const BattleList: FC = () => {
       <Stack direction="column" sx={{ justifyContent: 'flex-start', alignItems: "center" }}>
         <Stack direction="row" sx={{ justifyContent: 'space-between', p: 3, width: "100%", alignItems: "center" }}>
           <Typography>バトル一覧</Typography>
-          <ButtonLink href='/battle/?key=__new'><Typography>新しく作る</Typography></ButtonLink>
+          <ButtonLink href='/new/'><Typography>新しく作る</Typography></ButtonLink>
         </Stack>
         <List sx={{ width: "100%" }}>
           {battles && battles.map(({ key, battle }: BattleSummary, index: number) => (
             <ListItem key={`battle-${index}`}  sx={{ listStyle: 'none', py: '1', px: '5', }}>
               <Stack direction="row" sx={{ justifyContent: 'space-between', width: "100%", alignItems: "center" }}>
-                <Link href={`/battle/?key=${key}`} line>
+                <Link href={`/v1/?key=${key}`} line>
                   <Stack direction="column">
                     <Typography>{`${battle.first_player_name} vs ${battle.second_player_name}`}</Typography>
                     <Typography variant="caption">

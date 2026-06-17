@@ -32,7 +32,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         "": resolve(__dirname, "src/pages/index.html"),
-        battle: resolve(__dirname, "src/pages/battle/index.html"),
+        new: resolve(__dirname, "src/pages/new/index.html"),
+        list: resolve(__dirname, "src/pages/list/index.html"),
+        v1: resolve(__dirname, "src/pages/v1/index.html"),
       },
       output: {
         entryFileNames: `assets/[name]/bundle.js`,

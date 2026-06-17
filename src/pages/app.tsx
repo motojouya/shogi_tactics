@@ -14,7 +14,7 @@ export const App: FC = () => (
       <Typography sx={{ p: 1 }}>遊び方やルールは<MaterialLink href="https://github.com/motojouya/kniw" underline="always">こちらのページ</MaterialLink>を参照してください。</Typography>
       <Stack direction="row" sx={{ justifyContent: 'space-around', p: 1, width: '100%' }}>
         <Box>
-          <Link href="/battle/" line>
+          <Link href="/list/" line>
             <Typography>バトルの管理</Typography>
           </Link>
         </Box>

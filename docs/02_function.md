@@ -198,6 +198,13 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 ### 11. 一覧画面のurlをlistに
 - battleが指定されたら、versionをみて、当該のversion画面に遷移
 
+#### 10/11の済み分（実装メモ・同時対応）
+- vite multi-pageのエントリを再編。旧`battle`ページ(`?key`で new/list/battle を出し分け)を廃止し、`new`/`list`/`v1`の3エントリに分割(`vite.config.ts`の`rollupOptions.input`)。URLは`/new/` `/list/` `/v1/`。`/`(home)は据え置き。
+- `src/pages/{new,list,v1}/`に`index.html`/`index.tsx`/`app.tsx`を新設。旧`src/pages/battle/`は削除。subpage(`subpage/battle/{new,list,battle}.tsx`)は移動せず参照のみ付け替え。
+- repository初期化+IOProvider配線を`components/battle_io.tsx`(`BattleIO`)に共通化し、3ページのapp.tsxから利用。
+- `/v1`は`?key=<uuid>`で対象battleを表示。`BattleExsiting`に`version`propを追加し、`battle.version`と不一致なら表示しない(step10「同一versionじゃないと表示できない」)。turns空なら編成画面(`BattleFormation`)、それ以外は戦闘画面。
+- リンク/遷移の付け替え: home「バトルの管理」→`/list/`、list「新しく作る」→`/new/`・各battary→`/v1/?key=`、`new.tsx`の登録後transit→`/v1/?key=`、各画面のbackLink`/battle/`→`/list/`。`__new`分岐は廃止。
+
 ### 12. modelの型はzodから導出できるように
 - 保存するデータ型が一致していない状態を解消する必要があるので、battleからのskill参照やpiece参照をkey参照にして、presentationやcontrollerで解決する
 - **store_schema→model統合（step14の該当項目）と密接に連動する**。可能なら隣接させて進める。

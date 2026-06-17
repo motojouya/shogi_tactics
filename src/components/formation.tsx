@@ -82,7 +82,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
   };
 
   return (
-    <Container backLink="/battle/">
+    <Container backLink="/list/">
       <Stack sx={{ p: 1 }}>
         <Typography>{`${battle.first_player_name}(先手) vs ${battle.second_player_name}(後手) の編成`}</Typography>
         <Typography>{`先手 ${firstCount}/${unitCount} 後手 ${secondCount}/${unitCount}`}</Typography>
