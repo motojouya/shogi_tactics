@@ -239,6 +239,19 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 
 そもそも役割が曖昧で、特にmodelに実装すべき部分がformにあったりするので、どこに書くべきか考えて移す作業も必要
 
+#### 進め方（サブステップ分割。各完了時にbuild/test green）
+- **13-1: store_schema -> model統合**（済み。下記）
+- **13-2: store_utility・ioをstoreにmerge**（store_utility/ioの中身をstoreへ移動し、空になった元dirを削除）
+- **13-3: 命名変更**（store->repository / store_data->data(済) / procedure->controller / subpage->feature。importを一斉付け替え）
+- 「役割が曖昧でmodelに実装すべき部分がformにある」等の**責務の移動は今回スコープ外**（別途コード精査して指示する。step15側で扱う想定）
+
+#### 13-1の済み分（store_schema -> model統合）
+- **converter(`toModel`/`toJson`)を全廃**。datetime統一(step12先行)で保存型とmodel型が完全一致したため、変換は不要に。**model型(=zod schema)をそのまま保存・取得**する。
+- `store_utility/schema.ts`から`ToModel`/`ToJson`型を削除。`store_schema/`(unit/turn/battle + 各Json型エイリアス + converter)を**ディレクトリごと削除**。重複していたzod schemaはmodel側を正とする。
+- `disk_repository.ts`: `createRepository`から`toModel`/`toJson`引数を撤去。`save`/`exportJson`はmodelをそのまま渡し、`get`/`importJson`は`parseJson(schema)`の結果(=model)をそのまま返す。converterのエラー型`E`も不要になり`Repository<M>`へ簡素化(get/importJsonの戻りは`M | JsonSchemaUnmatchError | null`)。
+- consumer付け替え: `store/battle.ts`(`battleSchema`をmodelからimport、`createRepositoryBase<typeof battleSchema, Battle>`)、`io/indexed_database.ts`(`Dexie.Table<Battle>`)。
+- テスト: `store_schema/battle.unit.test.ts`(toBattle検証)を`model/battle.unit.test.ts`の`battleSchema.parse`テストへ移設(datetime文字列->Date coerce・2turn/DO_SKILL構造を検証)。`store/battle.unit.test.ts`は`toBattle`->`battleSchema.parse`へ。
+
 ### 14. repositoryの初期化はすべて一緒に行う
 - 初期化が必要なのはbattle tableぐらいで毎回使うので
 - context.IOに入れる値を、そもそもrepositoryで作ってしまう感じ。そしたら簡単なので。あるいはbattleRepositoryだけ別にして、ほかは全部でもいい
