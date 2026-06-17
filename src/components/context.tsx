@@ -1,8 +1,8 @@
 /* eslint react-refresh/only-export-components: 0 */
 import type { ReactNode } from "react";
 
-import type { Dialogue } from '../store/window_dialogue';
-import type { BattleRepository } from '../store/battle';
+import type { Dialogue } from '../repository/window_dialogue';
+import type { BattleRepository } from '../repository/battle';
 
 import { createContext, useContext } from "react";
 

@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { Typography } from '@mui/material';
 
 import { BattleIO } from '../../components/battle_io';
-import { BattleExsiting } from '../../subpage/battle/battle';
+import { BattleExsiting } from '../../feature/battle/battle';
 import { Container } from '../../components/utility';
 import { getSearchParams } from '../../components/utility';
 

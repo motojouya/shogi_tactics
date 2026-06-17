@@ -1,9 +1,9 @@
-import type { Battle } from "../../model/battle";
-import type { Unit } from "../../model/unit";
-import type { BattleRepository } from "../../store/battle";
-import type { Dialogue } from "../../store/window_dialogue";
+import type { Battle } from "../model/battle";
+import type { Unit } from "../model/unit";
+import type { BattleRepository } from "../repository/battle";
+import type { Dialogue } from "../repository/window_dialogue";
 
-import { copyBattle, createBattle, start } from "../../model/battle";
+import { copyBattle, createBattle, start } from "../model/battle";
 
 // step6: battle登録は2段階。
 // 1) registerBattle: player名/stepBase/unitCount/versionを受け取り、編成前の骨格(turns=[])を保存する。

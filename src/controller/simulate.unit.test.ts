@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
-import { start } from "../../model/battle";
-import { buildAction, effectBaseDamage, filterAlive } from "../../model/action";
+import { start } from "../model/battle";
+import { buildAction, effectBaseDamage, filterAlive } from "../model/action";
 import { simulate } from "./simulate";
 
 const zeros7 = Array.from({ length: 7 }, () => [0, 0, 0, 0, 0, 0, 0]);

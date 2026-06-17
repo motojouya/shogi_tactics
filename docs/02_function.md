@@ -257,6 +257,12 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - import付け替え: 移動ファイル間は相対(`../io/database`->`./database`等)、外部consumer(procedure/components/form/subpage/model/store各所)は`../io/*`/`../store_utility/*`->`../store/*`(または同階層`./`)へ。`mv`で移動しEditで付け替え(sed不使用)。
 - **既知のlayering smell(責務移動stepで解消予定)**: `io/dialogue`を`store/dialogue`へ移したことで、`model/unit`の`SelectOption`型importが**model->store**の型依存になった(`getSelectOption`/`selectUnit`がUI型をmodelに持つのが根因)。type-only importなので循環の実害(runtime/lint/build)は無いが、責務上は`SelectOption`等のUI型をmodelから外す対応が必要。13-3(命名変更)後の責務精査(step15想定)で扱う。
 
+#### 13-3の済み分（命名変更）
+- ディレクトリrename: **`store/` -> `repository/`**、**`subpage/` -> `feature/`**(`battle/`サブdirは保持)、**`procedure/battle/` -> `controller/`**(指示によりbattleサブdirを廃しcontroller直下にフラット化)。`store_data -> data`は既済のため対象外。
+- フラット化に伴い`controller/`配下8ファイルの内部相対importは深さ2->1(`../../model/` -> `../model/`、`../../store/` -> `../repository/`、`../../form/` -> `../form/`)。同階層rename(repository/feature)の移動ファイルは相対importの深さ変化なし(外部consumerのpath tokenのみ変更)。
+- 外部consumer付け替え: `components/*`・`form/battle`・`model/unit`の`../store/*` -> `../repository/*`、`components/*`の`../procedure/battle/*` -> `../controller/*`、`pages/{list,new,v1}/app.tsx`の`../../subpage/battle/*` -> `../../feature/battle/*`。`mv`(dir rename)+Editで実施(sed不使用)。
+- これで13(ディレクトリ統廃合)のmodel/store/io/store_utility/store_schema/procedure/subpageの再配置は完了(責務移動は別途)。
+
 ### 14. repositoryの初期化はすべて一緒に行う
 - 初期化が必要なのはbattle tableぐらいで毎回使うので
 - context.IOに入れる値を、そもそもrepositoryで作ってしまう感じ。そしたら簡単なので。あるいはbattleRepositoryだけ別にして、ほかは全部でもいい

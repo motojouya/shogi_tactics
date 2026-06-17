@@ -1,12 +1,12 @@
 import type { FC, ReactNode } from 'react';
-import type { BattleRepository } from '../store/battle';
+import type { BattleRepository } from '../repository/battle';
 
 import { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 
-import { createRepository as createBattleRepository } from '../store/battle';
-import { createDatabase } from '../store/indexed_database';
-import { dialogue } from '../store/window_dialogue';
+import { createRepository as createBattleRepository } from '../repository/battle';
+import { createDatabase } from '../repository/indexed_database';
+import { dialogue } from '../repository/window_dialogue';
 import { IOProvider } from './context';
 
 // new/list/v1の各ページで共通のrepository初期化とIOProvider配線をまとめる。

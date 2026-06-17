@@ -1,13 +1,13 @@
-import type { Battle } from "../../model/battle";
-import type { UnitReference } from "../../model/unit";
-import type { BattleRepository } from "../../store/battle";
-import type { DoActionForm } from "../../form/battle";
-import type { Dialogue } from "../../store/window_dialogue";
+import type { Battle } from "../model/battle";
+import type { UnitReference } from "../model/unit";
+import type { BattleRepository } from "../repository/battle";
+import type { DoActionForm } from "../form/battle";
+import type { Dialogue } from "../repository/window_dialogue";
 
-import { spendTurn } from "../../model/battle";
-import { toAction, ReceiverDuplicationError } from "../../form/battle";
-import { DataNotFoundError } from "../../store/schema";
-import { UserCancel } from "../../store/window_dialogue";
+import { spendTurn } from "../model/battle";
+import { toAction, ReceiverDuplicationError } from "../form/battle";
+import { DataNotFoundError } from "../repository/schema";
+import { UserCancel } from "../repository/window_dialogue";
 
 export type Act = (
   dialogue: Dialogue,

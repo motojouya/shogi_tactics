@@ -1,12 +1,12 @@
-import type { BattleRepository } from "../../store/battle";
-import type { Dialogue } from "../../store/window_dialogue";
+import type { BattleRepository } from "../repository/battle";
+import type { Dialogue } from "../repository/window_dialogue";
 
 import { describe, it, expect } from "vitest";
 
-import type { Unit } from "../../model/unit";
+import type { Unit } from "../model/unit";
 
 import { registerBattle, startBattle } from "./start";
-import { GameOngoing } from "../../model/battle";
+import { GameOngoing } from "../model/battle";
 
 // registerBattle/startBattleはget/importJsonを呼ばないので、それらはnull固定のスタブで十分。
 const battleRepository: BattleRepository = {

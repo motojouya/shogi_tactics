@@ -14,8 +14,8 @@ import {
   FormControlLabel,
 } from '@mui/material';
 
-import { pieceRepository } from '../store/piece';
-import { startBattle } from '../procedure/battle/start';
+import { pieceRepository } from '../repository/piece';
+import { startBattle } from '../controller/start';
 import { useIO } from './context';
 import { Container } from './utility';
 

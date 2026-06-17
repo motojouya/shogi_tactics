@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
 
-import type { BattleRepository } from "../../store/battle";
-import type { Dialogue } from "../../store/window_dialogue";
-import type { Battle } from "../../model/battle";
+import type { BattleRepository } from "../repository/battle";
+import type { Dialogue } from "../repository/window_dialogue";
+import type { Battle } from "../model/battle";
 
-import { createBattle, start, GameFirst, GameSecond } from "../../model/battle";
+import { createBattle, start, GameFirst, GameSecond } from "../model/battle";
 import { surrender } from "./surrender";
-import { UserCancel } from "../../store/window_dialogue";
+import { UserCancel } from "../repository/window_dialogue";
 
 const makeBattle = (): Battle => {
   const battle = createBattle("key", "first", "second", 2, 2, "v1");

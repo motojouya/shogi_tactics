@@ -47,14 +47,14 @@ import {
   ReceiverDuplicationError,
   DO_NOTHING,
 } from '../form/battle';
-import { pieceRepository } from '../store/piece';
-import { statusRepository } from '../store/status';
+import { pieceRepository } from '../repository/piece';
+import { statusRepository } from '../repository/status';
 
-import { DataNotFoundError } from '../store/schema';
-import { act } from '../procedure/battle/act';
-import { surrender } from '../procedure/battle/surrender';
-import { simulate } from '../procedure/battle/simulate';
-import { UserCancel } from '../store/window_dialogue';
+import { DataNotFoundError } from '../repository/schema';
+import { act } from '../controller/act';
+import { surrender } from '../controller/surrender';
+import { simulate } from '../controller/simulate';
+import { UserCancel } from '../repository/window_dialogue';
 import { useIO } from './context';
 import { Container } from './utility';
 

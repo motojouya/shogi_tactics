@@ -1,10 +1,10 @@
-import type { Battle } from "../../model/battle";
-import type { UnitReference } from "../../model/unit";
-import type { BattleRepository } from "../../store/battle";
-import type { Dialogue } from "../../store/window_dialogue";
+import type { Battle } from "../model/battle";
+import type { UnitReference } from "../model/unit";
+import type { BattleRepository } from "../repository/battle";
+import type { Dialogue } from "../repository/window_dialogue";
 
-import { GameFirst, GameSecond, copyBattle, surrender as modelSurrender } from "../../model/battle";
-import { UserCancel } from "../../store/window_dialogue";
+import { GameFirst, GameSecond, copyBattle, surrender as modelSurrender } from "../model/battle";
+import { UserCancel } from "../repository/window_dialogue";
 
 export type Surrender = (
   battleRepository: BattleRepository,

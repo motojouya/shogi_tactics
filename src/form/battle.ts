@@ -1,13 +1,13 @@
 import type { UnitReference } from "../model/unit";
 import type { DoActionInput } from "../model/battle";
-import type { SelectOption } from "../store/dialogue";
+import type { SelectOption } from "../repository/dialogue";
 
 import { z } from "zod";
 
-import { DataNotFoundError } from "../store/schema";
+import { DataNotFoundError } from "../repository/schema";
 import { selectUnit } from "../model/unit";
-import { actionRepository } from "../store/action";
-import { pieceRepository } from "../store/piece";
+import { actionRepository } from "../repository/action";
+import { pieceRepository } from "../repository/piece";
 import { ORDER_DO_NOTHING } from "../model/turn";
 
 // 何もしないを表すフォーム値(actionKeyとして使用)

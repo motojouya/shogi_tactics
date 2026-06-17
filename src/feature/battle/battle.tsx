@@ -5,7 +5,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 
 import { BattleContainer } from '../../components/battle';
 import { BattleFormation } from '../../components/formation';
-import { JsonSchemaUnmatchError } from '../../store/schema';
+import { JsonSchemaUnmatchError } from '../../repository/schema';
 import { useIO } from '../../components/context';
 import { Container } from '../../components/utility';
 

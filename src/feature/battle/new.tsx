@@ -11,8 +11,8 @@ import {
   Typography,
 } from '@mui/material';
 
-import { pieceRepository } from '../../store/piece';
-import { registerBattle, startBattle } from '../../procedure/battle/start';
+import { pieceRepository } from '../../repository/piece';
+import { registerBattle, startBattle } from '../../controller/start';
 import { buildNormalUnits, NORMAL_STEP_BASE, NORMAL_UNIT_COUNT } from '../../model/normal_mode';
 import { useIO } from '../../components/context';
 import { transit } from '../../components/utility';

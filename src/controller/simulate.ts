@@ -1,9 +1,9 @@
-import type { Turn } from "../../model/turn";
-import type { Unit, UnitReference } from "../../model/unit";
-import type { Action } from "../../model/action";
+import type { Turn } from "../model/turn";
+import type { Unit, UnitReference } from "../model/unit";
+import type { Action } from "../model/action";
 
-import { copyTurn } from "../../model/turn";
-import { sameUnit, toUnitReference } from "../../model/unit";
+import { copyTurn } from "../model/turn";
+import { sameUnit, toUnitReference } from "../model/unit";
 
 // 技を1人のreceiverに適用した結果を予測する(実行前の表示用)。死亡除外はせずhpの変化を見る。
 export type Simulated = { survive: boolean; unit: Unit | null };
