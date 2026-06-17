@@ -42,9 +42,9 @@ export const orderSchema = z.discriminatedUnion("type", [
 ]);
 export type Order = z.infer<typeof orderSchema>;
 
-// datetimeはmodelではDate。json(store_schema)では文字列に直列化される(step12時点ではstore_schemaは別管理)。
+// datetimeはmodel/json(store_schema)ともにDateで統一。z.coerce.date()でJSON import時の文字列もDate化する。
 export const turnSchema = z.object({
-  datetime: z.date(),
+  datetime: z.coerce.date(),
   order: orderSchema,
   units: z.array(unitSchema), // 行動適用・死亡除外後の全生存駒。steps昇順=次の行動順。初期値はlength=0
 });

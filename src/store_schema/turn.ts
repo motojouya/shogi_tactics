@@ -2,11 +2,8 @@ import type { Turn, Order } from "../model/turn";
 import type { Unit } from "../model/unit";
 import type { ToModel, ToJson } from "../store_utility/schema";
 
-import { parse, format } from "date-fns";
-
 import { z } from "zod";
 
-import { JsonSchemaUnmatchError } from "../store_utility/schema";
 import { toUnit, toUnitJson, unitSchema, toUnitReference, toUnitReferenceJson, unitReferenceSchema } from "./unit";
 
 export const formationSchema = z.object({
@@ -40,7 +37,8 @@ export type OrderSchema = typeof orderSchema;
 export type OrderJson = z.infer<OrderSchema>;
 
 export const turnSchema = z.object({
-  datetime: z.string().datetime({ local: true }),
+  // datetimeはmodelとjsonでDateに統一。IndexedDB(Dexie)は構造化クローンでDateをネイティブ保存し、JSON import時の文字列はcoerceでDate化する。
+  datetime: z.coerce.date(),
   order: orderSchema,
   units: z.array(unitSchema),
 });
@@ -73,11 +71,8 @@ export const toOrderJson: ToJson<Order, OrderJson> = (order) => {
   };
 };
 
-type FormatDate = (date: Date) => string;
-const formatDate: FormatDate = (date) => format(date, "yyyy-MM-dd'T'HH:mm:ss");
-
 export const toTurnJson: ToJson<Turn, TurnJson> = (turn) => ({
-  datetime: formatDate(turn.datetime),
+  datetime: turn.datetime,
   order: toOrderJson(turn.order),
   units: turn.units.map(toUnitJson),
 });
@@ -109,19 +104,13 @@ export const toOrder: ToModel<Order, OrderJson, never> = (orderJson) => {
   };
 };
 
-export const toTurn: ToModel<Turn, TurnJson, JsonSchemaUnmatchError> = (turnJson) => {
-  let datetime;
-  try {
-    datetime = parse(turnJson.datetime, "yyyy-MM-dd'T'HH:mm:ss", new Date());
-  } catch (e) {
-    return new JsonSchemaUnmatchError(e, "日付が間違っています");
-  }
-
+// datetimeはschema(z.coerce.date())でDateに正規化済みのため、ここは構造を写すだけ(parse不要・エラーなし)。
+export const toTurn: ToModel<Turn, TurnJson, never> = (turnJson) => {
   const order = toOrder(turnJson.order);
   const units: Unit[] = turnJson.units.map(toUnit);
 
   return {
-    datetime,
+    datetime: turnJson.datetime,
     order,
     units,
   };

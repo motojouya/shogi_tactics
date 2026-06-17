@@ -6,7 +6,6 @@ import { z } from "zod";
 
 import { toTurn, toTurnJson, turnSchema } from "./turn";
 
-import { JsonSchemaUnmatchError } from "../store_utility/schema";
 import { GameDraw, GameFirst, GameOngoing, GameSecond } from "../model/battle";
 
 // step6: home/visitorを廃止。ロスターは先頭Turn.unitsが持つ。
@@ -34,20 +33,12 @@ export const toBattleJson: ToJson<Battle, BattleJson> = (battle) => ({
   version: battle.version,
 });
 
-export type ToBattle = ToModel<Battle, BattleJson, JsonSchemaUnmatchError>;
+// datetimeはschema(turnSchema)でDate化済み。toTurnはエラーを返さないため、構造を写すだけ。
+export type ToBattle = ToModel<Battle, BattleJson, never>;
 export const toBattle: ToBattle = (battleJson) => {
-  const { key, first_player_name, second_player_name, stepBase, unitCount, version } = battleJson;
+  const { key, first_player_name, second_player_name, stepBase, unitCount, version, result } = battleJson;
 
-  const turns: Turn[] = [];
-  for (const turnJson of battleJson.turns) {
-    const turn = toTurn(turnJson);
-    if (turn instanceof JsonSchemaUnmatchError) {
-      return turn;
-    }
-    turns.push(turn);
-  }
-
-  const { result } = battleJson;
+  const turns: Turn[] = battleJson.turns.map(toTurn);
 
   return {
     key,
