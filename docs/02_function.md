@@ -252,6 +252,11 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - consumer付け替え: `store/battle.ts`(`battleSchema`をmodelからimport、`createRepositoryBase<typeof battleSchema, Battle>`)、`io/indexed_database.ts`(`Dexie.Table<Battle>`)。
 - テスト: `store_schema/battle.unit.test.ts`(toBattle検証)を`model/battle.unit.test.ts`の`battleSchema.parse`テストへ移設(datetime文字列->Date coerce・2turn/DO_SKILL構造を検証)。`store/battle.unit.test.ts`は`toBattle`->`battleSchema.parse`へ。
 
+#### 13-2の済み分（store_utility・ioをstoreにmerge）
+- `io/`(database/dialogue/indexed_database/window_dialogue)と`store_utility/`(disk_repository/memory_repository/schema)の中身を**`store/`へ移動**し、空になった`io/`・`store_utility/`を削除。
+- import付け替え: 移動ファイル間は相対(`../io/database`->`./database`等)、外部consumer(procedure/components/form/subpage/model/store各所)は`../io/*`/`../store_utility/*`->`../store/*`(または同階層`./`)へ。`mv`で移動しEditで付け替え(sed不使用)。
+- **既知のlayering smell(責務移動stepで解消予定)**: `io/dialogue`を`store/dialogue`へ移したことで、`model/unit`の`SelectOption`型importが**model->store**の型依存になった(`getSelectOption`/`selectUnit`がUI型をmodelに持つのが根因)。type-only importなので循環の実害(runtime/lint/build)は無いが、責務上は`SelectOption`等のUI型をmodelから外す対応が必要。13-3(命名変更)後の責務精査(step15想定)で扱う。
+
 ### 14. repositoryの初期化はすべて一緒に行う
 - 初期化が必要なのはbattle tableぐらいで毎回使うので
 - context.IOに入れる値を、そもそもrepositoryで作ってしまう感じ。そしたら簡単なので。あるいはbattleRepositoryだけ別にして、ほかは全部でもいい
