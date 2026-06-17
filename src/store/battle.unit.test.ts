@@ -2,8 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import type { Database } from "../io/database";
 import type { Battle } from "../model/battle";
-import { GameOngoing } from "../model/battle";
-import { toBattle } from "../store_schema/battle";
+import { GameOngoing, battleSchema } from "../model/battle";
 import { createRepository } from "./battle";
 import { format } from "date-fns";
 
@@ -43,7 +42,7 @@ const formatDate: FormatDate = (date) => format(date, "yyyy-MM-dd'T'HH:mm:ss");
 describe("Battle#createRepository", function () {
   it("save", async () => {
     const repository = await createRepository(dbMock);
-    const battle = toBattle(testData) as Battle;
+    const battle = battleSchema.parse(testData);
     await repository.save(battle);
     expect(true).toBe(true);
   });

@@ -1,8 +1,5 @@
 import { z } from "zod";
 
-export type ToModel<M, J, E> = (json: J) => M | E;
-export type ToJson<M, J> = (model: M) => J;
-
 export class JsonSchemaUnmatchError {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly error: any;

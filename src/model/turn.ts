@@ -42,7 +42,7 @@ export const orderSchema = z.discriminatedUnion("type", [
 ]);
 export type Order = z.infer<typeof orderSchema>;
 
-// datetimeはmodel/json(store_schema)ともにDateで統一。z.coerce.date()でJSON import時の文字列もDate化する。
+// datetimeはmodel型(=保存型)でDateに統一。z.coerce.date()でJSON import時の文字列もDate化する。
 export const turnSchema = z.object({
   datetime: z.coerce.date(),
   order: orderSchema,

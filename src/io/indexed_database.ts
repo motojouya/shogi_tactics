@@ -2,10 +2,10 @@ import type { Save, List, Get, Remove, ExportJson, ImportJson, Database } from "
 
 import Dexie from "dexie";
 
-import type { BattleJson } from "../store_schema/battle";
+import type { Battle } from "../model/battle";
 
 class KniwDB extends Dexie {
-  battle!: Dexie.Table<BattleJson, string>;
+  battle!: Dexie.Table<Battle, string>;
 
   constructor() {
     super("KniwDB");

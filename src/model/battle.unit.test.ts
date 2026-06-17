@@ -12,6 +12,7 @@ import {
   nextActor,
   sortedUnits,
   getLastTurn,
+  battleSchema,
   GameOngoing,
   GameFirst,
   GameSecond,
@@ -183,5 +184,51 @@ describe("Battle#surrender / isSettlement", function () {
       { side: "SECOND", piece: "pawn", hp: 0, steps: 0, statuses: [], leader: true },
     ]);
     expect(isSettlement(battle)).toBe(GameDraw);
+  });
+});
+
+// 保存型(=model)をそのまま検証/復元する。datetime文字列はz.coerce.date()でDate化される。
+describe("Battle#battleSchema", function () {
+  it("永続化されたjson形(datetimeは文字列)をparseしBattleに復元する", function () {
+    const json = {
+      key: "0191e000-0000-7000-8000-000000000000",
+      first_player_name: "light",
+      second_player_name: "dark",
+      stepBase: 4,
+      unitCount: 2,
+      version: "v1",
+      turns: [
+        {
+          datetime: "2023-06-29T12:12:21",
+          order: { type: "FORMATION" },
+          units: [
+            { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+            { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
+          ],
+        },
+        {
+          datetime: "2023-06-29T12:12:23",
+          order: {
+            type: "DO_SKILL",
+            actionKey: "meleeAttack",
+            actor: { side: "FIRST", piece: "king" },
+            receivers: [{ side: "SECOND", piece: "pawn" }],
+          },
+          units: [
+            { side: "SECOND", piece: "pawn", hp: 2, steps: 0, statuses: [], leader: true },
+            { side: "FIRST", piece: "king", hp: 2, steps: 6, statuses: [], leader: true },
+          ],
+        },
+      ],
+      result: "ONGOING",
+    };
+
+    const battle = battleSchema.parse(json);
+    expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
+    expect(battle.turns.length).toBe(2);
+    expect(battle.turns[0].datetime).toBeInstanceOf(Date);
+    expect(battle.turns[0].order.type).toBe("FORMATION");
+    expect(battle.turns[1].order.type).toBe("DO_SKILL");
+    expect(battle.result).toBe(GameOngoing);
   });
 });
