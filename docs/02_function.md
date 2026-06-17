@@ -210,6 +210,13 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - **store_schema→model統合（step14の該当項目）と密接に連動する**。可能なら隣接させて進める。
 - **着手前にmodel→store(repository)→modelの循環依存を調査する**（01_copy.md step10 NOTE）。schemaをmodelに取り込む際に循環が残らないか確認してから進め方を決める。
 
+#### 12の済み分（実装メモ）
+- 循環依存調査結果: `model`は`io/dialogue`(型)と自layerのみに依存し、store/repositoryへは非依存。よってmodelにzodを入れても循環は生じない(store_schema→model、store→model/store_schemaの一方向のまま)。
+- key参照化はstep7/8で完了済みのため、シリアライズ対象型はdatetime(Date vs string)以外、modelとjsonの形が一致。これを前提にmodel型をzod導出へ変更。
+- 対象(保存されるmodel型): `model/unit`(sideSchema/unitSchema/unitReferenceSchema→`Side`/`Unit`/`UnitReference`)、`model/turn`(formation/doAction/doNothing/surrender/orderSchema/turnSchema→`Order`/`Turn`等。datetimeは`z.date()`)、`model/battle`(gameResultSchema/battleSchema→`GameResult`/`Battle`)。型は全て`z.infer`で導出。関数(copy系/sortedUnits/spendTurn等)は変更なし。
+- 対象外: `Piece`/`Action`/`Status`はメモリ常駐のデータ定義(キーのみ保存)で直列化しないため、従来通り手書き型のまま。
+- store_schema(json schema+converter+repository検証schema)は**step12では据え置き**。modelとstore_schemaに同形schemaが一時的に二重化するが、これはstep14(store_schema→model統合)で解消する。store_schemaはmodelの型importのみで互換(変更不要)。
+
 ### 13. repositoryの初期化はすべて一緒に行う
 - 初期化が必要なのはbattle tableぐらいで毎回使うので
 - context.IOに入れる値を、そもそもrepositoryで作ってしまう感じ。そしたら簡単なので。あるいはbattleRepositoryだけ別にして、ほかは全部でもいい
