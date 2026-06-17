@@ -217,6 +217,13 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - 対象外: `Piece`/`Action`/`Status`はメモリ常駐のデータ定義(キーのみ保存)で直列化しないため、従来通り手書き型のまま。
 - store_schema(json schema+converter+repository検証schema)は**step12では据え置き**。modelとstore_schemaに同形schemaが一時的に二重化するが、これはstep14(store_schema→model統合)で解消する。store_schemaはmodelの型importのみで互換(変更不要)。
 
+#### 12の追加対応: datetime型の一致（step14先行）
+- 唯一の差分だった`turn.datetime`(model=Date / json=string)を**Dateに統一**。分岐を作らず統合できる状態にした。
+- 仕組み: IndexedDB(Dexie)は構造化クローンで`Date`をネイティブ保存できるため、保存・取得は`Date`のまま。JSON import時のみ文字列が来るので、schemaを`z.coerce.date()`にして文字列→Dateへ自動変換。
+- model/store_schema双方の`turnSchema.datetime`を`z.coerce.date()`に統一(infer型はともに`Date`、schema自体も同形に)。
+- `toTurn`/`toTurnJson`/`toBattle`からdatetime変換(date-fnsの`parse`/`format`)を撤去。datetime正規化はschema(parseJson)に集約され、converterは構造写像のみ・エラーなし(`toTurn`/`toBattle`は`ToModel<...,never>`)。
+- 後方互換: 既存の文字列datetimeで保存済みのデータも、読み込み時に`z.coerce.date()`がDate化するため問題なし。export時は`JSON.stringify(Date)`によりUTC ISO文字列になる(時刻は保持)。
+
 ### 13. repositoryの初期化はすべて一緒に行う
 - 初期化が必要なのはbattle tableぐらいで毎回使うので
 - context.IOに入れる値を、そもそもrepositoryで作ってしまう感じ。そしたら簡単なので。あるいはbattleRepositoryだけ別にして、ほかは全部でもいい
