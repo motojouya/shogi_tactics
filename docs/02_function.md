@@ -224,11 +224,7 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 - `toTurn`/`toTurnJson`/`toBattle`からdatetime変換(date-fnsの`parse`/`format`)を撤去。datetime正規化はschema(parseJson)に集約され、converterは構造写像のみ・エラーなし(`toTurn`/`toBattle`は`ToModel<...,never>`)。
 - 後方互換: 既存の文字列datetimeで保存済みのデータも、読み込み時に`z.coerce.date()`がDate化するため問題なし。export時は`JSON.stringify(Date)`によりUTC ISO文字列になる(時刻は保持)。
 
-### 13. repositoryの初期化はすべて一緒に行う
-- 初期化が必要なのはbattle tableぐらいで毎回使うので
-- context.IOに入れる値を、そもそもrepositoryで作ってしまう感じ。そしたら簡単なので。あるいはbattleRepositoryだけ別にして、ほかは全部でもいい
-
-### 14. ディレクトリ統廃合
+### 13. ディレクトリ統廃合
 - model -> 何もしない
 - store -> repositoryに命名変更
 - store_data -> dataに命名変更
@@ -243,12 +239,18 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 
 そもそも役割が曖昧で、特にmodelに実装すべき部分がformにあったりするので、どこに書くべきか考えて移す作業も必要
 
-### 15. 駒画像導入
+### 14. repositoryの初期化はすべて一緒に行う
+- 初期化が必要なのはbattle tableぐらいで毎回使うので
+- context.IOに入れる値を、そもそもrepositoryで作ってしまう感じ。そしたら簡単なので。あるいはbattleRepositoryだけ別にして、ほかは全部でもいい
+
+### 15. 内部構造の精査
+精査してからタスクが出てくる
+featureは不要かも。pagesを丁寧に定義したので。その代わりcomponent側に移すコードもあるはず。
+あとはunitに駒が重複しないようにバリデーションが入りそう。その他、制約はmodelに実装したいが、けっこう外側で定義しちゃってる
 
 ### 16. UI調整
 たぶんもっといろいろ治すところが出てくる
-勝利条件が全滅になってるかも。王将のロストにする。戦乱モードでは駒を指定できてもいいかも。
-unitに駒が重複しないようにバリデーションが入りそう。その他、制約はmodelに実装したいが、けっこう外側で定義しちゃってる
+駒画像導入も
 
 ### 17. dependabot導入
 - 他stepへの依存が無いため、サプライチェーン対策の観点で**前倒し実施も可**。
