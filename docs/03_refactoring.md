@@ -143,3 +143,90 @@ components / pages (presentation)  data (静的データ定義)
 | 4.7 | `BattleTurn` 分割 / `Action` のメタと実ロジックの構造分離 | 整理 | 低 | `components/battle.tsx`, `model/action.ts` |
 
 > 注: 2.4 の promotedLance 回復バグは構造課題(healCap ハードコード)の副作用だが、**単体のバグ修正としても先行対応可能**(`healCap` に promotedLance を加える/MaxHP 供給に切り替える)。
+
+---
+
+## 7. ユーザー方針(02_function.md step15 memo の反映)
+
+§1〜§6 は精査時点の「現状の問題と選択肢」。本節は `docs/02_function.md` step15 の `#### memo` に記された**ユーザーの決定・追加項目**を、上記分析に紐づけて整理したもの。**選択肢が割れていた箇所はここで方針が確定**しており、§3.1/§3.3/§4.7 など一部は私の推奨と**逆の決定**になっている(各項に明記)。実装の正は本節とする。
+
+### 7.1 model 層へのドメイン集約
+
+- **memory resolver 型を model に定義し、各 repository の `get` を渡す**(§2.4 の解決方針として確定):
+  - `model` に `(key: string) => Action | null` / `(key: string) => Piece | null` / `(key: string) => Status | null` の型を定義する。
+  - これらを束ねた dictionary を **`repository/index` で memory 3種(piece/action/status)の `get` だけ集めて生成**し、battle の model 関数へ渡す。**型(形)定義は model 側**に置く。
+  - これにより model が memory repository 相当を引数で受け取れ、**`action#act` が Piece(MaxHP)を要求する部分(=§2.4 healCap ハードコード/promotedLance 回復バグ)も同じ仕組みで解決**する。`healCap` の `king`/`promotedLance` データ二重管理が消える。
+- **`ReceiverDuplicationError`(受け手重複)は model 側の制約として実装**(§3.1/§3.4 で「あるべき層=model」とした項の決定)。「1つずつ追加 / 一気に追加」は画面実装方針が未定のため**今後の検討課題**とし、当面は現状の一気追加のまま。
+- **`model/normal_mode.ts` の内容は `model/unit.ts` へ統合**。ただし `NORMAL_UNIT_COUNT` / `NORMAL_STEP_BASE` は **`model/battle` へ**置く。
+- **`selectUnit` を form 層へ移動**(§2.1 で「model に残すか form へ寄せるか選択」とした点の決定 → **form 側へ**)。`getSelectOption` 削除(§2.1)と合わせ、model の UI 依存(`SelectOption`)を一掃する。
+
+### 7.2 form 層の再編(ファイル分割・select 解釈の集約)
+
+- **`form/battle.ts` を責務ごとに分割**(§3.1 の具体ファイル名を確定):
+  - action 関連 → **`form/action.ts`**
+  - unit 編成 → **`form/formation.ts`**
+  - battle 作成 → **`form/creation.ts`**
+- **`toAction` / `DoActionInput` の見直し**: 現状 form の `toAction` が **model 型 `DoActionInput` を組み立てて返す**のがレイヤとして不適切。方針:
+  - model への入力型は model 側に置く。form は**個々の値を取り出す**形にする。
+  - **action は repository 経由の解決なので form の責務外**。`spendTurn` に `repository#get`(=7.1 の resolver)を渡すなら、**action 解決は `spendTurn` 側で行う**。
+  - したがって form 側は **単に `UnitReference` の list を取得する関数**を用意すればよい(完全な `DoActionInput` の組み立ては不要)。
+- **select の option 取得は form に寄せる**(⚠ **§3.1 の私の推奨「表示整形=`receiverSelectOption` を component/utility へ」を変更**)。値の解釈も form の役割なので、option 生成と値解釈を form に集約する方がまとまりがよい、という判断。
+
+### 7.3 controller 層
+
+- **controller は第1引数で `Repository` を丸ごと受け取る**(現状の個別 repo/local を引数で受ける形からの変更)。controller 間でインタフェースが揃い、DI が単純化する。
+
+### 7.4 turn / battle ドメインの再設計
+
+- **`Turn` に `previous: number` を追加**(今後の「巻き戻し」機能のため)。
+- **battle の turn は sort しない / `hp:0` のユニットも残す**。行動順・次の actor は**その都度算出**する(現状 `sortedUnits` で並べ替え・死亡除外している方針の見直し)。
+- **`spendTurn` の分解**: 現状 `battle#spendTurn` が仮 turn を作り cost 計算まで抱えているロジックを **`Turn` 側へ移す**:
+  - actor の cost 消費は `Turn` の仕事にする。
+  - `action` は **`Turn` を知らず、`Unit` を受け取ってその Unit の計算だけ**を行う形にする(turn 依存を action から外す)。
+  - ※ §2.2(`simulate` を controller→model へ)と連動。ドメイン計算を model の turn/action に正しく再配置する一連の作業。
+
+### 7.5 repository / utility の整理
+
+- **import/export ロジック詳細(`BattleRepository#pickerOpts` 含む)を `repository/utility` に寄せて呼び出す**(repository 内の整理。§4.x 未記載の新規項目)。
+- **`components/utility.tsx` の routing(`transit`/`getSearchParams`)を `repository/local` へ移動**(⚠ **§3.3 の私の推奨「`components/routing.ts` か repository 寄り」を `repository/local` に確定**)。`local`(環境 provider)に画面遷移も含める判断。
+
+### 7.6 命名調整(細かい)
+
+- 残存する **`skill` → `action`** へ。
+- **repository と model を区別したい文脈では接尾語に `Repository` を付ける**。
+- その他、随時。
+
+### 7.7 feature ディレクトリの復活と画面分割(§4.7 の上位方針)
+
+⚠ **13-3 追加対応で削除した `feature/` を復活させる**方針(過去の判断の転換)。理由と形:
+
+- `components/battle.tsx` が肥大しているのは「component ではなく**画面全体**を表現している」ため。**画面表現を `feature/` に移す**ことで緩和する(§4.7 の `BattleTurn` 分割より上位の構造方針)。
+- **`pages` から `new` を削除**し、**`/v1` で `key` query string が無いとき `new` を出す**。
+- `/v1` に機能が集まるので、**creation(new) / formation / action を出し分け**る(決着済みは別途用意するかもしれない)。
+- 出し分け先の実装を **`feature/` に各ファイルで表現**する。
+
+### 7.8 後回し(UI 調整後に判断)
+
+- `pages/*/app.tsx` の細かい実装を component へ寄せるのは、**UI 調整が進んでから**判断する。
+
+### 7.9 方針サマリ(memo 由来の追加・変更)
+
+| # | 内容 | 分析項目との関係 | 区分 |
+|---|---|---|---|
+| 7.1a | model に memory resolver 型(Action/Piece/Status の `(key)=>…|null`)を定義し repository の `get` を渡す | §2.4 の解決方針として確定 | 確定 |
+| 7.1b | `repository/index` で memory3種の `get` dictionary を生成 → battle model へ | §2.4 関連・新規 | 新規 |
+| 7.1c | `ReceiverDuplicationError` を model 制約へ(当面は一気追加) | §3.1/§3.4 の決定 | 確定 |
+| 7.1d | `normal_mode.ts`→`unit.ts`、`NORMAL_*`→`battle` | 新規 | 新規 |
+| 7.1e | `selectUnit` を form へ | §2.1 の決定(form 側) | 確定 |
+| 7.2a | `form/battle.ts`→`action.ts`/`formation.ts`/`creation.ts` 分割 | §3.1 の具体化 | 確定 |
+| 7.2b | `toAction` は `UnitReference` list 取得へ縮小、action 解決は `spendTurn` | §3.1 の再定義 | 新規 |
+| 7.2c | select option 取得を form に集約 | **§3.1 の推奨を変更**(component→form) | 変更 |
+| 7.3 | controller 第1引数で `Repository` 丸ごと受け取り | 新規 | 新規 |
+| 7.4a | `Turn.previous` 追加(巻き戻し用) | 新規 | 新規 |
+| 7.4b | turn を sort しない / `hp:0` 残す / 行動順は算出 | 新規(構造) | 新規 |
+| 7.4c | `spendTurn` の cost 計算を `Turn` へ、action は Unit のみ受ける | §2.2 と連動 | 新規 |
+| 7.5a | import/export 詳細(`pickerOpts`)を `repository/utility` へ | 新規 | 新規 |
+| 7.5b | routing を `repository/local` へ | **§3.3 の移動先を確定**(repository/local) | 変更 |
+| 7.6 | 命名: `skill`→`action`、`Repository` 接尾語 | §4 系 | 確定 |
+| 7.7 | `feature/` 復活・`/v1` で出し分け・画面表現を feature へ | **§4.7 の上位方針**(feature 削除を転換) | 変更 |
+| 7.8 | pages→component の細分化は UI 調整後 | §4.7 関連 | 保留 |
