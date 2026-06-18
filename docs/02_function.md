@@ -320,7 +320,7 @@ featureは不要かも。pagesを丁寧に定義したので。その代わりco
 
 #### memo
 - BattleRepository#pickerOptsを含め、import/exportのロジック詳細は、utilityに寄せて呼び出したい
-- form/battle.tsはaction.tsのほうがいい。んで、unit編成はformation.ts。battle作成でbattleかな
+- form/battle.tsはaction.tsのほうがいい。んで、unit編成はformation.ts。battle作成でcreationかな
 - formのToActionはDoActionInputがmodelに実装されてるのがいまいちね。modelの入力はmodelにして、ToActionの戻り値もmodelの値をいくつかにしておく。というか、formから、それらをそれぞれ取得できたほうがいいかも。
   actionなんかはrepo経由なので、これはformの責務外で、spendTurnにrepository#getを渡すならspendTurnでやればいい
   なので単にunitReferenceのlistを取得する関数を用意すればいい
@@ -348,6 +348,10 @@ featureは不要かも。pagesを丁寧に定義したので。その代わりco
   - repositoryとmodelを区別したい文脈で接尾語にrepositoryをつける
   - その他
 - UI調整あとの話だが、pagesのapp.tsxの細かい実装はcomponentに入れてもいいかも。ただ、これはもっとUI調整をしてから
+- featureディレクトリは復活させたい。
+  で、pagesからnewは削除して、v1でkeyというquery stringが無いときにnewをだしたい。
+  v1に機能が沢山はいるので、creation(new)、formation, actionを出し分けるイメージ。もしかしたら決着済みは別途用意ずるかも
+  で、その出し分け先の実装として、featureに、各ファイルで表現するというもの。
 
 ### 16. dependabot導入
 - 他stepへの依存が無いため、サプライチェーン対策の観点で**前倒し実施も可**。
@@ -365,4 +369,7 @@ featureは不要かも。pagesを丁寧に定義したので。その代わりco
 markdownで書いてHTMLに変換したいが、reactで直書きのほうがいいかも
 markdownから変換するツールはいろいろありそうだが、装飾が面倒かもしれない
 githubを見るのではなく、画面上でみれたほうが良さそうだが、どこに置くかは要検討
+
+### 20. playwriteのテスト
+今後開発する際に、全体の流れにもバグを産まないようにするため
 
