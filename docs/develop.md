@@ -53,7 +53,7 @@
     対戦本体
 
 ### Battle Lifecycle
-battleはライフサイクルがあり、以下
+battleはライフサイクルがある
 
 ```mermaid
 stateDiagram-v2
@@ -70,13 +70,13 @@ urlのpathごとの画面ではなく、機能ごとの画面のこと。pathの
 以下の画面がある。
 
 - `/`  
-  トップ画面
+  トップ画面  
 - `/list`  
   battleのlistを表示する  
-- `/v1`
-  query stringがない場合、version1のbattleを作成して開始できる
-- `/v1?key=...` battleが編成中
-  特定のbattleの編成画面が表示される
-- `/v1?key=...` battleが対戦中/決着済み
-  特定のbattleの決着状態が表示される。対戦中なら行動選択画面も
+- `/v1`  
+  query stringがない場合、version1のbattleを作成して開始できる  
+- `/v1?key=...` battleが編成中  
+  特定のbattleの編成画面が表示される  
+- `/v1?key=...` battleが対戦中/決着済み  
+  特定のbattleの決着状態が表示される。対戦中なら行動選択画面も  
 
