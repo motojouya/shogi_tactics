@@ -341,6 +341,8 @@ featureは不要かも。pagesを丁寧に定義したので。その代わりco
 - battle#spendTurnで借りのturnをつくって、cost計算してってやってるので、これはturn側のロジックにしたい。
   これらのロジックは丸々actionには移せないか。turnを知ってるのはよくないので。actionは、unitを受け付けてそのunitの計算をする感じにするか
   actorのcost消費はturnのしごとか。なのでこのあたりはturnに追加したいな
+- component/utilityのroutingのはrepository/localに移動かな
+- repository/indexでmemory3つのgetだけ集めたdictionaryを取得できるように。んで、これをbattle Modelにわたすので、形定義はModel側
 - 細かい命名調整
   - skill->action
   - repositoryとmodelを区別したい文脈で接尾語にrepositoryをつける
