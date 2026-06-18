@@ -352,6 +352,7 @@ featureは不要かも。pagesを丁寧に定義したので。その代わりco
   で、pagesからnewは削除して、v1でkeyというquery stringが無いときにnewをだしたい。
   v1に機能が沢山はいるので、creation(new)、formation, actionを出し分けるイメージ。もしかしたら決着済みは別途用意ずるかも
   で、その出し分け先の実装として、featureに、各ファイルで表現するというもの。
+  components/battle.tsxが肥大化しているのは、componentではなく画面全体を表現しているからで、画面表現をfeatureに移動すれば緩和されるはず
 
 ### 16. dependabot導入
 - 他stepへの依存が無いため、サプライチェーン対策の観点で**前倒し実施も可**。
