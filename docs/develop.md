@@ -12,7 +12,7 @@
         開発時のチェックがある。通らないとmerge不可  
       - gh-pages.yml  
         github pagesの機能を使っているのでそのbuildを行う  
-  - docs/
+  - docs/  
     ドキュメント  
   - src/
     - model/  
@@ -24,7 +24,7 @@
     - repository/  
       保存したデータやマスタデータを出し入れする  
     - controller/  
-      modelとrepositoryを使って機能を実現する  
+      form,model,repositoryを使って機能を実現する  
     - components/  
       画面の部品  
     - feature/  
@@ -39,7 +39,8 @@
 単体テストは、対象のファイルと同じディレクトリに配置する
 
 ## Model
-データモデルは主にマスタ系と、実際に変化していくトランザクション系がある
+データモデルは主にマスタ系と、実際に変化していくトランザクション系がある。
+トランザクションデータはマスタを参照して、ロジックを実現している。
 
 - マスタ
   - Piece  
@@ -49,7 +50,7 @@
   - Status  
     unitに付与する状態を表現する
 - トランザクション
-  - battle
+  - battle  
     対戦本体
 
 ### Battle Lifecycle
@@ -78,5 +79,5 @@ urlのpathごとの画面ではなく、機能ごとの画面のこと。pathの
 - `/v1?key=...` battleが編成中  
   特定のbattleの編成画面が表示される  
 - `/v1?key=...` battleが対戦中/決着済み  
-  特定のbattleの決着状態が表示される。対戦中なら行動選択画面も  
+  特定のbattleの決着状態が表示される。対戦中なら行動選択機能も  
 
