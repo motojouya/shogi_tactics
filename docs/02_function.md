@@ -318,6 +318,35 @@ puppetの実装を検討。遠隔と近接の区別がつかなくなるので�
 featureは不要かも。pagesを丁寧に定義したので。その代わりcomponent側に移すコードもあるはず。
 あとはunitに駒が重複しないようにバリデーションが入りそう。その他、制約はmodelに実装したいが、けっこう外側で定義しちゃってる
 
+#### memo
+- BattleRepository#pickerOptsを含め、import/exportのロジック詳細は、utilityに寄せて呼び出したい
+- form/battle.tsはaction.tsのほうがいい。んで、unit編成はformation.ts。battle作成でbattleかな
+- formのToActionはDoActionInputがmodelに実装されてるのがいまいちね。modelの入力はmodelにして、ToActionの戻り値もmodelの値をいくつかにしておく。というか、formから、それらをそれぞれ取得できたほうがいいかも。
+  actionなんかはrepo経由なので、これはformの責務外で、spendTurnにrepository#getを渡すならspendTurnでやればいい
+  なので単にunitReferenceのlistを取得する関数を用意すればいい
+  selectUnit関数もformに移してくるほうがいいね
+  ReceiverDuplicationErrorだが、これはmodel側に実装すべき制約かな。1つずつ追加か、一気に追加は今後の検討課題。画面の実装方針がまだなので。一旦いまの一気追加で
+- selectのoption取得はformに寄せたい。値の解釈もformの役割なので、そこに集まってるほうがいい。
+- controllerは最初の引数で、Repositoryを丸々受け取りたい。
+- modelに以下の型定義ほしいね。んで、各repositoryのgetを渡す感じ
+  - (key:string) => Action | null
+  - (key:string) => Piece | null
+  - (key:string) => Status | null
+  - これらがあると、model側にmemory repositoryを渡すことができる。これらはいずれにしろ必要になるはずなので
+    action#actがpieceを要求する部分もこれで解決したい
+- model/normal_mode.tsの内容はunit.tsに実装すべきね
+  NORMAL_UNIT_COUNT,NORMAL_STEP_BASEはbattle
+- turnにprevious:numberを追加したい。今後巻き戻しの機能実装のため
+- battleのturnはsortする必要ないのと、hp:0でも残しておく。そのうえで、行動順や次のactorは算出する感じにする
+- battle#spendTurnで借りのturnをつくって、cost計算してってやってるので、これはturn側のロジックにしたい。
+  これらのロジックは丸々actionには移せないか。turnを知ってるのはよくないので。actionは、unitを受け付けてそのunitの計算をする感じにするか
+  actorのcost消費はturnのしごとか。なのでこのあたりはturnに追加したいな
+- 細かい命名調整
+  - skill->action
+  - repositoryとmodelを区別したい文脈で接尾語にrepositoryをつける
+  - その他
+- UI調整あとの話だが、pagesのapp.tsxの細かい実装はcomponentに入れてもいいかも。ただ、これはもっとUI調整をしてから
+
 ### 16. dependabot導入
 - 他stepへの依存が無いため、サプライチェーン対策の観点で**前倒し実施も可**。
 
