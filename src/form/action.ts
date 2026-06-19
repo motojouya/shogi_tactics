@@ -1,23 +1,13 @@
-import type { UnitReference } from "../model/unit";
-import type { DoActionInput } from "../model/battle";
+import type { Side, UnitReference } from "../model/unit";
 import type { SelectOption } from "../repository/utility";
 import type { Repository } from "../repository";
 
 import { z } from "zod";
 
-import { DataNotFoundError } from "../repository/error";
-import { selectUnit } from "../model/unit";
 import { ORDER_DO_NOTHING } from "../model/turn";
 
 // 何もしないを表すフォーム値(actionKeyとして使用)
 export const DO_NOTHING = ORDER_DO_NOTHING;
-
-export class ReceiverDuplicationError {
-  readonly message: string;
-  constructor(message: string) {
-    this.message = message;
-  }
-}
 
 export const doActionFormSchema = z.object({
   actionKey: z.string().min(1),
@@ -25,9 +15,19 @@ export const doActionFormSchema = z.object({
 });
 export type DoActionForm = z.infer<typeof doActionFormSchema>;
 
+// step15(S13/§7.1e): `${side}:${piece}` 形式のフォーム値文字列からUnitReferenceを復元する(model→form移設)。
+// 値(string)の解釈はform層の責務。formはmodelの型を知ってよい(逆は不可)。
+export type SelectUnit = (value: string) => UnitReference;
+export const selectUnit: SelectUnit = (value) => {
+  const index = value.indexOf(":");
+  const side = value.slice(0, index) as Side;
+  const piece = value.slice(index + 1);
+  return { side, piece };
+};
+
 const sideLabel = (reference: UnitReference): string => (reference.side === "FIRST" ? "先" : "後");
 
-// UnitReferenceを受け手選択肢に変換する。value形式は `${side}:${piece}` (model/unit.selectUnit互換)。
+// UnitReferenceを受け手選択肢に変換する。value形式は `${side}:${piece}` (selectUnit互換)。
 // piece repositoryはDIで受け取る(直接importしない)。
 export type ReceiverSelectOption = (pieceRepository: Repository["piece"]) => (reference: UnitReference) => SelectOption;
 export const receiverSelectOption: ReceiverSelectOption = (pieceRepository) => (reference) => {
@@ -38,35 +38,13 @@ export const receiverSelectOption: ReceiverSelectOption = (pieceRepository) => (
   };
 };
 
-// フォーム値(actionKey + receivers)をspendTurnのDoActionInputへ変換する。
-// 何もしない=null。actionKey不正=DataNotFoundError。受け手重複=ReceiverDuplicationError。
-export type ToAction = (
-  actionRepository: Repository["action"],
-) => (form: DoActionForm) => DoActionInput | null | DataNotFoundError | ReceiverDuplicationError;
-export const toAction: ToAction = (actionRepository) => (form) => {
-  const { actionKey } = form;
-  if (actionKey === DO_NOTHING) {
-    return null;
-  }
-
-  const action = actionRepository.get(actionKey);
-  if (!action) {
-    return new DataNotFoundError(actionKey, "action", `${actionKey}というactionは存在しません`);
-  }
-
-  const receiverValues = form.receivers
+// step15(S13/§7.2b): toActionは解体した。formの責務は受け手フォーム値(`${side}:${piece}`の配列)を
+// UnitReference[]へ解決することのみ。actionKeyはmodelがそのまま受け取れる値なので関数で包まず、controllerが直接渡す。
+// action解決(repository経由)・受け手重複検証(model)はform外の責務。
+export type ToReceivers = (receivers: DoActionForm["receivers"]) => UnitReference[];
+export const toReceivers: ToReceivers = (receivers) =>
+  receivers
     .filter((receiver) => !!receiver)
     .map((receiver) => receiver.value)
-    .filter((value): value is string => !!value);
-
-  if (new Set(receiverValues).size !== receiverValues.length) {
-    return new ReceiverDuplicationError("同じunitを複数回えらべません");
-  }
-
-  const receivers: UnitReference[] = receiverValues.map(selectUnit);
-
-  return {
-    action,
-    receivers,
-  };
-};
+    .filter((value): value is string => !!value)
+    .map(selectUnit);

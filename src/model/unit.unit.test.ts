@@ -6,7 +6,6 @@ import {
   copyUnit,
   toUnitReference,
   sameUnit,
-  selectUnit,
   buildNormalUnits,
   NORMAL_PIECE_ORDER,
   nextFormationSide,
@@ -81,13 +80,6 @@ describe("Unit#sameUnit", function () {
 
   it("sideが異なればfalse", function () {
     expect(sameUnit({ side: "FIRST", piece: "king" }, { side: "SECOND", piece: "king" })).toBe(false);
-  });
-});
-
-describe("Unit#selectUnit", function () {
-  it("valueからUnitReferenceを復元する", function () {
-    expect(selectUnit("FIRST:king")).toEqual({ side: "FIRST", piece: "king" });
-    expect(selectUnit("SECOND:gold")).toEqual({ side: "SECOND", piece: "gold" });
   });
 });
 

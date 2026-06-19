@@ -45,9 +45,9 @@ import { toUnitReference } from '../model/unit';
 import {
   doActionFormSchema,
   receiverSelectOption,
-  ReceiverDuplicationError,
   DO_NOTHING,
 } from '../form/action';
+import { ReceiverDuplicationError } from '../model/action';
 import { DataNotFoundError } from '../repository/error';
 import { act } from '../controller/act';
 import { surrender } from '../controller/surrender';
@@ -235,7 +235,7 @@ export const BattleTurn: FC<{
 }> = ({ battle, lastTurn, reload }) => {
 
   const io = useIO();
-  const { battle: battleRepository, local, piece, action } = io;
+  const { battle: battleRepository, local, piece } = io;
   const resolvers = createResolvers(io);
 
   const {
@@ -272,7 +272,7 @@ export const BattleTurn: FC<{
       return;
     }
 
-    const result = await act(local, battleRepository, action, resolvers)(battle, actor, form, () => new Date());
+    const result = await act(local, battleRepository, resolvers)(battle, actor, form, () => new Date());
 
     if (result instanceof DataNotFoundError) {
       setMessage('入力してください');

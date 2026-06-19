@@ -31,7 +31,7 @@ export type Action = {
 export type GetAction = (key: string) => Action | null;
 
 // step15(S5/§7.1c): 受け手重複はドメイン制約。同じunitを複数回対象にできない。
-// (form/action.tsにも同名の暫定classがあるが、S13でこのmodel版へ寄せる)
+// (S13でform側の暫定classを廃しこのmodel版へ一本化済み。controllerがvalidateReceiversで使う)
 export class ReceiverDuplicationError {
   readonly message: string;
   constructor(message: string) {

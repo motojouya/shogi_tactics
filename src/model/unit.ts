@@ -37,14 +37,7 @@ export const toUnitReference: ToUnitReference = (unit) => ({
 export type SameUnit = (left: UnitReference, right: UnitReference) => boolean;
 export const sameUnit: SameUnit = (left, right) => left.side === right.side && left.piece === right.piece;
 
-// `${side}:${piece}` 形式のフォーム値文字列からUnitReferenceを復元する
-export type SelectUnit = (value: string) => UnitReference;
-export const selectUnit: SelectUnit = (value) => {
-  const index = value.indexOf(":");
-  const side = value.slice(0, index) as Side;
-  const piece = value.slice(index + 1);
-  return { side, piece };
-};
+// step15(S13/§7.1e): `${side}:${piece}` 形式フォーム値の解釈(selectUnit)はform層の責務なのでform/action.tsへ移設した。
 
 // --- 通常モードのunit構築(旧 normal_mode.ts) ---
 

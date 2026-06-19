@@ -55,7 +55,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(local(true), battleRepository, actionRepository, resolvers)(
+    const result = await act(local(true), battleRepository, resolvers)(
       battle,
       actor,
       form,
@@ -73,7 +73,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "noSuchAction", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(local(true), battleRepository, actionRepository, resolvers)(
+    const result = await act(local(true), battleRepository, resolvers)(
       battle,
       actor,
       form,
@@ -86,7 +86,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(local(false), battleRepository, actionRepository, resolvers)(
+    const result = await act(local(false), battleRepository, resolvers)(
       battle,
       actor,
       form,

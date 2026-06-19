@@ -1,19 +1,22 @@
-import type { Battle } from "../model/battle";
+import type { Battle, DoActionInput } from "../model/battle";
 import type { UnitReference } from "../model/unit";
 import type { BattleRepository } from "../repository/battle";
 import type { DoActionForm } from "../form/action";
 import type { Local } from "../repository/local";
-import type { Repository } from "../repository";
 import type { Resolvers } from "../model/resolver";
 
 import { spendTurn } from "../model/battle";
-import { toAction, ReceiverDuplicationError } from "../form/action";
+import { validateReceivers, ReceiverDuplicationError } from "../model/action";
+import { toReceivers, DO_NOTHING } from "../form/action";
 import { DataNotFoundError, UserCancel } from "../repository/error";
 
+// step15(S13): formからは値だけ受け取り、controllerが組み立てる。
+// - actionKey: modelがそのまま扱える値なのでform関数を介さず直接読む。DO_NOTHINGならdoAction=null。
+// - receivers: formのtoReceiversでUnitReference[]へ解決。
+// - 受け手重複検証(validateReceivers)とaction解決(resolvers.getAction)はcontrollerの責務。
 export type Act = (
   local: Local,
   repository: BattleRepository,
-  action: Repository["action"],
   resolvers: Resolvers,
 ) => (
   battle: Battle,
@@ -21,10 +24,26 @@ export type Act = (
   doActionForm: DoActionForm,
   getDate: () => Date,
 ) => Promise<Battle | DataNotFoundError | ReceiverDuplicationError | UserCancel>;
-export const act: Act = (local, repository, action, resolvers) => async (battle, actor, doActionForm, getDate) => {
-  const doAction = toAction(action)(doActionForm);
-  if (doAction instanceof DataNotFoundError || doAction instanceof ReceiverDuplicationError) {
-    return doAction;
+export const act: Act = (local, repository, resolvers) => async (battle, actor, doActionForm, getDate) => {
+  let doAction: DoActionInput | null = null;
+  if (doActionForm.actionKey !== DO_NOTHING) {
+    const receivers = toReceivers(doActionForm.receivers);
+
+    const duplication = validateReceivers(receivers);
+    if (duplication) {
+      return duplication;
+    }
+
+    const action = resolvers.getAction(doActionForm.actionKey);
+    if (!action) {
+      return new DataNotFoundError(
+        doActionForm.actionKey,
+        "action",
+        `${doActionForm.actionKey}というactionは存在しません`,
+      );
+    }
+
+    doAction = { action, receivers };
   }
 
   if (!local.confirm("実行していいですか？")) {
