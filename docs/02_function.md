@@ -371,6 +371,7 @@ featureは不要かも。pagesを丁寧に定義したので。その代わりco
   - ⚠ **DB名変更**: step14で「IndexedDBデータ互換のため `KniwDB` 据え置き」としていたが、本stepで `ShogiTacticsDB` へ改名。既存の保存battle(旧DB)は新DBからは参照不可になる(0.1.0段階のため許容)。
   - ⚠ **デプロイ依存**: `VITE_URL_PREFIX`(=gh-pagesのbase path)はGitHub repo名に一致させる必要があるため、**repoを `shogi_tactics` にrenameしないとgh-pagesのasset解決が崩れる**(repo rename・git操作は本対応の範囲外)。
   - docs/00–02 の `kniw` 表記は fork 元・旧構成の**歴史的記録**として保持。`description/play/*`(旧CLIツール向けの陳腐化した説明)の表記更新は step19(プレイヤー向けドキュメント整備)に委ねる。
+- **サプライチェーン対策(workflow hardening)**: 全 action を**可変tagではなくcommit SHAで固定**(`# vX.Y.Z` コメント併記。dependabotがSHAごと追従更新)。`actions/checkout` に **`persist-credentials: false`**(GITHUB_TOKENをローカルgit configに残さない)。**最小権限**を明示: `check.yml` は top-level `permissions: contents: read`、`gh-pages.yml` は Pages デプロイに必要な `contents: read`/`pages: write`/`id-token: write` のみ。採用SHA: checkout v4.2.2=`11bd7190…`、setup-node v4.4.0=`49933ea5…`、configure-pages v5.0.0=`983d7736…`、upload-pages-artifact v3.0.1=`56afc609…`、deploy-pages v4.0.5=`d6db9016…`。
 - ※ workflowの trigger は現状の `workflow_dispatch` のまま据え置き(push/PR有効化は別途判断)。
 
 ### 18. UI調整
