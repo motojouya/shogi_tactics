@@ -56,8 +56,8 @@ import { UserCancel } from '../repository/error';
 import { useIO } from './context';
 import { createResolvers } from '../repository';
 import { Container } from './utility';
+import { sideLabel } from './label';
 
-const sideLabel = (side: 'FIRST' | 'SECOND'): string => (side === 'FIRST' ? '先手' : '後手');
 // step8: battleはkeyしか持たないので、presentationでstore参照してpiece/statusを解決する。
 const pieceName = (pieceRepository: Repository['piece'], pieceKey: string): string => {
   const piece = pieceRepository.get(pieceKey);

@@ -19,8 +19,7 @@ import {
 import { startBattle } from '../controller/start';
 import { useIO } from './context';
 import { Container } from './utility';
-
-const sideLabel = (side: Side): string => (side === 'FIRST' ? '先手' : '後手');
+import { sideLabel } from './label';
 
 // step6: 編成段階(battle.turns.length===0)のUI。
 // 先手→後手の交互に1unitずつ選び、双方がunitCountに達したら戦闘を開始できる。

@@ -269,7 +269,7 @@ components / pages (presentation)  data (静的データ定義)
 
 ### Phase 5 — component
 - **S17. formation.tsx を model 検証へ**【済】(§2.3 消費) — 直書きしていた編成ルールを S5 の model 検証へ委譲: `currentSide`(手番)→ **`nextFormationSide`**、`currentSideHasLeader`(大将1体制限)→ **`sideHasLeader`**、`done`(編成完了)→ **`isFormationComplete`**。`firstLeaderCount`/`secondLeaderCount` の直書き集計を撤去(`firstCount`/`secondCount` は進捗表示用の単純集計として残置)。欠落していた**駒重複ルールを `canAddPiece` で導入し UI に反映**: 選択駒が同陣営に既存なら「この駒を追加」ボタンを `disabled`・「この駒は既に配置済みです」を表示し、`addUnit` も `canAddSelected` でガード。build/test 122 pass/lint/format green。
-- **S18. battle.tsx の API 追従 + 小整理** — model simulate(S6)・resolver dictionary(S8)・form 分割(S12/S13)・routing(S10)の新 API へ追従。`sideLabel` 共通化(§4.1)。creation/list へ form schema(S14)適用。※本格的な画面分割は Phase 6。
+- **S18. battle.tsx の API 追従 + 小整理**【済】 — API 追従は S6–S16 で逐次完了済み(simulate=model、resolver dictionary=`createResolvers`、form=`form/action`+`toReceivers`、routing=`local.transit/getSearchParams`、controller=`act(io)`/`surrender(io)`、`ORDER_DO_NOTHING`)。本ステップの実作業は **`sideLabel` 共通化(§4.1)**: 通常形(先手/後手・`Side`受け取り)が `battle.tsx`/`formation.tsx` で完全重複していたため **`components/label.ts`** に切り出し両者から import。短縮形(先/後・`UnitReference`受け取り)は receiver select option 専用で表示文脈が異なるため `form/action.ts` 側に据え置き(§4.1 の「表記の使い分けは意図的」を尊重)。`components/utility.tsx` への合流は避けた(全 export が component の状態を保ち react-refresh 警告を出さないため)。creation/list への form schema 適用は **Phase 7(S20/S21)** で実施。build/test 122 pass/lint/format green。**⇒ Phase 5(component)完了。**
 
 ### Phase 6 — feature
 - **S19. feature 復活と画面表現の移設**(§7.7 / §4.7) — `feature/` を復活し、creation(new)/formation/action(/決着済み)の画面表現を各ファイルへ。`components/battle.tsx` が抱える「画面全体表現」を feature へ移し肥大を緩和。
