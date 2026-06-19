@@ -36,11 +36,12 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
 
   const [units, setUnits] = useState<Unit[]>([]);
 
-  const { control, handleSubmit, watch, reset } = useForm<FormationForm>({
+  const { control, handleSubmit, reset } = useForm<FormationForm>({
     resolver: zodResolver(formationFormSchema),
     defaultValues: { piece: pieces[0] ? pieces[0].key : '', leader: false },
   });
-  const selectedPiece = watch('piece');
+  // 選択中の駒(駒重複判定に使う)はUI stateとして持つ(react-hook-formのwatchはReact Compiler非互換のため)。
+  const [selectedPiece, setSelectedPiece] = useState<string>(pieces[0] ? pieces[0].key : '');
 
   const unitCount = battle.unitCount;
   // 進捗表示用のカウント(ゲームルールではない単なる集計)。
@@ -104,7 +105,10 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
                     select
                     size="small"
                     value={field.value}
-                    onChange={field.onChange}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      setSelectedPiece(e.target.value);
+                    }}
                     sx={{ minWidth: 160 }}
                   >
                     {pieces.map((piece) => {

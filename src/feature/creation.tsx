@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import type { CreationForm } from '../form/creation';
 
+import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -33,14 +34,14 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
     handleSubmit,
     register,
     control,
-    watch,
     formState: { errors },
   } = useForm<CreationForm>({
     resolver: zodResolver(creationFormSchema),
     defaultValues: { mode: 'normal', first_player_name: '', second_player_name: '', stepBase: '', unitCount: '' },
   });
 
-  const mode = watch('mode');
+  // 条件描画(戦乱モードの追加フィールド/ボタン文言)用にmodeをUI stateとして持つ(react-hook-formのwatchはReact Compiler非互換のため)。
+  const [mode, setMode] = useState<CreationForm['mode']>('normal');
 
   const create = async (form: CreationForm) => {
     if (form.mode === 'normal') {
@@ -84,7 +85,10 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
                   id="mode"
                   label="Mode"
                   value={field.value}
-                  onChange={field.onChange}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setMode(e.target.value as CreationForm['mode']);
+                  }}
                   sx={{ width: '100%' }}
                 >
                   <MenuItem value="normal">通常モード(7駒固定)</MenuItem>
