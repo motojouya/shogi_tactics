@@ -1,10 +1,13 @@
 import type { FC } from 'react';
 import type { Battle } from '../model/battle';
 import type { Unit, Side } from '../model/unit';
+import type { FormationForm } from '../form/formation';
 
 import { nextFormationSide, sideHasLeader, canAddPiece, isFormationComplete } from '../model/unit';
 
 import { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
   TextField,
@@ -16,6 +19,7 @@ import {
   FormControlLabel,
 } from '@mui/material';
 
+import { formationFormSchema, pieceSelectOption } from '../form/formation';
 import { startBattle } from '../controller/start';
 import { useIO } from '../components/context';
 import { Container } from '../components/utility';
@@ -23,6 +27,7 @@ import { sideLabel } from '../components/label';
 
 // step6: 編成段階(battle.turns.length===0)のUI。
 // 先手→後手の交互に1unitずつ選び、双方がunitCountに達したら戦闘を開始できる。
+// 「駒を追加」フォームの入力はform/formationのformationFormSchema(zodResolver)で検証する。
 export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
 
   const io = useIO();
@@ -30,8 +35,12 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
   const pieces = pieceRepository.all;
 
   const [units, setUnits] = useState<Unit[]>([]);
-  const [selected, setSelected] = useState<string>(pieces[0] ? pieces[0].key : '');
-  const [leader, setLeader] = useState<boolean>(false);
+
+  const { control, handleSubmit, watch, reset } = useForm<FormationForm>({
+    resolver: zodResolver(formationFormSchema),
+    defaultValues: { piece: pieces[0] ? pieces[0].key : '', leader: false },
+  });
+  const selectedPiece = watch('piece');
 
   const unitCount = battle.unitCount;
   // 進捗表示用のカウント(ゲームルールではない単なる集計)。
@@ -42,31 +51,32 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
   const currentSide: Side | null = nextFormationSide(units, unitCount);
   const currentSideHasLeader = currentSide ? sideHasLeader(units, currentSide) : false;
   // 同陣営に同じ駒は二重に置けない。選択中の駒が追加可能かを判定しUIに反映する。
-  const canAddSelected = currentSide ? canAddPiece(units, currentSide, selected) : false;
+  const canAddSelected = currentSide ? canAddPiece(units, currentSide, selectedPiece) : false;
   const done = isFormationComplete(units, unitCount);
 
   const playerName = (side: Side): string =>
     side === 'FIRST' ? battle.first_player_name : battle.second_player_name;
 
-  const addUnit = () => {
+  const addUnit = (form: FormationForm) => {
     if (!currentSide) {
       return;
     }
     // 駒重複は不可(modelのcanAddPieceで判定済み)。
-    if (!canAddSelected) {
+    if (!canAddPiece(units, currentSide, form.piece)) {
       return;
     }
-    const piece = pieceRepository.get(selected);
+    const piece = pieceRepository.get(form.piece);
     if (!piece) {
       return;
     }
     // leaderは陣営1体まで。既に居る場合は強制的にfalse。
-    const asLeader = leader && !currentSideHasLeader;
+    const asLeader = form.leader && !currentSideHasLeader;
     setUnits([
       ...units,
       { side: currentSide, piece: piece.key, hp: piece.MaxHP, steps: 0, statuses: [], leader: asLeader },
     ]);
-    setLeader(false);
+    // 駒選択は維持し、大将チェックのみ戻す。
+    reset({ piece: form.piece, leader: false });
   };
 
   const undo = () => setUnits(units.slice(0, -1));
@@ -83,36 +93,51 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
         <Typography>{`先手 ${firstCount}/${unitCount} 後手 ${secondCount}/${unitCount}`}</Typography>
 
         {!done && currentSide && (
-          <Stack direction="column" sx={{ pt: 2 }}>
+          <Stack direction="column" component="form" onSubmit={handleSubmit(addUnit)} sx={{ pt: 2 }}>
             <Typography>{`次は ${sideLabel(currentSide)}(${playerName(currentSide)}) の番です`}</Typography>
             <Stack direction="row" sx={{ alignItems: 'center', pt: 1 }}>
-              <TextField
-                select
-                size="small"
-                value={selected}
-                onChange={(e) => setSelected(e.target.value)}
-                sx={{ minWidth: 160 }}
-              >
-                {pieces.map((piece) => (
-                  <MenuItem key={piece.key} value={piece.key}>{piece.name}</MenuItem>
-                ))}
-              </TextField>
+              <Controller
+                name="piece"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    select
+                    size="small"
+                    value={field.value}
+                    onChange={field.onChange}
+                    sx={{ minWidth: 160 }}
+                  >
+                    {pieces.map((piece) => {
+                      const option = pieceSelectOption(piece);
+                      return (
+                        <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                      );
+                    })}
+                  </TextField>
+                )}
+              />
               <Box sx={{ pl: 1 }}>
-                <Button variant="contained" type="button" onClick={addUnit} disabled={!canAddSelected}>この駒を追加</Button>
+                <Button variant="contained" type="submit" disabled={!canAddSelected}>この駒を追加</Button>
               </Box>
             </Stack>
             {!canAddSelected && (
               <Typography color="error" sx={{ pt: 0.5 }}>この駒は既に配置済みです</Typography>
             )}
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={leader && !currentSideHasLeader}
-                  disabled={currentSideHasLeader}
-                  onChange={(e) => setLeader(e.target.checked)}
+            <Controller
+              name="leader"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={field.value && !currentSideHasLeader}
+                      disabled={currentSideHasLeader}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  }
+                  label={currentSideHasLeader ? '大将は選択済み' : '大将にする'}
                 />
-              }
-              label={currentSideHasLeader ? '大将は選択済み' : '大将にする'}
+              )}
             />
           </Stack>
         )}

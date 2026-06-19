@@ -1,25 +1,28 @@
 import { z } from "zod";
 
-// step15(S14/§3.2): pages/new の手書きバリデーション(player名必須・stepBase/unitCount≥1)をzod schemaへ。
-// battle作成フォーム。通常モード/戦乱モードで必須項目が異なるため2種を用意する。適用(react-hook-formへの接続)はPhase 7。
-
-// player名は両モード共通で必須。
-const playerNameFields = {
-  first_player_name: z.string().min(1, "先手のプレイヤー名を入力してください"),
-  second_player_name: z.string().min(1, "後手のプレイヤー名を入力してください"),
-};
-
-// 通常モード: player名のみ。stepBase/unitCountはNORMAL_STEP_BASE/NORMAL_UNIT_COUNTの固定定数を使う。
-export const normalCreationFormSchema = z.object({
-  ...playerNameFields,
-});
-export type NormalCreationForm = z.infer<typeof normalCreationFormSchema>;
-
-// 戦乱モード: stepBase/unitCountも入力。TextFieldのstring入力をcoerceで数値化し、1以上の整数を要求する。
-// 空文字""はNumber("")=0でmin(1)失敗、非数値はNaNでmin(1)失敗となり、いずれも入力を促すメッセージになる。
-export const warCreationFormSchema = z.object({
-  ...playerNameFields,
-  stepBase: z.coerce.number().int().min(1, "stepBaseは1以上の数値を入力してください"),
-  unitCount: z.coerce.number().int().min(1, "unitCountは1以上の数値を入力してください"),
-});
-export type WarCreationForm = z.infer<typeof warCreationFormSchema>;
+// step15(S14/§3.2 → 実利用化): battle作成フォームのzod schema。手書きバリデーションの唯一の置き換え先。
+// モードで必須項目が異なる(通常: player名のみ / 戦乱: stepBase/unitCountも1以上)ため、modeをフォーム値に含め
+// superRefineで条件付き検証する。TextFieldの入力はstringなのでstepBase/unitCountはstringのまま受け、利用側でNumber化する。
+export const creationFormSchema = z
+  .object({
+    mode: z.enum(["normal", "war"]),
+    first_player_name: z.string().min(1, "先手のプレイヤー名を入力してください"),
+    second_player_name: z.string().min(1, "後手のプレイヤー名を入力してください"),
+    stepBase: z.string().optional(),
+    unitCount: z.string().optional(),
+  })
+  .superRefine((value, ctx) => {
+    // 戦乱モードのみstepBase/unitCountを検証する(通常モードは固定定数を使うため未入力でよい)。
+    if (value.mode !== "war") {
+      return;
+    }
+    const stepBase = Number(value.stepBase);
+    if (!value.stepBase || Number.isNaN(stepBase) || stepBase < 1) {
+      ctx.addIssue({ code: "custom", path: ["stepBase"], message: "stepBaseは1以上の数値を入力してください" });
+    }
+    const unitCount = Number(value.unitCount);
+    if (!value.unitCount || Number.isNaN(unitCount) || unitCount < 1) {
+      ctx.addIssue({ code: "custom", path: ["unitCount"], message: "unitCountは1以上の数値を入力してください" });
+    }
+  });
+export type CreationForm = z.infer<typeof creationFormSchema>;
