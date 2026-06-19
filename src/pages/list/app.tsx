@@ -38,7 +38,7 @@ const BattleList: FC = () => {
       <Stack direction="column" sx={{ justifyContent: 'flex-start', alignItems: "center" }}>
         <Stack direction="row" sx={{ justifyContent: 'space-between', p: 3, width: "100%", alignItems: "center" }}>
           <Typography>バトル一覧</Typography>
-          <ButtonLink href='/new/'><Typography>新しく作る</Typography></ButtonLink>
+          <ButtonLink href='/v1/'><Typography>新しく作る</Typography></ButtonLink>
         </Stack>
         <List sx={{ width: "100%" }}>
           {battles && battles.map(({ key, battle }: BattleSummary, index: number) => (

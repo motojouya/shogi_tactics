@@ -6,6 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { BattleIO } from '../../components/battle_io';
 import { BattleAction } from '../../feature/action';
 import { BattleFormation } from '../../feature/formation';
+import { BattleCreation } from '../../feature/creation';
 import { JsonSchemaUnmatchError } from '../../repository/error';
 import { useIO } from '../../components/context';
 import { Container } from '../../components/utility';
@@ -51,21 +52,15 @@ const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey,
   return (<BattleAction battle={battle} />);
 };
 
+// /v1 で creation(key無し)/ formation / action を出し分ける(S20/§7.7)。
+// key無し=新規作成(creation)。key有りはBattleExsitingがturns有無でformation/actionを出し分ける。
 export const App: FC = () => {
   const searchParams = local.getSearchParams();
   const key = searchParams.get('key');
 
-  if (!key) {
-    return (
-      <Container backLink="/list/">
-        <Typography>表示するbattleが指定されていません</Typography>
-      </Container>
-    );
-  }
-
   return (
     <BattleIO>
-      <BattleExsiting battleKey={key} version={VERSION} />
+      {key ? <BattleExsiting battleKey={key} version={VERSION} /> : <BattleCreation />}
     </BattleIO>
   );
 };
