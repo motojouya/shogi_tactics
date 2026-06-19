@@ -1,12 +1,12 @@
 import type { Turn, Order } from "./turn";
 import type { Unit, UnitReference } from "./unit";
-import type { Action } from "./action";
 import type { Resolvers } from "./resolver";
 
 import { z } from "zod";
 
 import { copyTurn, turnSchema, clearActorStatuses, applyActorCost } from "./turn";
 import { copyUnit } from "./unit";
+import { DataNotFoundError } from "../repository/error";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
 
@@ -133,42 +133,54 @@ export const surrender: ModelSurrender = (battle, actor, datetime) => {
   };
 };
 
-// 行動内容。null=何もしない。
-export type DoActionInput = { action: Action; receivers: UnitReference[] };
-
-// step7/S7: spendTurnは「statusクリア→行動適用→cost消費→勝敗判定」のorchestration。
+// step15: spendTurnを doNothing / doAct に分割。共通処理(statusクリア→効果適用→cost消費→Turn追加→勝敗判定)はappendTurnへ。
 // status失効/cost消費はturn.tsの責務(clearActorStatuses/applyActorCost)。actionはunitsを受けて計算する(Turn非依存)。
 // 死亡駒は除外せずunitsに残し、並べ替えもしない(行動順・次actorはsortedUnits/nextActorで算出。§7.4b)。
-export type SpendTurn = (
+const appendTurn = (
   battle: Battle,
   actor: UnitReference,
-  doAction: DoActionInput | null,
-  resolvers: Resolvers,
+  order: Order,
+  cost: number,
   datetime: Date,
-) => Battle;
-export const spendTurn: SpendTurn = (battle, actor, doAction, resolvers, datetime) => {
+  apply: (units: Unit[]) => Unit[],
+): Battle => {
   const newBattle = copyBattle(battle);
   const lastTurn = arrayLast(newBattle.turns);
 
   // 1. actorの行動開始: 持続statusをクリア(次の自分の行動まで有効)。
   let units: Unit[] = clearActorStatuses(lastTurn.units, actor);
-
-  // 2. 技の効果を適用(actionはunitsを受けてunitsを返す)。
-  let order: Order;
-  if (doAction === null) {
-    order = { type: "DO_NOTHING", actor };
-  } else {
-    units = doAction.action.act(actor, doAction.receivers, units, resolvers.getPiece);
-    order = { type: "DO_ACTION", actionKey: doAction.action.key, actor, receivers: doAction.receivers };
-  }
-
+  // 2. 技の効果を適用(doNothingは何もしない)。
+  units = apply(units);
   // 3. actorのcost消費(stepBase + cost。何もしない=0)。
-  const cost = doAction ? doAction.action.cost : 0;
   units = applyActorCost(units, actor, newBattle.stepBase, cost);
-
   // 4. 死亡除外・並べ替えはせず、そのままTurnに積む。
   const newTurn: Turn = { datetime, previous: newBattle.turns.length - 1, order, units };
   newBattle.turns.push(newTurn);
   newBattle.result = isSettlement(newBattle);
   return newBattle;
+};
+
+// 何もしない: 行動内容(action)は不要。statusクリアとcost消費(0)のみ。
+export type DoNothing = (battle: Battle, actor: UnitReference, datetime: Date) => Battle;
+export const doNothing: DoNothing = (battle, actor, datetime) =>
+  appendTurn(battle, actor, { type: "DO_NOTHING", actor }, 0, datetime, (units) => units);
+
+// 技を実行: actionKeyをresolverで解決(存在チェックもここで行う)、receiverへ効果を適用しactorのcostを消費する。
+export type DoAct = (
+  battle: Battle,
+  actor: UnitReference,
+  actionKey: string,
+  receivers: UnitReference[],
+  resolvers: Resolvers,
+  datetime: Date,
+) => Battle | DataNotFoundError;
+export const doAct: DoAct = (battle, actor, actionKey, receivers, resolvers, datetime) => {
+  const action = resolvers.getAction(actionKey);
+  if (!action) {
+    return new DataNotFoundError(actionKey, "action", `${actionKey}というactionは存在しません`);
+  }
+  const order: Order = { type: "DO_ACTION", actionKey: action.key, actor, receivers };
+  return appendTurn(battle, actor, order, action.cost, datetime, (units) =>
+    action.act(actor, receivers, units, resolvers.getPiece),
+  );
 };

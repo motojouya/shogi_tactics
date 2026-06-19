@@ -6,7 +6,8 @@ import type { Battle } from "./battle";
 import {
   createBattle,
   start,
-  spendTurn,
+  doNothing,
+  doAct,
   surrender,
   isSettlement,
   nextActor,
@@ -54,8 +55,12 @@ const makeBattle = (units: Unit[], stepBase = 2): Battle => {
 
 const ref = (side: "FIRST" | "SECOND", piece: string): UnitReference => ({ side, piece });
 
-// S8: spendTurnはResolvers束を受け取る。getPieceはこのテストでは未使用(null固定)でよい。
-const resolvers = { getAction: () => null, getPiece: () => null, getStatus: () => null };
+// doActはresolvers.getActionでactionを解決する。テスト用Action(key="atk")を返す。getPieceは未使用(null固定)。
+const resolvers = {
+  getAction: (key: string) => (key === "atk" ? attack : null),
+  getPiece: () => null,
+  getStatus: () => null,
+};
 
 describe("Battle#createBattle", function () {
   it("骨格(turns=[])を生成する", function () {
@@ -107,19 +112,17 @@ describe("Battle#sortedUnits / nextActor", function () {
   });
 });
 
-describe("Battle#spendTurn", function () {
-  it("DO_ACTION: ダメージ適用・actorのsteps加算・steps昇順並べ替え", function () {
+describe("Battle#doAct", function () {
+  it("DO_ACTION: actionKeyをresolverで解決しダメージ適用・actorのsteps加算", function () {
     const battle = makeBattle([
       { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
       { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
     ]);
-    const result = spendTurn(
-      battle,
-      ref("FIRST", "king"),
-      { action: attack, receivers: [ref("SECOND", "pawn")] },
-      resolvers,
-      new Date(),
-    );
+    const result = doAct(battle, ref("FIRST", "king"), "atk", [ref("SECOND", "pawn")], resolvers, new Date());
+    if (result instanceof Error || "message" in result) {
+      expect.unreachable("doAct should succeed");
+      return;
+    }
 
     const last = getLastTurn(result);
     expect(last.order.type).toBe("DO_ACTION");
@@ -137,13 +140,11 @@ describe("Battle#spendTurn", function () {
       { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
       { side: "SECOND", piece: "pawn", hp: 2, steps: 0, statuses: [], leader: true },
     ]);
-    const result = spendTurn(
-      battle,
-      ref("FIRST", "king"),
-      { action: attack, receivers: [ref("SECOND", "pawn")] },
-      resolvers,
-      new Date(),
-    );
+    const result = doAct(battle, ref("FIRST", "king"), "atk", [ref("SECOND", "pawn")], resolvers, new Date());
+    if (result instanceof Error || "message" in result) {
+      expect.unreachable("doAct should succeed");
+      return;
+    }
 
     const last = getLastTurn(result);
     expect(last.units.length).toBe(2); // 死亡駒もunitsに残す(除外・並べ替えしない)
@@ -152,12 +153,23 @@ describe("Battle#spendTurn", function () {
     expect(result.result).toBe(GameFirst);
   });
 
-  it("DO_NOTHING: 自分の持続statusをクリアしsteps加算(cost0)", function () {
+  it("存在しないactionKeyはDataNotFoundErrorを返す", function () {
+    const battle = makeBattle([
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
+    ]);
+    const result = doAct(battle, ref("FIRST", "king"), "noSuchAction", [ref("SECOND", "pawn")], resolvers, new Date());
+    expect("message" in result).toBe(true);
+  });
+});
+
+describe("Battle#doNothing", function () {
+  it("自分の持続statusをクリアしsteps加算(cost0)", function () {
     const battle = makeBattle([
       { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: ["interception"], leader: true },
       { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
     ]);
-    const result = spendTurn(battle, ref("FIRST", "king"), null, resolvers, new Date());
+    const result = doNothing(battle, ref("FIRST", "king"), new Date());
 
     const last = getLastTurn(result);
     expect(last.order.type).toBe("DO_NOTHING");
