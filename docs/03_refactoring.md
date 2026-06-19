@@ -265,10 +265,10 @@ components / pages (presentation)  data (静的データ定義)
 - **S15. `DO_NOTHING` 一本化**【済】(§4.4) — `form/action.ts` の間接 re-export(`export const DO_NOTHING = ORDER_DO_NOTHING`)を廃止し、**`model/turn.ts` の `ORDER_DO_NOTHING` を単一の真実**に。consumer は直接 import へ: `controller/act.ts`(`../model/turn`)/`components/battle.tsx`(`../model/turn` の value import 追加)。`DO_NOTHING` 別名は src から消滅(残るは `ORDER_DO_NOTHING` 定数と schema の `z.literal("DO_NOTHING")` 等の文字列リテラルのみ)。build/test 122 pass/lint/format green。**⇒ Phase 3(form)完了。**
 
 ### Phase 4 — controller
-- **S16. controller の引数統一**(§7.3) — `act`/`start`/`surrender` を第1引数で `Repository` を丸ごと受け取る形に。caller(components)を追従。
+- **S16. controller の引数統一**【済】(§7.3) — `act`/`registerBattle`/`startBattle`/`surrender` を **第1引数で `Repository` を丸ごと受け取る**形に統一(従来は `(battleRepository, local)` 等を個別に curry)。内部で `repository.battle`/`repository.local` を分解。`act` は `repository` から **`createResolvers(repository)`** で resolvers を内製(resolvers 引数を撤去)。caller 追従: `components/battle.tsx`(`act(io)`/`surrender(io)`、未使用化した `local` を destructure から除去)、`components/formation.tsx`(`startBattle(io)`)、`pages/new/app.tsx`(`registerBattle(io)`/`startBattle(io)`、`local.transit` 用に `local` は残置)。test 3種は battle+local(+act は piece/action/status)を束ねた `Repository` を渡す形へ更新。build/test 122 pass/lint/format green。**⇒ Phase 4(controller)完了。**
 
 ### Phase 5 — component
-- **S17. formation.tsx を model 検証へ**(§2.3 消費) — S5 の `validateFormation`/駒重複検証を呼ぶだけにし、ゲームルールの直書きを除去。駒重複を UI に反映。
+- **S17. formation.tsx を model 検証へ**【済】(§2.3 消費) — 直書きしていた編成ルールを S5 の model 検証へ委譲: `currentSide`(手番)→ **`nextFormationSide`**、`currentSideHasLeader`(大将1体制限)→ **`sideHasLeader`**、`done`(編成完了)→ **`isFormationComplete`**。`firstLeaderCount`/`secondLeaderCount` の直書き集計を撤去(`firstCount`/`secondCount` は進捗表示用の単純集計として残置)。欠落していた**駒重複ルールを `canAddPiece` で導入し UI に反映**: 選択駒が同陣営に既存なら「この駒を追加」ボタンを `disabled`・「この駒は既に配置済みです」を表示し、`addUnit` も `canAddSelected` でガード。build/test 122 pass/lint/format green。
 - **S18. battle.tsx の API 追従 + 小整理** — model simulate(S6)・resolver dictionary(S8)・form 分割(S12/S13)・routing(S10)の新 API へ追従。`sideLabel` 共通化(§4.1)。creation/list へ form schema(S14)適用。※本格的な画面分割は Phase 6。
 
 ### Phase 6 — feature

@@ -59,11 +59,7 @@ describe("surrender", () => {
   it("second surrender", async () => {
     saved = null;
     const battle = makeBattle();
-    const result = await surrender(repository(true))(
-      battle,
-      { side: "SECOND", piece: "pawn" },
-      new Date(),
-    );
+    const result = await surrender(repository(true))(battle, { side: "SECOND", piece: "pawn" }, new Date());
     expect(result).toBe(null);
     expect(saved?.result).toBe(GameFirst); // 後手が降参 → 先手の勝ち
   });
@@ -71,11 +67,7 @@ describe("surrender", () => {
   it("cancel", async () => {
     saved = null;
     const battle = makeBattle();
-    const result = await surrender(repository(false))(
-      battle,
-      { side: "FIRST", piece: "king" },
-      new Date(),
-    );
+    const result = await surrender(repository(false))(battle, { side: "FIRST", piece: "king" }, new Date());
     expect(result instanceof UserCancel).toBe(true);
     expect(saved).toBe(null);
   });

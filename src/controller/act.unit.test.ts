@@ -62,12 +62,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(repository(true))(
-      battle,
-      actor,
-      form,
-      () => new Date("2024-01-01T00:00:00"),
-    );
+    const result = await act(repository(true))(battle, actor, form, () => new Date("2024-01-01T00:00:00"));
 
     if (result instanceof DataNotFoundError || result instanceof UserCancel || "message" in result) {
       expect.unreachable("act should succeed");
@@ -80,12 +75,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "noSuchAction", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(repository(true))(
-      battle,
-      actor,
-      form,
-      () => new Date("2024-01-01T00:00:00"),
-    );
+    const result = await act(repository(true))(battle, actor, form, () => new Date("2024-01-01T00:00:00"));
     expect(result instanceof DataNotFoundError).toBe(true);
   });
 
@@ -93,12 +83,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(repository(false))(
-      battle,
-      actor,
-      form,
-      () => new Date("2024-01-01T00:00:00"),
-    );
+    const result = await act(repository(false))(battle, actor, form, () => new Date("2024-01-01T00:00:00"));
     expect(result instanceof UserCancel).toBe(true);
   });
 });

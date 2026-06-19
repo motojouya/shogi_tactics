@@ -37,7 +37,11 @@ export const act: Act = (repository) => async (battle, actor, doActionForm, getD
 
     const action = resolvers.getAction(doActionForm.actionKey);
     if (!action) {
-      return new DataNotFoundError(doActionForm.actionKey, "action", `${doActionForm.actionKey}というactionは存在しません`);
+      return new DataNotFoundError(
+        doActionForm.actionKey,
+        "action",
+        `${doActionForm.actionKey}というactionは存在しません`,
+      );
     }
 
     doAction = { action, receivers };

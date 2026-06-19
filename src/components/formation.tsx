@@ -2,6 +2,8 @@ import type { FC } from 'react';
 import type { Battle } from '../model/battle';
 import type { Unit, Side } from '../model/unit';
 
+import { nextFormationSide, sideHasLeader, canAddPiece, isFormationComplete } from '../model/unit';
+
 import { useState } from 'react';
 import {
   Button,
@@ -33,32 +35,26 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
   const [leader, setLeader] = useState<boolean>(false);
 
   const unitCount = battle.unitCount;
+  // 進捗表示用のカウント(ゲームルールではない単なる集計)。
   const firstCount = units.filter((unit) => unit.side === 'FIRST').length;
   const secondCount = units.filter((unit) => unit.side === 'SECOND').length;
-  const firstLeaderCount = units.filter((unit) => unit.side === 'FIRST' && unit.leader).length;
-  const secondLeaderCount = units.filter((unit) => unit.side === 'SECOND' && unit.leader).length;
 
-  // 先手が先。先手と後手の数が揃っていれば次は先手、先手が1多ければ次は後手。
-  // 双方がunitCountに達したらnull(=選択完了)。
-  const currentSide: Side | null =
-    firstCount === secondCount
-      ? (firstCount < unitCount ? 'FIRST' : null)
-      : (secondCount < unitCount ? 'SECOND' : null);
-  // currentSide陣営が既にleaderを持っているか。各陣営leaderは1体まで。
-  const currentSideHasLeader =
-    currentSide === 'FIRST' ? firstLeaderCount > 0 : currentSide === 'SECOND' ? secondLeaderCount > 0 : false;
-  // 双方unitCountに達し、かつ各陣営ちょうど1体leaderが居ればStart可能。
-  const done =
-    firstCount === unitCount &&
-    secondCount === unitCount &&
-    firstLeaderCount === 1 &&
-    secondLeaderCount === 1;
+  // ゲームルール(次の手番/大将1体制限/編成完了/駒重複)はmodelの検証関数へ委譲する(§2.3)。
+  const currentSide: Side | null = nextFormationSide(units, unitCount);
+  const currentSideHasLeader = currentSide ? sideHasLeader(units, currentSide) : false;
+  // 同陣営に同じ駒は二重に置けない。選択中の駒が追加可能かを判定しUIに反映する。
+  const canAddSelected = currentSide ? canAddPiece(units, currentSide, selected) : false;
+  const done = isFormationComplete(units, unitCount);
 
   const playerName = (side: Side): string =>
     side === 'FIRST' ? battle.first_player_name : battle.second_player_name;
 
   const addUnit = () => {
     if (!currentSide) {
+      return;
+    }
+    // 駒重複は不可(modelのcanAddPieceで判定済み)。
+    if (!canAddSelected) {
       return;
     }
     const piece = pieceRepository.get(selected);
@@ -103,9 +99,12 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
                 ))}
               </TextField>
               <Box sx={{ pl: 1 }}>
-                <Button variant="contained" type="button" onClick={addUnit}>この駒を追加</Button>
+                <Button variant="contained" type="button" onClick={addUnit} disabled={!canAddSelected}>この駒を追加</Button>
               </Box>
             </Stack>
+            {!canAddSelected && (
+              <Typography color="error" sx={{ pt: 0.5 }}>この駒は既に配置済みです</Typography>
+            )}
             <FormControlLabel
               control={
                 <Checkbox
