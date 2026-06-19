@@ -22,7 +22,8 @@ import { Container } from '../components/utility';
 type Mode = 'normal' | 'war';
 
 // step15(S19/§7.7): battle作成画面。pages/new から feature へ移設(BattleNew → BattleCreation)。
-export const BattleCreation: FC = () => {
+// step15(S21/§4.6): versionはページ側の定数を prop で受け取る(ハードコードを排除)。
+export const BattleCreation: FC<{ version: string }> = ({ version }) => {
 
   const io = useIO();
   const { local, piece: pieceRepository } = io;
@@ -35,9 +36,6 @@ export const BattleCreation: FC = () => {
     register,
     formState: { errors }, //, isSubmitting
   } = useForm<{ first_player_name: string; second_player_name: string; stepBase: string; unitCount: string }>();
-
-  // version v1では保存文字列のみ(ルール分岐は持たない)。default値として固定で付与する。
-  const version = 'v1';
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const register_ = async (battleForm: any) => {

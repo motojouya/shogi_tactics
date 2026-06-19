@@ -60,7 +60,7 @@ export const App: FC = () => {
 
   return (
     <BattleIO>
-      {key ? <BattleExsiting battleKey={key} version={VERSION} /> : <BattleCreation />}
+      {key ? <BattleExsiting battleKey={key} version={VERSION} /> : <BattleCreation version={VERSION} />}
     </BattleIO>
   );
 };

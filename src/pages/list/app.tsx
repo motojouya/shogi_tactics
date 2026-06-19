@@ -18,7 +18,17 @@ import { Container, Link, ButtonLink } from '../../components/utility';
 type BattleSummary = { key: string; battle: Battle };
 
 const BattleList: FC = () => {
-  const { battle: battleRepository } = useIO();
+  const { battle: battleRepository, local } = useIO();
+
+  // step15(S21/§4.5): Delete実装。確認の上battleRepository.removeを呼ぶ。
+  // useLiveQueryがDexieのテーブル変更を検知し一覧は自動更新される。
+  const onDelete = async (key: string) => {
+    if (!local.confirm('このバトルを削除しますか？')) {
+      return;
+    }
+    await battleRepository.remove(key);
+  };
+
   const battles = useLiveQuery(async () => {
     const keys = await battleRepository.list();
     const loaded = await Promise.all(keys.map((key) => battleRepository.get(key)));
@@ -52,7 +62,7 @@ const BattleList: FC = () => {
                     </Typography>
                   </Stack>
                 </Link>
-                <Button variant="outlined" type="button" onClick={() => console.log('Not Deleted! TODO!')}><Typography>Delete</Typography></Button>
+                <Button variant="outlined" type="button" onClick={() => onDelete(key)}><Typography>Delete</Typography></Button>
               </Stack>
             </ListItem>
           ))}

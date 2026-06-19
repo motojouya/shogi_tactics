@@ -281,8 +281,8 @@ components / pages (presentation)  data (静的データ定義)
   - **ページ出し分けの配線(pages/new 削除・/v1 で key 無し時 creation 表示・creation/formation/action dispatch)は S20**。本ステップは移設に限定し各 check green を維持。build/test 122 pass/lint/format green。
 
 ### Phase 7 — pages
-- **S20. pages 出し分け配線**(§7.7) — `pages/new` 削除、`/v1` で `key` query 無し時に new を表示、creation/formation/action を feature で出し分け。
-- **S21. 残整理** — list の delete 実装(§4.5)、`version='v1'` 定数化(§4.6)。
+- **S20. pages 出し分け配線**【済】(§7.7) — マルチページ(MPA)構成で `new` ルートを廃止: `vite.config.ts` の `rollupOptions.input` から `new` を除去、`src/pages/new/`(app/index.html/index.tsx)を削除(precache 14→10 entries)。`/v1` の `App` を **`<BattleIO>` で全体を包み、`key` query 有無で出し分け**: key 無し→**`BattleCreation`**(新規作成)、key 有り→`BattleExsiting`(従来どおり turns 有無で **formation/action** を出し分け)。これで creation/formation/action が `/v1` 一本に集約。`list` の「新しく作る」リンクを `/new/`→`/v1/` に変更。build/test 122 pass/lint/format green。
+- **S21. 残整理**【済】 — (§4.5) `pages/list` の Delete を実装: `local.confirm` で確認後 `battleRepository.remove(key)`。`useLiveQuery` が Dexie テーブル変更を検知し一覧は自動更新。(§4.6 + ユーザー要望) `version='v1'` のハードコードを排除し **`pages/v1` の `VERSION` 定数に集約**。`BattleCreation` を `version` prop 受け取りに変更(`FC<{ version: string }>`)し、`pages/v1` が `BattleExsiting`/`BattleCreation` 双方に `version={VERSION}` を渡す形に。feature 内の `const version='v1'` を撤去。build/test 122 pass/lint/format green。
 - **S22(保留)** — `pages/*/app.tsx` の細部を component へ寄せる(§7.8) は **UI 調整後**に判断。
 
 ### レイヤ非依存(任意のタイミング)
