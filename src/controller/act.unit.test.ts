@@ -8,6 +8,7 @@ import type { DoActionForm } from "../form/battle";
 import { createBattle, start, getLastTurn } from "../model/battle";
 import { act } from "./act";
 import { actionRepository } from "../repository/action";
+import { pieceRepository } from "../repository/piece";
 import { DataNotFoundError, UserCancel } from "../repository/error";
 
 const makeBattle = (): Battle => {
@@ -47,7 +48,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(local(true), battleRepository, actionRepository)(
+    const result = await act(local(true), battleRepository, actionRepository, pieceRepository)(
       battle,
       actor,
       form,
@@ -65,7 +66,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "noSuchAction", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(local(true), battleRepository, actionRepository)(
+    const result = await act(local(true), battleRepository, actionRepository, pieceRepository)(
       battle,
       actor,
       form,
@@ -78,7 +79,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(local(false), battleRepository, actionRepository)(
+    const result = await act(local(false), battleRepository, actionRepository, pieceRepository)(
       battle,
       actor,
       form,

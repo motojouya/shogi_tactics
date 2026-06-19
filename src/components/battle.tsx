@@ -51,7 +51,7 @@ import {
 import { DataNotFoundError } from '../repository/error';
 import { act } from '../controller/act';
 import { surrender } from '../controller/surrender';
-import { simulate } from '../controller/simulate';
+import { simulate } from '../model/simulation';
 import { UserCancel } from '../repository/error';
 import { useIO } from './context';
 import { Container } from './utility';
@@ -269,7 +269,7 @@ export const BattleTurn: FC<{
       return;
     }
 
-    const result = await act(local, battleRepository, action)(battle, actor, form, () => new Date());
+    const result = await act(local, battleRepository, action, piece)(battle, actor, form, () => new Date());
 
     if (result instanceof DataNotFoundError) {
       setMessage('入力してください');
@@ -302,7 +302,7 @@ export const BattleTurn: FC<{
     }
     const index2 = value.indexOf(':');
     const receiver: UnitReference = { side: value.slice(0, index2) as 'FIRST' | 'SECOND', piece: value.slice(index2 + 1) };
-    const { survive, unit } = simulate(selectedAction, actor, receiver, lastTurn);
+    const { survive, unit } = simulate(selectedAction, actor, receiver, lastTurn, piece.get);
 
     const newSimulated = [...simulated];
     while (newSimulated.length <= index) {

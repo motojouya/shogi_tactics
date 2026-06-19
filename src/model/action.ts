@@ -1,11 +1,12 @@
 import type { Turn } from "./turn";
 import type { UnitReference } from "./unit";
+import type { GetPiece } from "./piece";
 
 import { copyTurn } from "./turn";
 import { sameUnit, toUnitReference } from "./unit";
 
-// 技の効果を定義する関数
-export type Act = (actor: UnitReference, receiver: UnitReference[], turn: Turn) => Turn;
+// 技の効果を定義する関数。getPieceはPiece解決resolver(MaxHP等の参照に使う。§2.4)。
+export type Act = (actor: UnitReference, receiver: UnitReference[], turn: Turn, getPiece: GetPiece) => Turn;
 
 // 技を適用するunitの選択肢をFilterする関数
 export type Filter = (actor: UnitReference, turn: Turn) => UnitReference[];
@@ -92,19 +93,16 @@ export const effectGrantStatus: EffectGrantStatus = (statusKey) => (_self) => (_
   return newTurn;
 };
 
-// FIXME MaxHPはPieceが持つがactからpieceRepositoryを参照すると循環依存になるため、暫定でpieceキーから上限を固定で導出する。
-// step8でcontroller/presentation側のkey解決に寄せる際に、Unit/Pieceから正しいMaxHPを供給する形へ置き換える。
-type HealCap = (piece: string) => number;
-const healCap: HealCap = (piece) => (piece === "king" ? 2 : 3);
-
-// receiverの体力を上限(healCap)まで回復し、cloneしたTurnを返すActを生成する(回復処方=最大回復)。
-// 既に上限を超えている場合(身代わり等)は減らさない。
+// receiverの体力を上限(piece.MaxHP)まで回復し、cloneしたTurnを返すActを生成する(回復処方=最大回復)。
+// MaxHPはgetPiece resolver経由でPieceから取得する(§2.4: 旧healCapハードコードを解消。promotedLance等MaxHP=2の駒も正しく扱える)。
+// 既に上限を超えている場合(身代わり等)は減らさない。解決できないpieceは現hpを上限扱いにして増減しない。
 export type EffectHeal = (self: Action) => Act;
-export const effectHeal: EffectHeal = (_self) => (_actor, receiver, turn) => {
+export const effectHeal: EffectHeal = (_self) => (_actor, receiver, turn, getPiece) => {
   const newTurn = copyTurn(turn);
   newTurn.units = newTurn.units.map((unit) => {
     if (receiver.some((reference) => sameUnit(reference, toUnitReference(unit)))) {
-      return { ...unit, hp: Math.max(unit.hp, healCap(unit.piece)) };
+      const maxHp = getPiece(unit.piece)?.MaxHP ?? unit.hp;
+      return { ...unit, hp: Math.max(unit.hp, maxHp) };
     }
     return unit;
   });

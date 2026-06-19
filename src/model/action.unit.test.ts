@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import type { Action, Act, Filter } from "./action";
 import type { Unit } from "./unit";
 import type { Turn } from "./turn";
+import type { GetPiece } from "./piece";
 import {
   buildAction,
   effectBaseDamage,
@@ -49,6 +50,16 @@ const buildTurn = (units: Unit[]): Turn => ({
   datetime: new Date("2024-01-01T00:00:00"),
   order: { type: "FORMATION" },
   units,
+});
+
+// effectHeal用のgetPiece stub。MaxHPはking=2、それ以外=3。
+const healGetPiece: GetPiece = (key) => ({
+  key,
+  name: key,
+  description: "",
+  MaxHP: key === "king" ? 2 : 3,
+  move: 3,
+  actions: [],
 });
 
 describe("Action#effectBaseDamage", function () {
@@ -247,6 +258,7 @@ describe("Action#effectHeal", function () {
         { side: "FIRST", piece: "gold" },
       ],
       turn,
+      healGetPiece,
     );
 
     expect(result.units[0].hp).toBe(2); // king上限2
@@ -256,9 +268,28 @@ describe("Action#effectHeal", function () {
   it("既に上限を超えている場合は減らさない", function () {
     const turn = buildTurn([{ side: "FIRST", piece: "king", hp: 4, steps: 0, statuses: [] }]);
 
-    const result = effectHeal(baseAction)({ side: "FIRST", piece: "pawn" }, [{ side: "FIRST", piece: "king" }], turn);
+    const result = effectHeal(baseAction)(
+      { side: "FIRST", piece: "pawn" },
+      [{ side: "FIRST", piece: "king" }],
+      turn,
+      healGetPiece,
+    );
 
     expect(result.units[0].hp).toBe(4);
+  });
+
+  it("MaxHP=2の駒(promotedLance等)は2までしか回復しない(§2.4 旧healCapバグの回帰)", function () {
+    const turn = buildTurn([{ side: "FIRST", piece: "promotedLance", hp: 1, steps: 0, statuses: [] }]);
+    const getPiece: GetPiece = (key) => ({ key, name: key, description: "", MaxHP: 2, move: 3, actions: [] });
+
+    const result = effectHeal(baseAction)(
+      { side: "FIRST", piece: "pawn" },
+      [{ side: "FIRST", piece: "promotedLance" }],
+      turn,
+      getPiece,
+    );
+
+    expect(result.units[0].hp).toBe(2); // 旧実装はking以外一律3で3まで回復していた
   });
 });
 

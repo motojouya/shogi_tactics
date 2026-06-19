@@ -1,6 +1,7 @@
 import type { Turn, Order } from "./turn";
 import type { Unit, UnitReference } from "./unit";
 import type { Action } from "./action";
+import type { GetPiece } from "./piece";
 
 import { z } from "zod";
 
@@ -141,9 +142,10 @@ export type SpendTurn = (
   battle: Battle,
   actor: UnitReference,
   doAction: DoActionInput | null,
+  getPiece: GetPiece,
   getDatetime: () => Date,
 ) => Battle;
-export const spendTurn: SpendTurn = (battle, actor, doAction, getDatetime) => {
+export const spendTurn: SpendTurn = (battle, actor, doAction, getPiece, getDatetime) => {
   const newBattle = copyBattle(battle);
   const lastTurn = arrayLast(newBattle.turns);
 
@@ -158,7 +160,7 @@ export const spendTurn: SpendTurn = (battle, actor, doAction, getDatetime) => {
   } else {
     // 2. 技の効果を適用(Act経由でTurn.unitsを更新)。
     const working: Turn = { datetime: getDatetime(), previous: 0, order: { type: "FORMATION" }, units };
-    const acted = doAction.action.act(actor, doAction.receivers, working);
+    const acted = doAction.action.act(actor, doAction.receivers, working, getPiece);
     units = acted.units;
     order = { type: "DO_ACTION", actionKey: doAction.action.key, actor, receivers: doAction.receivers };
   }
