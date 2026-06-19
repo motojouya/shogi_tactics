@@ -37,7 +37,8 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
     formState: { errors },
   } = useForm<CreationForm>({
     resolver: zodResolver(creationFormSchema),
-    defaultValues: { mode: 'normal', first_player_name: '', second_player_name: '', stepBase: '', unitCount: '' },
+    // stepBase/unitCountの既定値は通常モードの値(14/7)。通常モードでは入力欄を出さずこの既定値を使う。
+    defaultValues: { mode: 'normal', first_player_name: '', second_player_name: '', stepBase: NORMAL_STEP_BASE, unitCount: NORMAL_UNIT_COUNT },
   });
 
   // 条件描画(戦乱モードの追加フィールド/ボタン文言)用にmodeをUI stateとして持つ(react-hook-formのwatchはReact Compiler非互換のため)。
@@ -59,12 +60,12 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
       return;
     }
 
-    // 戦乱モード: stepBase/unitCountはschemaで1以上を保証済み。登録後の編成画面でunitsを選択する。
+    // 戦乱モード: stepBase/unitCountはschemaで1以上を保証済みのnumber。登録後の編成画面でunitsを選択する。
     const battle = await registerBattle(io)(
       form.first_player_name,
       form.second_player_name,
-      Number(form.stepBase),
-      Number(form.unitCount),
+      form.stepBase,
+      form.unitCount,
       version,
     );
     local.transit(`/v1/?key=${battle.key}`);
@@ -131,7 +132,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
                   label="Step Base"
                   placeholder="基礎コスト(1以上)"
                   variant="outlined"
-                  {...register('stepBase')}
+                  {...register('stepBase', { valueAsNumber: true })}
                   helperText={errors.stepBase && errors.stepBase.message}
                   sx={{ width: '100%' }}
                 />
@@ -144,7 +145,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
                   label="Unit Count"
                   placeholder="片側のユニット数(1以上)"
                   variant="outlined"
-                  {...register('unitCount')}
+                  {...register('unitCount', { valueAsNumber: true })}
                   helperText={errors.unitCount && errors.unitCount.message}
                   sx={{ width: '100%' }}
                 />
