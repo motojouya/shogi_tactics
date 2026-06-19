@@ -4,10 +4,7 @@ import type { Repository } from "../repository";
 
 import { z } from "zod";
 
-import { ORDER_DO_NOTHING } from "../model/turn";
-
-// 何もしないを表すフォーム値(actionKeyとして使用)
-export const DO_NOTHING = ORDER_DO_NOTHING;
+// 「何もしない」のactionKey sentinelは model/turn の ORDER_DO_NOTHING を単一の真実とする(S15/§4.4で間接re-exportを廃止)。
 
 export const doActionFormSchema = z.object({
   actionKey: z.string().min(1),

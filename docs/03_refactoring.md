@@ -255,8 +255,13 @@ components / pages (presentation)  data (静的データ定義)
 
 ### Phase 3 — form
 - **S12. form 分割**【済】(§7.2a) — 現状 `form/battle.ts` の内容は全て action 関連(`DoActionForm`/`doActionFormSchema`/`toAction`/`receiverSelectOption`/`ReceiverDuplicationError`(暫定)/`DO_NOTHING`)だったため、**`form/battle.ts` → `form/action.ts`** へ移設(`mv`、内容は同一・同ディレクトリなので相対 import 不変)。importer を `../form/battle` → `../form/action` に更新(`components/battle.tsx`/`controller/act.ts`/`controller/act.unit.test.ts`)、`model/action.ts` のコメント参照も追従。**`form/formation.ts`/`form/creation.ts` は内容が出る S13(selectUnit/select option 集約)/S14(creation zod)で新設**(空ファイルは作らない方針)。build/test 115 pass/lint/format green。
-- **S13. form 責務の集約**(§7.2b/§7.2c/§7.1e) — `toAction` を `UnitReference` list 取得へ縮小(action 解決は S6 で spendTurn 側に移済のため form から除去)、`selectUnit` を form へ、select option 取得(`receiverSelectOption`)を form に集約。
-- **S14. creation フォームの zod 化**(§3.2) — `pages/new` の手書きバリデーション(player 名必須・stepBase/unitCount≥1)を `form/creation` の schema へ(適用は Phase 7)。
+- **S13. form 責務の集約**【済】(§7.2b/§7.2c/§7.1e) — **`toAction` を解体**(ユーザー方針)。form の責務は「変換が要る値」のみ:
+  - `selectUnit`(`"FIRST:king"` → `UnitReference`)を **model/unit.ts → form/action.ts** へ移設(値 string の解釈は form の責務。form→model 依存は可・逆は不可)。テストも `form/action.unit.test.ts` へ移設(コロケーション)。
+  - 受け手解決のみ関数化: **`toReceivers(form.receivers): UnitReference[]`**(`selectUnit` で map)。**`actionKey` は model がそのまま扱える値なので関数で包まず controller が直接読む**。
+  - `receiverSelectOption`/`DO_NOTHING` は form に残置。
+  - form 版 `ReceiverDuplicationError` 暫定 class を**削除し model 版(S5)へ一本化**。`components/battle.tsx` の import を `model/action` へ変更。
+  - **controller `act` が組み立てを担う**: `actionKey===DO_NOTHING`→`doAction=null`、それ以外は `toReceivers`→`validateReceivers`(model)で重複検証→`resolvers.getAction(actionKey)` で解決(null は `DataNotFoundError`)→`DoActionInput{action,receivers}` を spendTurn へ。`act` の `action: Repository["action"]` 引数を撤去(resolvers.getAction を使用)、caller(`components/battle.tsx`)と test を追従。`spendTurn`/`DoActionInput` は不変で **model→repository/error 依存を作らない**。build/test 117 pass(+form 2)/lint/format green。
+- **S14. creation フォームの zod 化**【済】(§3.2) — `pages/new` の手書きバリデーションを **`form/creation.ts`** の zod schema 化。2モードで必須が異なるため2種を新設: **`normalCreationFormSchema`**(player名のみ必須。stepBase/unitCount は `NORMAL_STEP_BASE`/`NORMAL_UNIT_COUNT` 固定)/ **`warCreationFormSchema`**(player名 + `z.coerce.number().int().min(1)` で stepBase/unitCount を数値化・1以上要求。空文字=0/非数値=NaN はいずれも min(1) 失敗)。型 `NormalCreationForm`/`WarCreationForm` を z.infer で導出。schema 検証の colocation テスト追加。**pages/new への接続(react-hook-form + zodResolver 化)は Phase 7(S20)で実施**(現状の手書き分岐は据え置き)。build/test 122 pass(+creation 5)/lint/format green。
 - **S15. `DO_NOTHING` 一本化**(§4.4)。
 
 ### Phase 4 — controller

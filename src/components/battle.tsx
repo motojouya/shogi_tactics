@@ -45,8 +45,8 @@ import { toUnitReference } from '../model/unit';
 import {
   doActionFormSchema,
   receiverSelectOption,
-  DO_NOTHING,
 } from '../form/action';
+import { ORDER_DO_NOTHING } from '../model/turn';
 import { ReceiverDuplicationError } from '../model/action';
 import { DataNotFoundError } from '../repository/error';
 import { act } from '../controller/act';
@@ -179,7 +179,7 @@ const ActionSelect: FC<{
 }> = ({ actions, onSelect, errors, control }) => {
 
   const actionOptions = actions.map(action => ({ value: action.key, label: action.name }));
-  actionOptions.push({ value: DO_NOTHING, label: '何もしない' });
+  actionOptions.push({ value: ORDER_DO_NOTHING, label: '何もしない' });
 
   const onChange = (hookOnChange: HookOnChange) => (e: SelectChangeEvent<string>) => {
     const actionKey = e.target.value;

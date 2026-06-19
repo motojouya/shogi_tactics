@@ -6,12 +6,13 @@ import type { Local } from "../repository/local";
 import type { Resolvers } from "../model/resolver";
 
 import { spendTurn } from "../model/battle";
+import { ORDER_DO_NOTHING } from "../model/turn";
 import { validateReceivers, ReceiverDuplicationError } from "../model/action";
-import { toReceivers, DO_NOTHING } from "../form/action";
+import { toReceivers } from "../form/action";
 import { DataNotFoundError, UserCancel } from "../repository/error";
 
 // step15(S13): formからは値だけ受け取り、controllerが組み立てる。
-// - actionKey: modelがそのまま扱える値なのでform関数を介さず直接読む。DO_NOTHINGならdoAction=null。
+// - actionKey: modelがそのまま扱える値なのでform関数を介さず直接読む。ORDER_DO_NOTHINGならdoAction=null。
 // - receivers: formのtoReceiversでUnitReference[]へ解決。
 // - 受け手重複検証(validateReceivers)とaction解決(resolvers.getAction)はcontrollerの責務。
 export type Act = (
@@ -26,7 +27,7 @@ export type Act = (
 ) => Promise<Battle | DataNotFoundError | ReceiverDuplicationError | UserCancel>;
 export const act: Act = (local, repository, resolvers) => async (battle, actor, doActionForm, getDate) => {
   let doAction: DoActionInput | null = null;
-  if (doActionForm.actionKey !== DO_NOTHING) {
+  if (doActionForm.actionKey !== ORDER_DO_NOTHING) {
     const receivers = toReceivers(doActionForm.receivers);
 
     const duplication = validateReceivers(receivers);
