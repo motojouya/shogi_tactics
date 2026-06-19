@@ -93,6 +93,7 @@ export const createBattle: CreateBattle = (key, firstPlayerName, secondPlayerNam
 export type Start = (units: Unit[], datetime: Date) => Turn;
 export const start: Start = (units, datetime) => ({
   datetime,
+  previous: 0, // 先頭Turn(直前なし)
   order: { type: "FORMATION" },
   units: units.map(copyUnit),
 });
@@ -125,6 +126,7 @@ export const surrender: ModelSurrender = (battle, actor, datetime) => {
   const lastTurn = arrayLast(battle.turns);
   return {
     datetime,
+    previous: battle.turns.length - 1, // 直前(投了時点)のTurn index
     order: { type: "SURRENDER", actor },
     units: lastTurn.units.map(copyUnit),
   };
@@ -155,7 +157,7 @@ export const spendTurn: SpendTurn = (battle, actor, doAction, getDatetime) => {
     order = { type: "DO_NOTHING", actor };
   } else {
     // 2. 技の効果を適用(Act経由でTurn.unitsを更新)。
-    const working: Turn = { datetime: getDatetime(), order: { type: "FORMATION" }, units };
+    const working: Turn = { datetime: getDatetime(), previous: 0, order: { type: "FORMATION" }, units };
     const acted = doAction.action.act(actor, doAction.receivers, working);
     units = acted.units;
     order = { type: "DO_ACTION", actionKey: doAction.action.key, actor, receivers: doAction.receivers };
@@ -168,7 +170,7 @@ export const spendTurn: SpendTurn = (battle, actor, doAction, getDatetime) => {
   );
 
   // 4. 死亡除外 → steps昇順に並べ替え。
-  const newTurn: Turn = { datetime: getDatetime(), order, units };
+  const newTurn: Turn = { datetime: getDatetime(), previous: newBattle.turns.length - 1, order, units };
   newTurn.units = sortedUnits(newTurn);
 
   newBattle.turns.push(newTurn);

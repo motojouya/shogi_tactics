@@ -45,6 +45,7 @@ export type Order = z.infer<typeof orderSchema>;
 // datetimeはmodel型(=保存型)でDateに統一。z.coerce.date()でJSON import時の文字列もDate化する。
 export const turnSchema = z.object({
   datetime: z.coerce.date(),
+  previous: z.number().default(0), // 巻き戻し用。このTurnの直前Turnのindex(先頭=0)。default(0)で旧データ互換
   order: orderSchema,
   units: z.array(unitSchema), // 行動適用・死亡除外後の全生存駒。steps昇順=次の行動順。初期値はlength=0
 });
@@ -80,6 +81,7 @@ export const copyOrder: CopyOrder = (order) => {
 export type CopyTurn = (turn: Turn) => Turn;
 export const copyTurn: CopyTurn = (turn) => ({
   datetime: new Date(turn.datetime.getTime()),
+  previous: turn.previous,
   order: copyOrder(turn.order),
   units: turn.units.map(copyUnit),
 });

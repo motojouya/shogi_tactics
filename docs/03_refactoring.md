@@ -241,7 +241,7 @@ components / pages (presentation)  data (静的データ定義)
 ### Phase 1 — model
 - **S1. model 純化**【済】 — `getSelectOption`+`GetSelectOption`+`sideLabel`(private)削除 → `SelectOption` import 除去(§2.1)、残存 `skill` 命名 `DO_SKILL` → `DO_ACTION`(§7.6一部)。`model/unit.unit.test.ts` の該当ケース削除。⇒ **model→repository 依存が消滅**。`Piece.move` 削除(§4.3)は**ユーザー指示により実施せず(move は残す)**。
 - **S2. model 内再配置**【済】 — `normal_mode.ts`(`buildNormalUnits`/`NORMAL_PIECE_ORDER`/`GetPiece`/`BuildNormalUnits`)→ `unit.ts` 統合、`NORMAL_UNIT_COUNT`/`NORMAL_STEP_BASE` → `battle.ts`(§7.1d)。`normal_mode.ts` 削除。`pages/new/app.tsx` の import 付け替え。test は `buildNormalUnits` 系を `unit.unit.test.ts` へ・定数値を `battle.unit.test.ts` へ移設。
-- **S3. `Turn.previous` 追加**(§7.4a) — schema に `previous`(default 0、旧データ互換)。
+- **S3. `Turn.previous` 追加**【済】(§7.4a) — `turnSchema` に `previous: z.number().default(0)`(旧データは parse 時に 0 補完で互換)。意味は「直前 Turn の index(巻き戻し用)」。`copyTurn` と `battle.ts` の Turn 構築4箇所(start=0 / surrender=turns.length-1 / spendTurn working=0 / newTurn=turns.length-1)に反映。テスト fixture は型チェック外かつ未参照のため変更なし。
 - **S4. resolver 型定義**(§7.1a) — model に `GetAction=(key)=>Action|null` / `GetPiece` / `GetStatus` を追加(型のみ、未使用)。
 - **S5. 編成・受け手検証を model に新設**(§2.3 / §7.1c) — `validateFormation`(交互順・大将ちょうど1体・完了判定)・駒重複検証・受け手重複(`ReceiverDuplicationError`)を model 制約として実装。`formation.tsx`/`form` は当面現状ロジックのまま(重複は許容、green)。test 追加。
 - **S6. action の resolver 化 + simulate 移設** — `controller/simulate` を model へ(§2.2)、`action#act` が Piece を要求する部分を `GetPiece` 経由に(§2.4 healCap ハードコード解消・**promotedLance 回復バグ修正**)。call site は当面 `repository.piece.get` 等を直接渡して green(束ね方は S8)。
