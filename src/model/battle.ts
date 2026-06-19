@@ -1,7 +1,7 @@
 import type { Turn, Order } from "./turn";
 import type { Unit, UnitReference } from "./unit";
 import type { Action } from "./action";
-import type { GetPiece } from "./piece";
+import type { Resolvers } from "./resolver";
 
 import { z } from "zod";
 
@@ -143,10 +143,10 @@ export type SpendTurn = (
   battle: Battle,
   actor: UnitReference,
   doAction: DoActionInput | null,
-  getPiece: GetPiece,
+  resolvers: Resolvers,
   getDatetime: () => Date,
 ) => Battle;
-export const spendTurn: SpendTurn = (battle, actor, doAction, getPiece, getDatetime) => {
+export const spendTurn: SpendTurn = (battle, actor, doAction, resolvers, getDatetime) => {
   const newBattle = copyBattle(battle);
   const lastTurn = arrayLast(newBattle.turns);
 
@@ -158,7 +158,7 @@ export const spendTurn: SpendTurn = (battle, actor, doAction, getPiece, getDatet
   if (doAction === null) {
     order = { type: "DO_NOTHING", actor };
   } else {
-    units = doAction.action.act(actor, doAction.receivers, units, getPiece);
+    units = doAction.action.act(actor, doAction.receivers, units, resolvers.getPiece);
     order = { type: "DO_ACTION", actionKey: doAction.action.key, actor, receivers: doAction.receivers };
   }
 

@@ -8,7 +8,8 @@ import { BattleContainer } from '../../components/battle';
 import { BattleFormation } from '../../components/formation';
 import { JsonSchemaUnmatchError } from '../../repository/error';
 import { useIO } from '../../components/context';
-import { Container, getSearchParams } from '../../components/utility';
+import { Container } from '../../components/utility';
+import { local } from '../../repository/local';
 
 // /v1 : version1のbattleを表示する。?key=<uuid>で対象を指定。version不一致は表示しない。
 export const VERSION = 'v1';
@@ -51,7 +52,7 @@ const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey,
 };
 
 export const App: FC = () => {
-  const searchParams = getSearchParams();
+  const searchParams = local.getSearchParams();
   const key = searchParams.get('key');
 
   if (!key) {

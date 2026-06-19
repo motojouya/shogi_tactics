@@ -3,7 +3,7 @@ import type { Battle } from "../model/battle";
 import Dexie from "dexie";
 
 import { battleSchema } from "../model/battle";
-import { parseJson } from "./utility";
+import { parseJson, importJsonFile, exportJsonFile } from "./utility";
 import { CopyFailError, JsonSchemaUnmatchError } from "./error";
 
 // battle専用のrepository。schema変換が無くなりbattle固有のロジックも無いため、Database抽象を廃しDexieを直接使う。
@@ -29,20 +29,8 @@ class BattleDB extends Dexie {
   }
 }
 
-const pickerOpts = {
-  types: [
-    {
-      description: "JSON",
-      accept: {
-        "application/json": [".json"],
-      },
-    },
-  ],
-  excludeAcceptAllOption: true,
-};
-
-export type CreateRepository = () => Promise<BattleRepository>;
-export const createRepository: CreateRepository = async () => {
+export type CreateBattleRepository = () => Promise<BattleRepository>;
+export const createBattleRepository: CreateBattleRepository = async () => {
   const db = new BattleDB();
   return {
     save: async (battle) => {
@@ -62,20 +50,7 @@ export const createRepository: CreateRepository = async () => {
     remove: async (key) => {
       await db.battle.delete(key);
     },
-    importJson: async (_fileName) => {
-      // @ts-expect-error window is not defined
-      const [fileHandle] = await window.showOpenFilePicker({ ...pickerOpts, multiple: false });
-      const file = await fileHandle.getFile();
-      const text = await file.text();
-      return parseJson(battleSchema)(JSON.parse(text));
-    },
-    exportJson: async (battle, fileName) => {
-      // @ts-expect-error window is not defined
-      const newHandle = await window.showSaveFilePicker({ ...pickerOpts, suggestedName: `${fileName}.json` });
-      const writableStream = await newHandle.createWritable();
-      await writableStream.write(JSON.stringify(battle));
-      await writableStream.close();
-      return null;
-    },
+    importJson: async (_fileName) => importJsonFile(battleSchema),
+    exportJson: async (battle, fileName) => exportJsonFile(battle, fileName),
   };
 };

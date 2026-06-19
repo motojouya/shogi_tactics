@@ -41,6 +41,13 @@ const local = (confirm: boolean): Local => ({
   now: () => new Date("2024-01-01T00:00:00"),
 });
 
+// S8: actはResolvers束を受け取る。repositoryのgetメソッドから束ねる。
+const resolvers = {
+  getAction: actionRepository.get,
+  getPiece: pieceRepository.get,
+  getStatus: () => null,
+};
+
 const actor = { side: "FIRST", piece: "king" } as const;
 
 describe("act", () => {
@@ -48,7 +55,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(local(true), battleRepository, actionRepository, pieceRepository)(
+    const result = await act(local(true), battleRepository, actionRepository, resolvers)(
       battle,
       actor,
       form,
@@ -66,7 +73,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "noSuchAction", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(local(true), battleRepository, actionRepository, pieceRepository)(
+    const result = await act(local(true), battleRepository, actionRepository, resolvers)(
       battle,
       actor,
       form,
@@ -79,7 +86,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(local(false), battleRepository, actionRepository, pieceRepository)(
+    const result = await act(local(false), battleRepository, actionRepository, resolvers)(
       battle,
       actor,
       form,

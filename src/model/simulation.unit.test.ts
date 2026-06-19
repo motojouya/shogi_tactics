@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
 
-import type { GetPiece } from "./piece";
+import type { Resolvers } from "./resolver";
 
 import { start } from "./battle";
 import { buildAction, effectBaseDamage, filterAlive } from "./action";
 import { simulate } from "./simulation";
 
-// effectBaseDamageはMaxHPを参照しないので、getPieceはnull固定のstubでよい。
-const getPiece: GetPiece = () => null;
+// effectBaseDamageはMaxHPを参照しないので、getPieceはnull固定のstubでよい(S8: Resolvers束で渡す)。
+const resolvers: Resolvers = { getAction: () => null, getPiece: () => null, getStatus: () => null };
 
 const zeros7 = Array.from({ length: 7 }, () => [0, 0, 0, 0, 0, 0, 0]);
 
@@ -43,7 +43,7 @@ describe("simulate", () => {
       ],
       new Date("2024-01-01T00:00:00"),
     );
-    const result = simulate(attack, actor, { side: "SECOND", piece: "pawn" }, turn, getPiece);
+    const result = simulate(attack, actor, { side: "SECOND", piece: "pawn" }, turn, resolvers);
     expect(result.survive).toBe(true);
     expect(result.unit?.hp).toBe(1); // 3 - 2
   });
@@ -56,7 +56,7 @@ describe("simulate", () => {
       ],
       new Date("2024-01-01T00:00:00"),
     );
-    const result = simulate(attack, actor, { side: "SECOND", piece: "pawn" }, turn, getPiece);
+    const result = simulate(attack, actor, { side: "SECOND", piece: "pawn" }, turn, resolvers);
     expect(result.survive).toBe(false);
     expect(result.unit?.hp).toBe(0); // 2 - 2
   });

@@ -16,7 +16,7 @@ import { registerBattle, startBattle } from '../../controller/start';
 import { buildNormalUnits } from '../../model/unit';
 import { NORMAL_STEP_BASE, NORMAL_UNIT_COUNT } from '../../model/battle';
 import { useIO } from '../../components/context';
-import { transit, Container } from '../../components/utility';
+import { Container } from '../../components/utility';
 
 // 通常モード: unitCount=7/stepBase=14固定、units(飛->角->金->銀->桂->香->王、leader=king)もbattle作成時に登録し、編成画面を出さずそのまま開始。
 // 戦乱モード: stepBase/unitCountを入力し、登録後の編成画面でunitsを選択する。
@@ -66,7 +66,7 @@ const BattleNew: FC = () => {
       );
       const units = buildNormalUnits((key) => pieceRepository.get(key));
       await startBattle(battleRepository, local)(battle, units);
-      transit(`/v1/?key=${battle.key}`);
+      local.transit(`/v1/?key=${battle.key}`);
       return;
     }
 
@@ -93,7 +93,7 @@ const BattleNew: FC = () => {
       unitCount,
       version,
     );
-    transit(`/v1/?key=${battle.key}`);
+    local.transit(`/v1/?key=${battle.key}`);
   };
 
   // FIXME messageの表示で以前はFormErrorMessageを使っていたがchakra v3ではなくなったため、一旦Textで代用

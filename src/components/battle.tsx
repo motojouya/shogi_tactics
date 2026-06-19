@@ -54,6 +54,7 @@ import { surrender } from '../controller/surrender';
 import { simulate } from '../model/simulation';
 import { UserCancel } from '../repository/error';
 import { useIO } from './context';
+import { createResolvers } from '../repository';
 import { Container } from './utility';
 
 const sideLabel = (side: 'FIRST' | 'SECOND'): string => (side === 'FIRST' ? '先手' : '後手');
@@ -233,7 +234,9 @@ export const BattleTurn: FC<{
   reload: (battle: Battle) => void,
 }> = ({ battle, lastTurn, reload }) => {
 
-  const { battle: battleRepository, local, piece, action } = useIO();
+  const io = useIO();
+  const { battle: battleRepository, local, piece, action } = io;
+  const resolvers = createResolvers(io);
 
   const {
     handleSubmit,
@@ -269,7 +272,7 @@ export const BattleTurn: FC<{
       return;
     }
 
-    const result = await act(local, battleRepository, action, piece)(battle, actor, form, () => new Date());
+    const result = await act(local, battleRepository, action, resolvers)(battle, actor, form, () => new Date());
 
     if (result instanceof DataNotFoundError) {
       setMessage('入力してください');
@@ -302,7 +305,7 @@ export const BattleTurn: FC<{
     }
     const index2 = value.indexOf(':');
     const receiver: UnitReference = { side: value.slice(0, index2) as 'FIRST' | 'SECOND', piece: value.slice(index2 + 1) };
-    const { survive, unit } = simulate(selectedAction, actor, receiver, lastTurn, piece.get);
+    const { survive, unit } = simulate(selectedAction, actor, receiver, lastTurn, resolvers);
 
     const newSimulated = [...simulated];
     while (newSimulated.length <= index) {

@@ -4,6 +4,7 @@ import type { BattleRepository } from "../repository/battle";
 import type { DoActionForm } from "../form/battle";
 import type { Local } from "../repository/local";
 import type { Repository } from "../repository";
+import type { Resolvers } from "../model/resolver";
 
 import { spendTurn } from "../model/battle";
 import { toAction, ReceiverDuplicationError } from "../form/battle";
@@ -13,14 +14,14 @@ export type Act = (
   local: Local,
   repository: BattleRepository,
   action: Repository["action"],
-  piece: Repository["piece"],
+  resolvers: Resolvers,
 ) => (
   battle: Battle,
   actor: UnitReference,
   doActionForm: DoActionForm,
   getDate: () => Date,
 ) => Promise<Battle | DataNotFoundError | ReceiverDuplicationError | UserCancel>;
-export const act: Act = (local, repository, action, piece) => async (battle, actor, doActionForm, getDate) => {
+export const act: Act = (local, repository, action, resolvers) => async (battle, actor, doActionForm, getDate) => {
   const doAction = toAction(action)(doActionForm);
   if (doAction instanceof DataNotFoundError || doAction instanceof ReceiverDuplicationError) {
     return doAction;
@@ -30,7 +31,7 @@ export const act: Act = (local, repository, action, piece) => async (battle, act
     return new UserCancel("Cancelされました");
   }
 
-  const newBattle = spendTurn(battle, actor, doAction, piece.get, getDate);
+  const newBattle = spendTurn(battle, actor, doAction, resolvers, getDate);
 
   await repository.save(newBattle);
   return newBattle;
