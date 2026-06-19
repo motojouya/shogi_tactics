@@ -1,13 +1,13 @@
 import type { Battle } from "../model/battle";
 import type { UnitReference } from "../model/unit";
 import type { BattleRepository } from "../repository/battle";
-import type { DoActionForm } from "../form/battle";
+import type { DoActionForm } from "../form/action";
 import type { Local } from "../repository/local";
 import type { Repository } from "../repository";
 import type { Resolvers } from "../model/resolver";
 
 import { spendTurn } from "../model/battle";
-import { toAction, ReceiverDuplicationError } from "../form/battle";
+import { toAction, ReceiverDuplicationError } from "../form/action";
 import { DataNotFoundError, UserCancel } from "../repository/error";
 
 export type Act = (

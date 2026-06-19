@@ -3,7 +3,7 @@ import type { Battle } from '../model/battle';
 import type { Unit, UnitReference } from '../model/unit';
 import type { Turn } from '../model/turn';
 import type { Action } from '../model/action';
-import type { DoActionForm } from '../form/battle';
+import type { DoActionForm } from '../form/action';
 import type { Repository } from '../repository';
 import type { SelectChangeEvent } from '@mui/material';
 
@@ -47,7 +47,7 @@ import {
   receiverSelectOption,
   ReceiverDuplicationError,
   DO_NOTHING,
-} from '../form/battle';
+} from '../form/action';
 import { DataNotFoundError } from '../repository/error';
 import { act } from '../controller/act';
 import { surrender } from '../controller/surrender';

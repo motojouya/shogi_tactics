@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 import type { BattleRepository } from "../repository/battle";
 import type { Local } from "../repository/local";
 import type { Battle } from "../model/battle";
-import type { DoActionForm } from "../form/battle";
+import type { DoActionForm } from "../form/action";
 
 import { createBattle, start, getLastTurn } from "../model/battle";
 import { act } from "./act";

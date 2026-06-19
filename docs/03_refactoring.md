@@ -254,7 +254,7 @@ components / pages (presentation)  data (静的データ定義)
 - **S11. 命名(Repository 接尾語)**【済】(§7.6) — 監査の結果、(1) 残存 `skill` は src から既に一掃済み(S1 完了)、(2) memory repository(`pieceRepository`/`actionRepository`/`statusRepository`)と `BattleRepository` 型は既に接尾語付きで OK。唯一の不統一だった `repository/battle.ts` の factory(汎用名 `createRepository`/`CreateRepository`。index.ts の「全 Repository を束ねる `createRepository`」と概念衝突し別名 import が必要だった)を **`createBattleRepository`/`CreateBattleRepository`** に改名。`index.ts` の `as` 別名 import を解消。`local`/`Local` は provider でありモデル衝突が無いため対象外。build/test 115 pass/lint/format green。**⇒ Phase 2(repository)完了。**
 
 ### Phase 3 — form
-- **S12. form 分割**(§7.2a) — `form/battle.ts` を `form/action.ts` / `form/formation.ts` / `form/creation.ts` へ。
+- **S12. form 分割**【済】(§7.2a) — 現状 `form/battle.ts` の内容は全て action 関連(`DoActionForm`/`doActionFormSchema`/`toAction`/`receiverSelectOption`/`ReceiverDuplicationError`(暫定)/`DO_NOTHING`)だったため、**`form/battle.ts` → `form/action.ts`** へ移設(`mv`、内容は同一・同ディレクトリなので相対 import 不変)。importer を `../form/battle` → `../form/action` に更新(`components/battle.tsx`/`controller/act.ts`/`controller/act.unit.test.ts`)、`model/action.ts` のコメント参照も追従。**`form/formation.ts`/`form/creation.ts` は内容が出る S13(selectUnit/select option 集約)/S14(creation zod)で新設**(空ファイルは作らない方針)。build/test 115 pass/lint/format green。
 - **S13. form 責務の集約**(§7.2b/§7.2c/§7.1e) — `toAction` を `UnitReference` list 取得へ縮小(action 解決は S6 で spendTurn 側に移済のため form から除去)、`selectUnit` を form へ、select option 取得(`receiverSelectOption`)を form に集約。
 - **S14. creation フォームの zod 化**(§3.2) — `pages/new` の手書きバリデーション(player 名必須・stepBase/unitCount≥1)を `form/creation` の schema へ(適用は Phase 7)。
 - **S15. `DO_NOTHING` 一本化**(§4.4)。
