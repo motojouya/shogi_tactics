@@ -125,11 +125,11 @@ describe("Battle#spendTurn", function () {
     const king = last.units.find((unit) => unit.piece === "king");
     expect(pawn?.hp).toBe(1); // 3 - 2
     expect(king?.steps).toBe(4); // 0 + stepBase2 + cost2
-    expect(last.units[0].piece).toBe("pawn"); // steps0 < steps4
+    expect(sortedUnits(last)[0].piece).toBe("pawn"); // steps0 < steps4(storageは並べ替えず行動順を算出)
     expect(result.result).toBe(GameOngoing);
   });
 
-  it("死亡駒は除外し、片側全滅で決着する", function () {
+  it("死亡駒はunitsに残しつつ行動順から除外し、片側全滅で決着する", function () {
     const battle = makeBattle([
       { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
       { side: "SECOND", piece: "pawn", hp: 2, steps: 0, statuses: [], leader: true },
@@ -143,8 +143,9 @@ describe("Battle#spendTurn", function () {
     );
 
     const last = getLastTurn(result);
-    expect(last.units.length).toBe(1);
-    expect(last.units[0].piece).toBe("king");
+    expect(last.units.length).toBe(2); // 死亡駒もunitsに残す(除外・並べ替えしない)
+    expect(sortedUnits(last).length).toBe(1); // 行動順は死亡駒を除外して算出
+    expect(sortedUnits(last)[0].piece).toBe("king");
     expect(result.result).toBe(GameFirst);
   });
 

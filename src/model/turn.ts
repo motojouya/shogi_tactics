@@ -1,6 +1,8 @@
+import type { Unit, UnitReference } from "./unit";
+
 import { z } from "zod";
 
-import { copyUnit, unitSchema, unitReferenceSchema } from "./unit";
+import { copyUnit, sameUnit, unitSchema, unitReferenceSchema } from "./unit";
 
 // 何もしないを表すOrderのキー(form/UIの選択肢として利用)
 export const ORDER_DO_NOTHING = "DO_NOTHING";
@@ -85,3 +87,15 @@ export const copyTurn: CopyTurn = (turn) => ({
   order: copyOrder(turn.order),
   units: turn.units.map(copyUnit),
 });
+
+// step15(S7/§7.4c): actorの行動進行(status失効・cost消費)はTurnの責務(actionはTurnを知らない)。
+
+// actorの持続statusは「次の自分の行動まで」有効なので、自分の行動開始時にクリアする。全unitをcopyして返す。
+export type ClearActorStatuses = (units: Unit[], actor: UnitReference) => Unit[];
+export const clearActorStatuses: ClearActorStatuses = (units, actor) =>
+  units.map((unit) => (sameUnit(unit, actor) ? { ...copyUnit(unit), statuses: [] } : copyUnit(unit)));
+
+// 行動したactorのstepsをstepBase+cost進める(行動順が後ろへ下がる)。死亡除外・並べ替えはしない(行動順は算出側)。
+export type ApplyActorCost = (units: Unit[], actor: UnitReference, stepBase: number, cost: number) => Unit[];
+export const applyActorCost: ApplyActorCost = (units, actor, stepBase, cost) =>
+  units.map((unit) => (sameUnit(unit, actor) ? { ...unit, steps: unit.steps + stepBase + cost } : unit));

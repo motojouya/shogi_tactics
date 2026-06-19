@@ -5,8 +5,8 @@ import type { GetPiece } from "./piece";
 
 import { z } from "zod";
 
-import { copyTurn, turnSchema } from "./turn";
-import { copyUnit, sameUnit } from "./unit";
+import { copyTurn, turnSchema, clearActorStatuses, applyActorCost } from "./turn";
+import { copyUnit } from "./unit";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
 
@@ -136,8 +136,9 @@ export const surrender: ModelSurrender = (battle, actor, datetime) => {
 // 行動内容。null=何もしない。
 export type DoActionInput = { action: Action; receivers: UnitReference[] };
 
-// step7: spendTurnを「行動適用→死亡除外→steps更新→並べ替え→勝敗判定」に簡素化。
-// WT/restWtの仮想時間・二重Turn・sleepループは廃止。actorはUnitReferenceで受け取る。
+// step7/S7: spendTurnは「statusクリア→行動適用→cost消費→勝敗判定」のorchestration。
+// status失効/cost消費はturn.tsの責務(clearActorStatuses/applyActorCost)。actionはunitsを受けて計算する(Turn非依存)。
+// 死亡駒は除外せずunitsに残し、並べ替えもしない(行動順・次actorはsortedUnits/nextActorで算出。§7.4b)。
 export type SpendTurn = (
   battle: Battle,
   actor: UnitReference,
@@ -149,32 +150,24 @@ export const spendTurn: SpendTurn = (battle, actor, doAction, getPiece, getDatet
   const newBattle = copyBattle(battle);
   const lastTurn = arrayLast(newBattle.turns);
 
-  // 1. 作業用units。actorの持続statusは「次の自分の行動まで」有効なので、自分の行動時にクリアする。
-  let units: Unit[] = lastTurn.units.map((unit) =>
-    sameUnit(unit, actor) ? { ...copyUnit(unit), statuses: [] } : copyUnit(unit),
-  );
+  // 1. actorの行動開始: 持続statusをクリア(次の自分の行動まで有効)。
+  let units: Unit[] = clearActorStatuses(lastTurn.units, actor);
 
+  // 2. 技の効果を適用(actionはunitsを受けてunitsを返す)。
   let order: Order;
   if (doAction === null) {
     order = { type: "DO_NOTHING", actor };
   } else {
-    // 2. 技の効果を適用(Act経由でTurn.unitsを更新)。
-    const working: Turn = { datetime: getDatetime(), previous: 0, order: { type: "FORMATION" }, units };
-    const acted = doAction.action.act(actor, doAction.receivers, working, getPiece);
-    units = acted.units;
+    units = doAction.action.act(actor, doAction.receivers, units, getPiece);
     order = { type: "DO_ACTION", actionKey: doAction.action.key, actor, receivers: doAction.receivers };
   }
 
-  // 3. 行動駒のstepsを加算(stepBase + cost。何もしない=0)。
+  // 3. actorのcost消費(stepBase + cost。何もしない=0)。
   const cost = doAction ? doAction.action.cost : 0;
-  units = units.map((unit) =>
-    sameUnit(unit, actor) ? { ...unit, steps: unit.steps + newBattle.stepBase + cost } : unit,
-  );
+  units = applyActorCost(units, actor, newBattle.stepBase, cost);
 
-  // 4. 死亡除外 → steps昇順に並べ替え。
+  // 4. 死亡除外・並べ替えはせず、そのままTurnに積む。
   const newTurn: Turn = { datetime: getDatetime(), previous: newBattle.turns.length - 1, order, units };
-  newTurn.units = sortedUnits(newTurn);
-
   newBattle.turns.push(newTurn);
   newBattle.result = isSettlement(newBattle);
   return newBattle;

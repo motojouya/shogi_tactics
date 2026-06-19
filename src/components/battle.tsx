@@ -134,7 +134,7 @@ const ReceiverSelect: FC<{
     addReceiver();
   };
 
-  const receiverOptions = action.filter(actor, lastTurn).map(receiverSelectOption(piece));
+  const receiverOptions = action.filter(actor, lastTurn.units).map(receiverSelectOption(piece));
 
   return (
     <Controller
