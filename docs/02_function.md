@@ -357,10 +357,21 @@ featureは不要かも。pagesを丁寧に定義したので。その代わりco
 ### 16. dependabot導入
 - 他stepへの依存が無いため、サプライチェーン対策の観点で**前倒し実施も可**。
 
+#### 16の済み分（実装メモ）
+- `.github/dependabot.yml` を新設。`npm`(ルート単一package.json。workspace廃止済み)と `github-actions` の2 ecosystem を weekly 更新、`open-pull-requests-limit: 10`。
+
 ### 17. github actions見直し
 - npm workspace使わなくなったので、それに伴って開発コマンドの見直し
 - アプリケーション名の見直し
 - step17同様、他stepへの依存が無いため**前倒し実施も可**。
+
+#### 17の済み分（実装メモ）
+- **開発コマンド**: 廃止済みworkspace前提のコマンドを修正。`check.yml` の test job(`build -w @motojouya/kniw-core` + `test -ws`)→ `npm run test`、build job(`build -w @motojouya/kniw-command`)→ `npm run build`。`gh-pages.yml` の `build -w @motojouya/kniw-web` → `npm run build`、artifact path `packages/web/dist` → `dist`。action も `checkout@v3`/`setup-node@v3` → `v4`(以後dependabotが追従)。
+- **アプリケーション名**: 製品名は **将棋タクティクス(英字: Shogi Tactics)** に確定(`kniw`/`KNIW`表記を撤去)。表示(日本語): manifest name/short_name/description・各html `<title>`・Header(`components/utility.tsx`)を「将棋タクティクス」へ。識別子(英字): `VITE_URL_PREFIX` `kniw`→`shogi_tactics`、DexieのDB名 `KniwDB`→`ShogiTacticsDB`、githubリンク `motojouya/kniw`→`motojouya/shogi_tactics`。
+  - ⚠ **DB名変更**: step14で「IndexedDBデータ互換のため `KniwDB` 据え置き」としていたが、本stepで `ShogiTacticsDB` へ改名。既存の保存battle(旧DB)は新DBからは参照不可になる(0.1.0段階のため許容)。
+  - ⚠ **デプロイ依存**: `VITE_URL_PREFIX`(=gh-pagesのbase path)はGitHub repo名に一致させる必要があるため、**repoを `shogi_tactics` にrenameしないとgh-pagesのasset解決が崩れる**(repo rename・git操作は本対応の範囲外)。
+  - docs/00–02 の `kniw` 表記は fork 元・旧構成の**歴史的記録**として保持。`description/play/*`(旧CLIツール向けの陳腐化した説明)の表記更新は step19(プレイヤー向けドキュメント整備)に委ねる。
+- ※ workflowの trigger は現状の `workflow_dispatch` のまま据え置き(push/PR有効化は別途判断)。
 
 ### 18. UI調整
 たぶんもっといろいろ治すところが出てくる

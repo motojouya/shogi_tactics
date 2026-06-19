@@ -22,7 +22,7 @@ class BattleDB extends Dexie {
   battle!: Dexie.Table<Battle, string>;
 
   constructor() {
-    super("KniwDB");
+    super("ShogiTacticsDB");
     this.version(1).stores({
       battle: "key",
     });

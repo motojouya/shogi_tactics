@@ -18,9 +18,9 @@ export default defineConfig({
       },
       manifest: {
         scope: path,
-        name: "KNIW - tactics board game",
-        short_name: "KNIW",
-        description: "KNIW is a board game that combines tactics and strategy.",
+        name: "将棋タクティクス",
+        short_name: "将棋タクティクス",
+        description: "将棋タクティクスは戦術と戦略を組み合わせたボードゲームです。",
         theme_color: "#ffffff",
       },
     }),

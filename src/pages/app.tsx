@@ -10,8 +10,8 @@ import { Container, Link } from '../components/utility';
 export const App: FC = () => (
   <Container backLink={null}>
     <Stack sx={{ justifyContent: 'flex-start', alignItems: "center" }}>
-      <Typography sx={{ p: 1 }}>KNIWはタクティクスオウガを参考にしたボードゲームです。</Typography>
-      <Typography sx={{ p: 1 }}>遊び方やルールは<MaterialLink href="https://github.com/motojouya/kniw" underline="always">こちらのページ</MaterialLink>を参照してください。</Typography>
+      <Typography sx={{ p: 1 }}>将棋タクティクスはタクティクスオウガを参考にしたボードゲームです。</Typography>
+      <Typography sx={{ p: 1 }}>遊び方やルールは<MaterialLink href="https://github.com/motojouya/shogi_tactics" underline="always">こちらのページ</MaterialLink>を参照してください。</Typography>
       <Stack direction="row" sx={{ justifyContent: 'space-around', p: 1, width: '100%' }}>
         <Box>
           <Link href="/list/" line>

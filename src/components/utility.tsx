@@ -60,7 +60,7 @@ export const Header: FC<{ backLink: string | null; }> = ({ backLink }) => {
         )}
         <Box sx={{ p: 1 }}>
           <Link href="/" line={false}>
-            <Typography variant="h3">KNIW</Typography>
+            <Typography variant="h3">将棋タクティクス</Typography>
           </Link>
         </Box>
       </Stack>
