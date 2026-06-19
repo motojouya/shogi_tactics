@@ -118,7 +118,7 @@ describe("Battle#spendTurn", function () {
       ref("FIRST", "king"),
       { action: attack, receivers: [ref("SECOND", "pawn")] },
       resolvers,
-      () => new Date(),
+      new Date(),
     );
 
     const last = getLastTurn(result);
@@ -142,7 +142,7 @@ describe("Battle#spendTurn", function () {
       ref("FIRST", "king"),
       { action: attack, receivers: [ref("SECOND", "pawn")] },
       resolvers,
-      () => new Date(),
+      new Date(),
     );
 
     const last = getLastTurn(result);
@@ -157,7 +157,7 @@ describe("Battle#spendTurn", function () {
       { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: ["interception"], leader: true },
       { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
     ]);
-    const result = spendTurn(battle, ref("FIRST", "king"), null, resolvers, () => new Date());
+    const result = spendTurn(battle, ref("FIRST", "king"), null, resolvers, new Date());
 
     const last = getLastTurn(result);
     expect(last.order.type).toBe("DO_NOTHING");

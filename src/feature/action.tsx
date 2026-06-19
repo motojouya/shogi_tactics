@@ -272,7 +272,7 @@ export const BattleTurn: FC<{
       return;
     }
 
-    const result = await act(io)(battle, actor, form, () => new Date());
+    const result = await act(io)(battle, actor, form);
 
     if (result instanceof DataNotFoundError) {
       setMessage('入力してください');

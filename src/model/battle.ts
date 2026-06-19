@@ -144,9 +144,9 @@ export type SpendTurn = (
   actor: UnitReference,
   doAction: DoActionInput | null,
   resolvers: Resolvers,
-  getDatetime: () => Date,
+  datetime: Date,
 ) => Battle;
-export const spendTurn: SpendTurn = (battle, actor, doAction, resolvers, getDatetime) => {
+export const spendTurn: SpendTurn = (battle, actor, doAction, resolvers, datetime) => {
   const newBattle = copyBattle(battle);
   const lastTurn = arrayLast(newBattle.turns);
 
@@ -167,7 +167,7 @@ export const spendTurn: SpendTurn = (battle, actor, doAction, resolvers, getDate
   units = applyActorCost(units, actor, newBattle.stepBase, cost);
 
   // 4. 死亡除外・並べ替えはせず、そのままTurnに積む。
-  const newTurn: Turn = { datetime: getDatetime(), previous: newBattle.turns.length - 1, order, units };
+  const newTurn: Turn = { datetime, previous: newBattle.turns.length - 1, order, units };
   newBattle.turns.push(newTurn);
   newBattle.result = isSettlement(newBattle);
   return newBattle;

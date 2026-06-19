@@ -20,9 +20,8 @@ export type Act = (
   battle: Battle,
   actor: UnitReference,
   doActionForm: DoActionForm,
-  getDate: () => Date,
 ) => Promise<Battle | DataNotFoundError | ReceiverDuplicationError | UserCancel>;
-export const act: Act = (repository) => async (battle, actor, doActionForm, getDate) => {
+export const act: Act = (repository) => async (battle, actor, doActionForm) => {
   const { battle: battleRepository, local } = repository;
   const resolvers = createResolvers(repository);
 
@@ -51,7 +50,7 @@ export const act: Act = (repository) => async (battle, actor, doActionForm, getD
     return new UserCancel("Cancelされました");
   }
 
-  const newBattle = spendTurn(battle, actor, doAction, resolvers, getDate);
+  const newBattle = spendTurn(battle, actor, doAction, resolvers, local.now());
 
   await battleRepository.save(newBattle);
   return newBattle;
