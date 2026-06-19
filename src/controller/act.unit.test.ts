@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import type { BattleRepository } from "../repository/battle";
 import type { Local } from "../repository/local";
+import type { Repository } from "../repository";
 import type { Battle } from "../model/battle";
 import type { DoActionForm } from "../form/action";
 
@@ -9,6 +10,7 @@ import { createBattle, start, getLastTurn } from "../model/battle";
 import { act } from "./act";
 import { actionRepository } from "../repository/action";
 import { pieceRepository } from "../repository/piece";
+import { statusRepository } from "../repository/status";
 import { DataNotFoundError, UserCancel } from "../repository/error";
 
 const makeBattle = (): Battle => {
@@ -39,14 +41,19 @@ const local = (confirm: boolean): Local => ({
   notice: () => {},
   getUuid: () => "key",
   now: () => new Date("2024-01-01T00:00:00"),
+  transit: () => {},
+  getSearchParams: () => new URLSearchParams(),
 });
 
-// S8: actはResolvers束を受け取る。repositoryのgetメソッドから束ねる。
-const resolvers = {
-  getAction: actionRepository.get,
-  getPiece: pieceRepository.get,
-  getStatus: () => null,
-};
+// S16: actはRepositoryを丸ごと受け取る。内部でcreateResolversがpiece/action/statusのgetを束ねる。
+const repository = (confirm: boolean) =>
+  ({
+    battle: battleRepository,
+    local: local(confirm),
+    action: actionRepository,
+    piece: pieceRepository,
+    status: statusRepository,
+  }) as unknown as Repository;
 
 const actor = { side: "FIRST", piece: "king" } as const;
 
@@ -55,7 +62,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(local(true), battleRepository, resolvers)(
+    const result = await act(repository(true))(
       battle,
       actor,
       form,
@@ -73,7 +80,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "noSuchAction", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(local(true), battleRepository, resolvers)(
+    const result = await act(repository(true))(
       battle,
       actor,
       form,
@@ -86,7 +93,7 @@ describe("act", () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "SECOND:pawn" }] };
 
-    const result = await act(local(false), battleRepository, resolvers)(
+    const result = await act(repository(false))(
       battle,
       actor,
       form,

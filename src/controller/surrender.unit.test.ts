@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import type { BattleRepository } from "../repository/battle";
 import type { Local } from "../repository/local";
+import type { Repository } from "../repository";
 import type { Battle } from "../model/battle";
 
 import { createBattle, start, GameFirst, GameSecond } from "../model/battle";
@@ -39,13 +40,18 @@ const local = (confirm: boolean): Local => ({
   notice: () => {},
   getUuid: () => "key",
   now: () => new Date("2024-01-01T00:00:00"),
+  transit: () => {},
+  getSearchParams: () => new URLSearchParams(),
 });
+
+// S16: controllerはRepositoryを丸ごと受け取る。surrenderはbattle/localのみ参照する。
+const repository = (confirm: boolean) => ({ battle: battleRepository, local: local(confirm) }) as unknown as Repository;
 
 describe("surrender", () => {
   it("first surrender", async () => {
     saved = null;
     const battle = makeBattle();
-    const result = await surrender(battleRepository, local(true))(battle, { side: "FIRST", piece: "king" }, new Date());
+    const result = await surrender(repository(true))(battle, { side: "FIRST", piece: "king" }, new Date());
     expect(result).toBe(null);
     expect(saved?.result).toBe(GameSecond); // 先手が降参 → 後手の勝ち
   });
@@ -53,7 +59,7 @@ describe("surrender", () => {
   it("second surrender", async () => {
     saved = null;
     const battle = makeBattle();
-    const result = await surrender(battleRepository, local(true))(
+    const result = await surrender(repository(true))(
       battle,
       { side: "SECOND", piece: "pawn" },
       new Date(),
@@ -65,7 +71,7 @@ describe("surrender", () => {
   it("cancel", async () => {
     saved = null;
     const battle = makeBattle();
-    const result = await surrender(battleRepository, local(false))(
+    const result = await surrender(repository(false))(
       battle,
       { side: "FIRST", piece: "king" },
       new Date(),

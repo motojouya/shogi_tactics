@@ -1,5 +1,6 @@
 import type { BattleRepository } from "../repository/battle";
 import type { Local } from "../repository/local";
+import type { Repository } from "../repository";
 
 import { describe, it, expect } from "vitest";
 
@@ -23,7 +24,12 @@ const local: Local = {
   notice: (_message) => {},
   getUuid: () => "0191e000-0000-7000-8000-000000000000",
   now: () => new Date("2023-06-29T12:12:21"),
+  transit: () => {},
+  getSearchParams: () => new URLSearchParams(),
 };
+
+// S16: controllerはRepositoryを丸ごと受け取る。start系はbattle/localのみ参照する。
+const repository = { battle: battleRepository, local } as unknown as Repository;
 
 const units: Unit[] = [
   { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
@@ -32,7 +38,7 @@ const units: Unit[] = [
 
 describe("registerBattle", () => {
   it("register battle", async () => {
-    const battle = await registerBattle(battleRepository, local)("first", "second", 4, 4, "v1");
+    const battle = await registerBattle(repository)("first", "second", 4, 4, "v1");
 
     expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
     expect(battle.first_player_name).toBe("first");
@@ -48,8 +54,8 @@ describe("registerBattle", () => {
 
 describe("startBattle", () => {
   it("start battle", async () => {
-    const registered = await registerBattle(battleRepository, local)("first", "second", 4, 4, "v1");
-    const battle = await startBattle(battleRepository, local)(registered, units);
+    const registered = await registerBattle(repository)("first", "second", 4, 4, "v1");
+    const battle = await startBattle(repository)(registered, units);
 
     expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
     expect(battle.first_player_name).toBe("first");

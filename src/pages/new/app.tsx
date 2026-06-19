@@ -24,7 +24,8 @@ type Mode = 'normal' | 'war';
 
 const BattleNew: FC = () => {
 
-  const { battle: battleRepository, local, piece: pieceRepository } = useIO();
+  const io = useIO();
+  const { local, piece: pieceRepository } = io;
 
   const [mode, setMode] = useState<Mode>('normal');
   const [message, setMessage] = useState<string>('');
@@ -57,7 +58,7 @@ const BattleNew: FC = () => {
         return;
       }
       // 通常モード: 固定パラメータでbattleを作り、default unitsで先頭Turnまで積んでそのまま開始する。
-      const battle = await registerBattle(battleRepository, local)(
+      const battle = await registerBattle(io)(
         firstPlayerName,
         secondPlayerName,
         NORMAL_STEP_BASE,
@@ -65,7 +66,7 @@ const BattleNew: FC = () => {
         version,
       );
       const units = buildNormalUnits((key) => pieceRepository.get(key));
-      await startBattle(battleRepository, local)(battle, units);
+      await startBattle(io)(battle, units);
       local.transit(`/v1/?key=${battle.key}`);
       return;
     }
@@ -86,7 +87,7 @@ const BattleNew: FC = () => {
       return;
     }
 
-    const battle = await registerBattle(battleRepository, local)(
+    const battle = await registerBattle(io)(
       firstPlayerName,
       secondPlayerName,
       stepBase,

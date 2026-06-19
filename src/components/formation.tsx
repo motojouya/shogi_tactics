@@ -24,7 +24,8 @@ const sideLabel = (side: Side): string => (side === 'FIRST' ? '先手' : '後手
 // 先手→後手の交互に1unitずつ選び、双方がunitCountに達したら戦闘を開始できる。
 export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
 
-  const { battle: battleRepository, local, piece: pieceRepository } = useIO();
+  const io = useIO();
+  const { piece: pieceRepository } = io;
   const pieces = pieceRepository.all;
 
   const [units, setUnits] = useState<Unit[]>([]);
@@ -77,7 +78,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
 
   const startGame = async () => {
     // 先頭Turnを積んで保存。useLiveQueryがturns更新を検知し戦闘画面へ切り替わる。
-    await startBattle(battleRepository, local)(battle, units);
+    await startBattle(io)(battle, units);
   };
 
   return (
