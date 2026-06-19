@@ -17,9 +17,9 @@ import {
 } from '@mui/material';
 
 import { startBattle } from '../controller/start';
-import { useIO } from './context';
-import { Container } from './utility';
-import { sideLabel } from './label';
+import { useIO } from '../components/context';
+import { Container } from '../components/utility';
+import { sideLabel } from '../components/label';
 
 // step6: 編成段階(battle.turns.length===0)のUI。
 // 先手→後手の交互に1unitずつ選び、双方がunitCountに達したら戦闘を開始できる。

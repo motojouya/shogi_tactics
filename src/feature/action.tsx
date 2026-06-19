@@ -53,10 +53,10 @@ import { act } from '../controller/act';
 import { surrender } from '../controller/surrender';
 import { simulate } from '../model/simulation';
 import { UserCancel } from '../repository/error';
-import { useIO } from './context';
+import { useIO } from '../components/context';
 import { createResolvers } from '../repository';
-import { Container } from './utility';
-import { sideLabel } from './label';
+import { Container } from '../components/utility';
+import { sideLabel } from '../components/label';
 
 // step8: battleはkeyしか持たないので、presentationでstore参照してpiece/statusを解決する。
 const pieceName = (pieceRepository: Repository['piece'], pieceKey: string): string => {
@@ -215,7 +215,7 @@ const ActionSelect: FC<{
   );
 };
 
-export const BattleContainer: FC<{ battle: Battle }> = ({ battle }) => {
+export const BattleAction: FC<{ battle: Battle }> = ({ battle }) => {
 
   const [lastTurn, setLastTurn] = useState<Turn | null>(() => getLastTurn(battle));
 

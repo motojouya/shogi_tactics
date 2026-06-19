@@ -4,8 +4,8 @@ import { Typography } from '@mui/material';
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { BattleIO } from '../../components/battle_io';
-import { BattleContainer } from '../../components/battle';
-import { BattleFormation } from '../../components/formation';
+import { BattleAction } from '../../feature/action';
+import { BattleFormation } from '../../feature/formation';
 import { JsonSchemaUnmatchError } from '../../repository/error';
 import { useIO } from '../../components/context';
 import { Container } from '../../components/utility';
@@ -48,7 +48,7 @@ const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey,
     return (<BattleFormation battle={battle} />);
   }
 
-  return (<BattleContainer battle={battle} />);
+  return (<BattleAction battle={battle} />);
 };
 
 export const App: FC = () => {

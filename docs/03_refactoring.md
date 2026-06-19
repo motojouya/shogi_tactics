@@ -272,7 +272,13 @@ components / pages (presentation)  data (静的データ定義)
 - **S18. battle.tsx の API 追従 + 小整理**【済】 — API 追従は S6–S16 で逐次完了済み(simulate=model、resolver dictionary=`createResolvers`、form=`form/action`+`toReceivers`、routing=`local.transit/getSearchParams`、controller=`act(io)`/`surrender(io)`、`ORDER_DO_NOTHING`)。本ステップの実作業は **`sideLabel` 共通化(§4.1)**: 通常形(先手/後手・`Side`受け取り)が `battle.tsx`/`formation.tsx` で完全重複していたため **`components/label.ts`** に切り出し両者から import。短縮形(先/後・`UnitReference`受け取り)は receiver select option 専用で表示文脈が異なるため `form/action.ts` 側に据え置き(§4.1 の「表記の使い分けは意図的」を尊重)。`components/utility.tsx` への合流は避けた(全 export が component の状態を保ち react-refresh 警告を出さないため)。creation/list への form schema 適用は **Phase 7(S20/S21)** で実施。build/test 122 pass/lint/format green。**⇒ Phase 5(component)完了。**
 
 ### Phase 6 — feature
-- **S19. feature 復活と画面表現の移設**(§7.7 / §4.7) — `feature/` を復活し、creation(new)/formation/action(/決着済み)の画面表現を各ファイルへ。`components/battle.tsx` が抱える「画面全体表現」を feature へ移し肥大を緩和。
+- **S19. feature 復活と画面表現の移設**【済】(§7.7 / §4.7) — `feature/` を新設し画面表現を移設(ロジック不変・import 追従のみ):
+  - `components/battle.tsx`(403行)→ **`feature/action.tsx`**(`BattleContainer`→**`BattleAction`** に改名。戦闘画面。決着表示も `GameStatus` が担うため当面 finished 専用画面は作らない)。
+  - `components/formation.tsx` → **`feature/formation.tsx`**(`BattleFormation`)。
+  - `pages/new/app.tsx` の `BattleNew` → **`feature/creation.tsx`**(`BattleCreation`)。`pages/new/app.tsx` は `BattleIO`+feature のみの薄いページに。
+  - `feature/` は `src` 直下なので `../model`/`../controller`/`../repository`/`../form` は不変、`components/{context,utility,label}` 参照のみ `./` → `../components/` に修正。
+  - importer 追従: `pages/v1/app.tsx`(`feature/action` の `BattleAction`・`feature/formation` の `BattleFormation`)。
+  - **ページ出し分けの配線(pages/new 削除・/v1 で key 無し時 creation 表示・creation/formation/action dispatch)は S20**。本ステップは移設に限定し各 check green を維持。build/test 122 pass/lint/format green。
 
 ### Phase 7 — pages
 - **S20. pages 出し分け配線**(§7.7) — `pages/new` 削除、`/v1` で `key` query 無し時に new を表示、creation/formation/action を feature で出し分け。
