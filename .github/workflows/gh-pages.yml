@@ -2,9 +2,9 @@ name: github pages
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
 # Pagesデプロイに必要な最小権限(OIDCのid-token、pages write)。
 permissions:
