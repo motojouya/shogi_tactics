@@ -27,6 +27,28 @@ export type Action = {
   reachRange: number[][]; // Actorを中心[3][3]とした7×7(piercingArrowのみActorを2マス下[5][3]へずらす)
 };
 
+// step15(S4): repositoryのaction memory getをmodelへ渡すためのresolver型。
+export type GetAction = (key: string) => Action | null;
+
+// step15(S5/§7.1c): 受け手重複はドメイン制約。同じunitを複数回対象にできない。
+// (form/battle.tsにも同名の暫定classがあるが、S13でこのmodel版へ寄せる)
+export class ReceiverDuplicationError {
+  readonly message: string;
+  constructor(message: string) {
+    this.message = message;
+  }
+}
+
+// 受け手リストに重複(同一 side:piece)があればエラー、無ければnull。
+export type ValidateReceivers = (receivers: UnitReference[]) => ReceiverDuplicationError | null;
+export const validateReceivers: ValidateReceivers = (receivers) => {
+  const keys = receivers.map((receiver) => `${receiver.side}:${receiver.piece}`);
+  if (new Set(keys).size !== keys.length) {
+    return new ReceiverDuplicationError("同じunitを複数回えらべません");
+  }
+  return null;
+};
+
 // reachLengthがこの値より大きいActionを遠隔攻撃とみなす(矢かわしの無効化判定に使用)。
 const RANGED_REACH_THRESHOLD = 2;
 

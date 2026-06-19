@@ -1,4 +1,4 @@
-import type { Piece } from "./piece";
+import type { GetPiece } from "./piece";
 
 import { z } from "zod";
 
@@ -54,9 +54,8 @@ export const NORMAL_PIECE_ORDER: string[] = ["rook", "bishop", "gold", "silver",
 // 先頭ほどstepsが小さい扱い(steps=0同点はindexで決着)なので、ここで先手->後手を駒順に交互へ並べる。
 const NORMAL_SIDES: Side[] = ["FIRST", "SECOND"];
 
-export type GetPiece = (key: string) => Piece | null | undefined;
-
 // 通常モードの先頭Turn units。駒順ごとに先手->後手で交互に並べ、第1ラウンドが両軍交互の行動になるようにする。
+// getPieceは piece.ts のGetPiece resolver(=> Piece | null)を利用する。
 export type BuildNormalUnits = (getPiece: GetPiece) => Unit[];
 export const buildNormalUnits: BuildNormalUnits = (getPiece) =>
   NORMAL_PIECE_ORDER.flatMap((key) => {
@@ -73,3 +72,38 @@ export const buildNormalUnits: BuildNormalUnits = (getPiece) =>
       leader: piece.key === "king",
     }));
   });
+
+// --- 編成(formation)の検証(step15 S5/§2.3。formation UIのルールをmodelに集約) ---
+
+// 次に駒を追加する陣営。先手が先、数が揃っていれば先手、先手が1多ければ後手。双方unitCount到達でnull(=完了)。
+export type NextFormationSide = (units: Unit[], unitCount: number) => Side | null;
+export const nextFormationSide: NextFormationSide = (units, unitCount) => {
+  const firstCount = units.filter((unit) => unit.side === "FIRST").length;
+  const secondCount = units.filter((unit) => unit.side === "SECOND").length;
+  if (firstCount === secondCount) {
+    return firstCount < unitCount ? "FIRST" : null;
+  }
+  return secondCount < unitCount ? "SECOND" : null;
+};
+
+// その陣営が既にleaderを持っているか(各陣営leaderは1体まで)。
+export type SideHasLeader = (units: Unit[], side: Side) => boolean;
+export const sideHasLeader: SideHasLeader = (units, side) => units.some((unit) => unit.side === side && unit.leader);
+
+// 同じ陣営に同じ駒を二重に置けない(駒重複検証。§2.3で欠落していたルール)。追加可ならtrue。
+export type CanAddPiece = (units: Unit[], side: Side, piece: string) => boolean;
+export const canAddPiece: CanAddPiece = (units, side, piece) =>
+  !units.some((unit) => unit.side === side && unit.piece === piece);
+
+// 双方unitCountに達し、各陣営ちょうど1体leaderが居れば編成完了(Start可能)。
+export type IsFormationComplete = (units: Unit[], unitCount: number) => boolean;
+export const isFormationComplete: IsFormationComplete = (units, unitCount) => {
+  const first = units.filter((unit) => unit.side === "FIRST");
+  const second = units.filter((unit) => unit.side === "SECOND");
+  return (
+    first.length === unitCount &&
+    second.length === unitCount &&
+    first.filter((unit) => unit.leader).length === 1 &&
+    second.filter((unit) => unit.leader).length === 1
+  );
+};

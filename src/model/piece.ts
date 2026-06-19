@@ -8,3 +8,6 @@ export type Piece = {
   move: number;
   actions: Action[];
 };
+
+// step15(S4): repositoryのpiece memory getをmodelへ渡すためのresolver型。
+export type GetPiece = (key: string) => Piece | null;

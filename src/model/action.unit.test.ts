@@ -11,6 +11,8 @@ import {
   effectOverHeal,
   filterActor,
   filterAlive,
+  validateReceivers,
+  ReceiverDuplicationError,
 } from "./action";
 
 const noopAct: Act = (_actor, _receiver, turn) => turn;
@@ -288,5 +290,23 @@ describe("Action#filterAlive", function () {
       { side: "FIRST", piece: "king" },
       { side: "SECOND", piece: "silver" },
     ]);
+  });
+});
+
+describe("Action#validateReceivers", function () {
+  it("重複が無ければnull", function () {
+    const result = validateReceivers([
+      { side: "FIRST", piece: "king" },
+      { side: "SECOND", piece: "king" },
+    ]);
+    expect(result).toBeNull();
+  });
+
+  it("同一 side:piece が重複していればReceiverDuplicationError", function () {
+    const result = validateReceivers([
+      { side: "FIRST", piece: "king" },
+      { side: "FIRST", piece: "king" },
+    ]);
+    expect(result).toBeInstanceOf(ReceiverDuplicationError);
   });
 });
