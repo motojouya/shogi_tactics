@@ -230,3 +230,50 @@ components / pages (presentation)  data (静的データ定義)
 | 7.6 | 命名: `skill`→`action`、`Repository` 接尾語 | §4 系 | 確定 |
 | 7.7 | `feature/` 復活・`/v1` で出し分け・画面表現を feature へ | **§4.7 の上位方針**(feature 削除を転換) | 変更 |
 | 7.8 | pages→component の細分化は UI 調整後 | §4.7 関連 | 保留 |
+
+---
+
+## 8. 作業順序(依存元 → 依存先)
+
+依存方向 **model → repository → form → controller → component → feature → pages** に沿って上流から修正する。各 step は「上流の変更 + green を保つための直近 caller の最小更新」を1単位とし、**step 完了時に build/test green**(step 内の一時的 red は可)。signature を変える model 系 step では call site を最小限だけ追従させ、presentation の本格的な作り替えは下流 phase で行う(同一 caller を2度触る箇所があるが、green 維持のため意図的)。
+
+### Phase 1 — model
+- **S1. model 純化** — `getSelectOption`+`sideLabel`(private)削除 → `SelectOption` import 除去(§2.1)、`Piece.move` 削除(§4.3)、残存 `skill` 命名(`DO_SKILL` 等)を `action` へ(§7.6一部)。`model/unit.unit.test.ts` の該当ケース削除。⇒ **model→repository 依存が消滅**。
+- **S2. model 内再配置** — `normal_mode.ts` → `unit.ts` 統合、`NORMAL_UNIT_COUNT`/`NORMAL_STEP_BASE` → `battle.ts`(§7.1d)。`normal_mode` 参照箇所の import 付け替え、test 移設。
+- **S3. `Turn.previous` 追加**(§7.4a) — schema に `previous`(default 0、旧データ互換)。
+- **S4. resolver 型定義**(§7.1a) — model に `GetAction=(key)=>Action|null` / `GetPiece` / `GetStatus` を追加(型のみ、未使用)。
+- **S5. 編成・受け手検証を model に新設**(§2.3 / §7.1c) — `validateFormation`(交互順・大将ちょうど1体・完了判定)・駒重複検証・受け手重複(`ReceiverDuplicationError`)を model 制約として実装。`formation.tsx`/`form` は当面現状ロジックのまま(重複は許容、green)。test 追加。
+- **S6. action の resolver 化 + simulate 移設** — `controller/simulate` を model へ(§2.2)、`action#act` が Piece を要求する部分を `GetPiece` 経由に(§2.4 healCap ハードコード解消・**promotedLance 回復バグ修正**)。call site は当面 `repository.piece.get` 等を直接渡して green(束ね方は S8)。
+- **S7. spendTurn / Turn 再設計** — `spendTurn` の cost 計算・仮 turn 生成を `Turn` 側ロジックへ、`action` は `Unit` を受けて計算(turn 非依存)(§7.4c)。turn を sort せず `hp:0` も残し、行動順・次 actor は算出する形へ(§7.4b)。直近 caller を最小更新。
+
+### Phase 2 — repository
+- **S8. resolver dictionary**(§7.1b) — `repository/index` で memory3種(piece/action/status)の `get` を束ねる生成関数を用意し、battle model へ渡す形に。S6/S7 で直接渡していた call site を dictionary 経由へ寄せる。
+- **S9. import/export を utility へ**(§7.5a) — `BattleRepository#pickerOpts` 含む import/export 詳細を `repository/utility` に移し、`BattleRepository` は呼ぶだけに。
+- **S10. routing 移動**(§7.5b) — `components/utility.tsx` の `transit`/`getSearchParams` を `repository/local` へ移動。component の import を local 経由へ。
+- **S11. 命名(Repository 接尾語)**(§7.6) — repository と model を区別する文脈で接尾語 `Repository` を統一。
+
+### Phase 3 — form
+- **S12. form 分割**(§7.2a) — `form/battle.ts` を `form/action.ts` / `form/formation.ts` / `form/creation.ts` へ。
+- **S13. form 責務の集約**(§7.2b/§7.2c/§7.1e) — `toAction` を `UnitReference` list 取得へ縮小(action 解決は S6 で spendTurn 側に移済のため form から除去)、`selectUnit` を form へ、select option 取得(`receiverSelectOption`)を form に集約。
+- **S14. creation フォームの zod 化**(§3.2) — `pages/new` の手書きバリデーション(player 名必須・stepBase/unitCount≥1)を `form/creation` の schema へ(適用は Phase 7)。
+- **S15. `DO_NOTHING` 一本化**(§4.4)。
+
+### Phase 4 — controller
+- **S16. controller の引数統一**(§7.3) — `act`/`start`/`surrender` を第1引数で `Repository` を丸ごと受け取る形に。caller(components)を追従。
+
+### Phase 5 — component
+- **S17. formation.tsx を model 検証へ**(§2.3 消費) — S5 の `validateFormation`/駒重複検証を呼ぶだけにし、ゲームルールの直書きを除去。駒重複を UI に反映。
+- **S18. battle.tsx の API 追従 + 小整理** — model simulate(S6)・resolver dictionary(S8)・form 分割(S12/S13)・routing(S10)の新 API へ追従。`sideLabel` 共通化(§4.1)。creation/list へ form schema(S14)適用。※本格的な画面分割は Phase 6。
+
+### Phase 6 — feature
+- **S19. feature 復活と画面表現の移設**(§7.7 / §4.7) — `feature/` を復活し、creation(new)/formation/action(/決着済み)の画面表現を各ファイルへ。`components/battle.tsx` が抱える「画面全体表現」を feature へ移し肥大を緩和。
+
+### Phase 7 — pages
+- **S20. pages 出し分け配線**(§7.7) — `pages/new` 削除、`/v1` で `key` query 無し時に new を表示、creation/formation/action を feature で出し分け。
+- **S21. 残整理** — list の delete 実装(§4.5)、`version='v1'` 定数化(§4.6)。
+- **S22(保留)** — `pages/*/app.tsx` の細部を component へ寄せる(§7.8) は **UI 調整後**に判断。
+
+### レイヤ非依存(任意のタイミング)
+- **§4.2 range 配列の共有定数化**(`data/action/`) — data 層で他に依存しないため、いつでも独立実施可。
+
+> 各 step は単独でも green に戻せる粒度に割っているが、S6/S7(model 中核)は signature 変更が広く波及するため、**1 step 内で controller/components の call site 追従まで含める**点に注意。下流 phase(S16〜S20)は同じ caller を「正しい構造へ」作り替える 2 度目の接触になる。
