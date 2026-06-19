@@ -13,7 +13,8 @@ import {
 
 import { BattleIO } from '../../components/battle_io';
 import { registerBattle, startBattle } from '../../controller/start';
-import { buildNormalUnits, NORMAL_STEP_BASE, NORMAL_UNIT_COUNT } from '../../model/normal_mode';
+import { buildNormalUnits } from '../../model/unit';
+import { NORMAL_STEP_BASE, NORMAL_UNIT_COUNT } from '../../model/battle';
 import { useIO } from '../../components/context';
 import { transit, Container } from '../../components/utility';
 

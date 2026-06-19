@@ -17,6 +17,10 @@ export const GameFirst: GameResult = "FIRST";
 export const GameSecond: GameResult = "SECOND";
 export const GameDraw: GameResult = "DRAW";
 
+// note.md「通常モード」準拠。片側7駒固定、stepBaseは14(=unitCount*2)。
+export const NORMAL_UNIT_COUNT = 7;
+export const NORMAL_STEP_BASE = 14;
+
 // step6: home/visitor(PartyBattling)を廃止。ロスターは先頭Turnのunitsが持つ(types.md準拠)。
 export const battleSchema = z.object({
   turns: z.array(turnSchema), // turns.length===0は編成段階。先頭Turn.unitsがロスター

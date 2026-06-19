@@ -17,6 +17,8 @@ import {
   GameFirst,
   GameSecond,
   GameDraw,
+  NORMAL_UNIT_COUNT,
+  NORMAL_STEP_BASE,
 } from "./battle";
 import { buildAction, effectBaseDamage, filterAlive } from "./action";
 
@@ -230,5 +232,12 @@ describe("Battle#battleSchema", function () {
     expect(battle.turns[0].order.type).toBe("FORMATION");
     expect(battle.turns[1].order.type).toBe("DO_ACTION");
     expect(battle.result).toBe(GameOngoing);
+  });
+});
+
+describe("Battle#通常モード定数", function () {
+  it("stepBase/unitCountの定数値", function () {
+    expect(NORMAL_UNIT_COUNT).toBe(7);
+    expect(NORMAL_STEP_BASE).toBe(14);
   });
 });
