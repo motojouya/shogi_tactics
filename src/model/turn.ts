@@ -15,7 +15,7 @@ export type Formation = z.infer<typeof formationSchema>;
 
 // 技の実行。actionKey(過渡的にキー保持。実体解決はpresentation/step8)とactor/receiversはUnitReferenceで持つ。
 export const doActionSchema = z.object({
-  type: z.literal("DO_SKILL"),
+  type: z.literal("DO_ACTION"),
   actionKey: z.string(),
   actor: unitReferenceSchema,
   receivers: z.array(unitReferenceSchema),
@@ -52,7 +52,7 @@ export type Turn = z.infer<typeof turnSchema>;
 
 export type CopyOrder = (order: Order) => Order;
 export const copyOrder: CopyOrder = (order) => {
-  if (order.type === "DO_SKILL") {
+  if (order.type === "DO_ACTION") {
     return {
       type: order.type,
       actionKey: order.actionKey,

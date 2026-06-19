@@ -57,7 +57,7 @@ describe("act", () => {
     if (result instanceof DataNotFoundError || result instanceof UserCancel || "message" in result) {
       expect.unreachable("act should succeed");
     } else {
-      expect(getLastTurn(result).order.type).toBe("DO_SKILL");
+      expect(getLastTurn(result).order.type).toBe("DO_ACTION");
     }
   });
 

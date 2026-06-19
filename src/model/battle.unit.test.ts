@@ -103,7 +103,7 @@ describe("Battle#sortedUnits / nextActor", function () {
 });
 
 describe("Battle#spendTurn", function () {
-  it("DO_SKILL: ダメージ適用・actorのsteps加算・steps昇順並べ替え", function () {
+  it("DO_ACTION: ダメージ適用・actorのsteps加算・steps昇順並べ替え", function () {
     const battle = makeBattle([
       { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
       { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: [], leader: true },
@@ -116,7 +116,7 @@ describe("Battle#spendTurn", function () {
     );
 
     const last = getLastTurn(result);
-    expect(last.order.type).toBe("DO_SKILL");
+    expect(last.order.type).toBe("DO_ACTION");
 
     const pawn = last.units.find((unit) => unit.piece === "pawn");
     const king = last.units.find((unit) => unit.piece === "king");
@@ -209,7 +209,7 @@ describe("Battle#battleSchema", function () {
         {
           datetime: "2023-06-29T12:12:23",
           order: {
-            type: "DO_SKILL",
+            type: "DO_ACTION",
             actionKey: "meleeAttack",
             actor: { side: "FIRST", piece: "king" },
             receivers: [{ side: "SECOND", piece: "pawn" }],
@@ -228,7 +228,7 @@ describe("Battle#battleSchema", function () {
     expect(battle.turns.length).toBe(2);
     expect(battle.turns[0].datetime).toBeInstanceOf(Date);
     expect(battle.turns[0].order.type).toBe("FORMATION");
-    expect(battle.turns[1].order.type).toBe("DO_SKILL");
+    expect(battle.turns[1].order.type).toBe("DO_ACTION");
     expect(battle.result).toBe(GameOngoing);
   });
 });

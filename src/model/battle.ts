@@ -154,7 +154,7 @@ export const spendTurn: SpendTurn = (battle, actor, doAction, getDatetime) => {
     const working: Turn = { datetime: getDatetime(), order: { type: "FORMATION" }, units };
     const acted = doAction.action.act(actor, doAction.receivers, working);
     units = acted.units;
-    order = { type: "DO_SKILL", actionKey: doAction.action.key, actor, receivers: doAction.receivers };
+    order = { type: "DO_ACTION", actionKey: doAction.action.key, actor, receivers: doAction.receivers };
   }
 
   // 3. 行動駒のstepsを加算(stepBase + cost。何もしない=0)。

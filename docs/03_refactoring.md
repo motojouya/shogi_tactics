@@ -95,7 +95,8 @@ components / pages (presentation)  data (静的データ定義)
 - **整理の方向**: `data/action/` に共有定数(例 `REACH_MELEE` / `REACH_RANGED` / `REACH_SPEAR`)を切り出して参照。これらは表示専用メタなのでロジック影響なし。
 
 ### 4.3 `Piece.move` は未使用(dead)
-- `model/piece.ts` の `move` は各 `data/piece/*` で値が入るが、**model/data 全体で一度も参照されない**(検証済み)。将来の移動メカニクス用のプレースホルダと思われる。削除するか、用途をコメントで明示するか。
+- `model/piece.ts` の `move` は各 `data/piece/*` で値が入るが、**model/data 全体で一度も参照されない**(検証済み)。将来の移動メカニクス用のプレースホルダと思われる。
+- **方針: 削除しない(ユーザー決定)**。将来の移動メカニクス用に `move` は残す。本項は dead 指摘の記録のみ。
 
 ### 4.4 `DO_NOTHING` の間接 re-export
 - `model/turn.ts:6` の `ORDER_DO_NOTHING` を `form/battle.ts:13-14` で `DO_NOTHING` として再 export。実害は無いが定数の出所が分かりづらい。1本化を検討(低)。
@@ -136,7 +137,7 @@ components / pages (presentation)  data (静的データ定義)
 | 3.4 | バリデーションを model(ドメイン規則)/ form(入力形式)に二分集約 | 責務 | 中 | 横断 |
 | 4.1 | `sideLabel` 共通化 | 重複 | 低 | 横断 |
 | 4.2 | range 配列を共有定数化 | 重複 | 低 | `data/action/` |
-| 4.3 | `Piece.move` 削除 or 用途明示 | dead | 低 | `model/piece.ts`, `data/piece/` |
+| 4.3 | `Piece.move` は残す(ユーザー決定。将来の移動メカニクス用) | dead | — | `model/piece.ts`, `data/piece/` |
 | 4.4 | `DO_NOTHING` 間接 re-export の1本化 | 整理 | 低 | `model/turn.ts`, `form/battle.ts` |
 | 4.5 | 一覧 delete 実装 | 機能 | 低 | `pages/list/app.tsx` |
 | 4.6 | `version` 定数化 | 整理 | 低 | `pages/{new,v1}` |
@@ -238,7 +239,7 @@ components / pages (presentation)  data (静的データ定義)
 依存方向 **model → repository → form → controller → component → feature → pages** に沿って上流から修正する。各 step は「上流の変更 + green を保つための直近 caller の最小更新」を1単位とし、**step 完了時に build/test green**(step 内の一時的 red は可)。signature を変える model 系 step では call site を最小限だけ追従させ、presentation の本格的な作り替えは下流 phase で行う(同一 caller を2度触る箇所があるが、green 維持のため意図的)。
 
 ### Phase 1 — model
-- **S1. model 純化** — `getSelectOption`+`sideLabel`(private)削除 → `SelectOption` import 除去(§2.1)、`Piece.move` 削除(§4.3)、残存 `skill` 命名(`DO_SKILL` 等)を `action` へ(§7.6一部)。`model/unit.unit.test.ts` の該当ケース削除。⇒ **model→repository 依存が消滅**。
+- **S1. model 純化**【済】 — `getSelectOption`+`GetSelectOption`+`sideLabel`(private)削除 → `SelectOption` import 除去(§2.1)、残存 `skill` 命名 `DO_SKILL` → `DO_ACTION`(§7.6一部)。`model/unit.unit.test.ts` の該当ケース削除。⇒ **model→repository 依存が消滅**。`Piece.move` 削除(§4.3)は**ユーザー指示により実施せず(move は残す)**。
 - **S2. model 内再配置** — `normal_mode.ts` → `unit.ts` 統合、`NORMAL_UNIT_COUNT`/`NORMAL_STEP_BASE` → `battle.ts`(§7.1d)。`normal_mode` 参照箇所の import 付け替え、test 移設。
 - **S3. `Turn.previous` 追加**(§7.4a) — schema に `previous`(default 0、旧データ互換)。
 - **S4. resolver 型定義**(§7.1a) — model に `GetAction=(key)=>Action|null` / `GetPiece` / `GetStatus` を追加(型のみ、未使用)。

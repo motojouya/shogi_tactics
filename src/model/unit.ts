@@ -1,6 +1,3 @@
-import type { SelectOption } from "../repository/utility";
-import type { Piece } from "./piece";
-
 import { z } from "zod";
 
 // step12: modelの型はzod schemaから導出する(型の単一の真実)。保存値はすべてキー参照(piece/status)なのでmodelとjsonの形はdatetime以外一致する。
@@ -38,17 +35,7 @@ export const toUnitReference: ToUnitReference = (unit) => ({
 export type SameUnit = (left: UnitReference, right: UnitReference) => boolean;
 export const sameUnit: SameUnit = (left, right) => left.side === right.side && left.piece === right.piece;
 
-type SideLabel = (side: Side) => string;
-const sideLabel: SideLabel = (side) => (side === "FIRST" ? "先" : "後");
-
-// charactor.getSelectOption相当。unitのside表示＋pieceの名前をlabelに、side＋pieceのkeyをvalueに入れる
-export type GetSelectOption = (unit: Unit, piece: Piece) => SelectOption;
-export const getSelectOption: GetSelectOption = (unit, piece) => ({
-  label: `${sideLabel(unit.side)}:${piece.name}`,
-  value: `${unit.side}:${piece.key}`,
-});
-
-// charactor.selectCharactor相当。getSelectOptionのvalue文字列からUnitReferenceを復元する
+// `${side}:${piece}` 形式のフォーム値文字列からUnitReferenceを復元する
 export type SelectUnit = (value: string) => UnitReference;
 export const selectUnit: SelectUnit = (value) => {
   const index = value.indexOf(":");

@@ -1,8 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import type { Unit } from "./unit";
-import type { Piece } from "./piece";
-import { copyUnit, toUnitReference, sameUnit, getSelectOption, selectUnit } from "./unit";
+import { copyUnit, toUnitReference, sameUnit, selectUnit } from "./unit";
 
 const baseUnit: Unit = {
   side: "FIRST",
@@ -10,15 +9,6 @@ const baseUnit: Unit = {
   hp: 2,
   steps: 0,
   statuses: ["guard"],
-};
-
-const kingPiece: Piece = {
-  key: "king",
-  name: "将軍",
-  description: "王将",
-  MaxHP: 2,
-  move: 3,
-  actions: [],
 };
 
 describe("Unit#copyUnit", function () {
@@ -60,31 +50,9 @@ describe("Unit#sameUnit", function () {
   });
 });
 
-describe("Unit#getSelectOption", function () {
-  it("先手はlabelに先＋piece名、valueにside＋pieceのkey", function () {
-    const option = getSelectOption(baseUnit, kingPiece);
-
-    expect(option.label).toBe("先:将軍");
-    expect(option.value).toBe("FIRST:king");
-  });
-
-  it("後手はlabelが後始まり", function () {
-    const option = getSelectOption({ ...baseUnit, side: "SECOND" }, kingPiece);
-
-    expect(option.label).toBe("後:将軍");
-    expect(option.value).toBe("SECOND:king");
-  });
-});
-
 describe("Unit#selectUnit", function () {
   it("valueからUnitReferenceを復元する", function () {
     expect(selectUnit("FIRST:king")).toEqual({ side: "FIRST", piece: "king" });
     expect(selectUnit("SECOND:gold")).toEqual({ side: "SECOND", piece: "gold" });
-  });
-
-  it("getSelectOptionのvalueと往復できる", function () {
-    const option = getSelectOption(baseUnit, kingPiece);
-
-    expect(selectUnit(option.value)).toEqual({ side: "FIRST", piece: "king" });
   });
 });
