@@ -374,16 +374,18 @@ featureは不要かも。pagesを丁寧に定義したので。その代わりco
 - **サプライチェーン対策(workflow hardening)**: 全 action を**可変tagではなくcommit SHAで固定**(`# vX.Y.Z` コメント併記。dependabotがSHAごと追従更新)。`actions/checkout` に **`persist-credentials: false`**(GITHUB_TOKENをローカルgit configに残さない)。**最小権限**を明示: `check.yml` は top-level `permissions: contents: read`、`gh-pages.yml` は Pages デプロイに必要な `contents: read`/`pages: write`/`id-token: write` のみ。採用SHA: checkout v4.2.2=`11bd7190…`、setup-node v4.4.0=`49933ea5…`、configure-pages v5.0.0=`983d7736…`、upload-pages-artifact v3.0.1=`56afc609…`、deploy-pages v4.0.5=`d6db9016…`。
 - ※ workflowの trigger は現状の `workflow_dispatch` のまま据え置き(push/PR有効化は別途判断)。
 
-### 18. UI調整
-たぶんもっといろいろ治すところが出てくる
-駒画像導入も
-UI調整したらコードの整理もしたい。component設計、コードコメント削除、modelの責務整理など
-
-### 19. プレイヤー向けの説明ドキュメント整備
+### 18. プレイヤー向けの説明ドキュメント整備
 markdownで書いてHTMLに変換したいが、reactで直書きのほうがいいかも
 markdownから変換するツールはいろいろありそうだが、装飾が面倒かもしれない
 githubを見るのではなく、画面上でみれたほうが良さそうだが、どこに置くかは要検討
 
+### 19. UI調整
+たぶんもっといろいろ治すところが出てくる
+駒画像導入も
+
 ### 20. playwriteのテスト
 今後開発する際に、全体の流れにもバグを産まないようにするため
+
+### 21. コード整理
+コードの整理もしたい。component設計、コードコメント削除、modelの責務整理、テストコードの整理など
 
