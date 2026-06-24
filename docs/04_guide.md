@@ -89,8 +89,10 @@ viteでmarkdownをするpathに、素のreactを書くpathが混ざるため、�
 ## 済み分（実装メモ）
 - 依存追加: `react-markdown@10` / `remark-gfm@4`(素の`npm install`)。
 - **静的マルチエントリで実装(404不要)**。`vite.config.ts`の`rollupOptions.input`へ6エントリ追加(`guide` / `guide/{tutorial,rule,turbulent,offscreen,piece}`)。出力は`dist/guide/.../index.html`。html実体6枚は静的URL用の最小boilerplate(各`<title>`のみ差異)。
-- **React実体は`src/pages/guide/{main.tsx,app.tsx}`の2ファイルに集約**。6枚のhtmlは全て同じ`main.tsx`を参照(目次は`./main.tsx`、配下は`../main.tsx`)。`main.tsx`は描画のみの薄いentry、`app.tsx`が`App`をexportし`window.location.pathname`から'guide'の次セグメント(slug)で出し分け(なし→目次 / `piece`→駒一覧 / その他→`markdownBySlug[slug]`を`MarkdownPage`で描画 / 不一致→NotFound)。
-- markdownは`app.tsx`で`import.meta.glob("../../guide/*.md", { eager:true, query:"?raw", import:"default" })`一括取得→slug→本文stringのmap化。Rollupが共通`main.js`チャンクへdedup(markdown本文も埋め込み)。
+- **命名はlist/v1慣習に踏襲**(`index.tsx`=createRootするentry/htmlが読む、`app.tsx`=`App`コンポーネント本体)。
+- **目次+markdown4ページは共通の`src/pages/guide/{index.tsx,app.tsx}`を共有**。5枚のhtml(`guide` `guide/{tutorial,rule,turbulent,offscreen}`)は同じ`index.tsx`を参照(目次は`./index.tsx`、配下は`../index.tsx`)。`index.tsx`は描画のみの薄いentry、`app.tsx`の`App`が`window.location.pathname`から'guide'の次セグメント(slug)で出し分け(なし→目次 / その他→`markdownBySlug[slug]`を`MarkdownPage`で描画 / 不一致→NotFound)。
+- **`/guide/piece`は独立ページ**: `src/pages/guide/piece/{index.tsx,app.tsx}`(他pageと同形。`index.html`は自前の`./index.tsx`を参照)。素のreactで駒一覧を描画するため共有dispatcherから分離(dispatcher側にpiece分岐は持たない。目次のリンクのみ残す)。
+- markdownは`app.tsx`で`import.meta.glob("../../guide/*.md", { eager:true, query:"?raw", import:"default" })`一括取得→slug→本文stringのmap化。Rollupが共通`guide.js`チャンクへdedup(markdown本文も埋め込み)。piece は独立の`piece.js`チャンク。
 - **`components/markdown.tsx`**新設: `parseFrontmatter`(先頭`---...---`を剥がしtitle抽出。約10行・ライブラリ不要・非export)と`MarkdownPage`(frontmatterのtitleは`document.title`専用にuseEffectで設定。本文先頭`# 見出し`がページ見出しを兼ねるので別途見出しは出さない。`a`要素はhttp(s)を`_blank`、各要素をMUI Typographyへマップ)。
 - **`/guide/piece`はBattleIO非依存**で`pieceRepository`を直接import(読み取り専用・Dexie初期化不要)。各駒のname/description/MaxHP/moveと内包actions(name/description/cost/baseDamage/reach/effect)をMUI Card+Tableで表示。
 - 導線: ホーム(`pages/app.tsx`)のGitHubリンクをアプリ内`/guide`へ差し替え、「遊び方」リンクboxを追加。
