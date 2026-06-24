@@ -60,7 +60,7 @@
     "dexie-react-hooks": "4.4.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "react-hook-form": "7.77.0",
+    "react-hook-form": "7.79.0",
     "react-markdown": "10.1.0",
     "remark-gfm": "4.0.1",
     "uuid": "14.0.0",
