@@ -379,6 +379,9 @@ markdownで書いてHTMLに変換したいが、reactで直書きのほうがい
 markdownから変換するツールはいろいろありそうだが、装飾が面倒かもしれない
 githubを見るのではなく、画面上でみれたほうが良さそうだが、どこに置くかは要検討
 
+#### 18の済み分（実装メモ）
+- 詳細は`docs/04_guide.md`参照。`src/guide/*.md`を`/guide`配下の静的マルチエントリ(6 html)で表示。markdownは`?raw`+`import.meta.glob`で取得し`react-markdown`+`remark-gfm`で描画。`/guide`目次・`/guide/piece`(駒一覧)は素のreact。共通エントリ`src/pages/guide/{main,app}.tsx`にReact実体を集約。build/test/lint/format green。
+
 ### 19. UI調整
 たぶんもっといろいろ治すところが出てくる
 駒画像導入も
