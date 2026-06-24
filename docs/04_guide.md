@@ -93,7 +93,8 @@ viteでmarkdownをするpathに、素のreactを書くpathが混ざるため、�
 - **目次+markdown4ページは共通の`src/pages/guide/{index.tsx,app.tsx}`を共有**。5枚のhtml(`guide` `guide/{tutorial,rule,turbulent,offscreen}`)は同じ`index.tsx`を参照(目次は`./index.tsx`、配下は`../index.tsx`)。`index.tsx`は描画のみの薄いentry、`app.tsx`の`App`が`window.location.pathname`から'guide'の次セグメント(slug)で出し分け(なし→目次 / その他→`markdownBySlug[slug]`を`MarkdownPage`で描画 / 不一致→NotFound)。
 - **`/guide/piece`は独立ページ**: `src/pages/guide/piece/{index.tsx,app.tsx}`(他pageと同形。`index.html`は自前の`./index.tsx`を参照)。素のreactで駒一覧を描画するため共有dispatcherから分離(dispatcher側にpiece分岐は持たない。目次のリンクのみ残す)。
 - markdownは`app.tsx`で`import.meta.glob("../../guide/*.md", { eager:true, query:"?raw", import:"default" })`一括取得→slug→本文stringのmap化。Rollupが共通`guide.js`チャンクへdedup(markdown本文も埋め込み)。piece は独立の`piece.js`チャンク。
-- **`components/markdown.tsx`**新設: `parseFrontmatter`(先頭`---...---`を剥がしtitle抽出。約10行・ライブラリ不要・非export)と`MarkdownPage`(frontmatterのtitleは`document.title`専用にuseEffectで設定。本文先頭`# 見出し`がページ見出しを兼ねるので別途見出しは出さない。`a`要素はhttp(s)を`_blank`、各要素をMUI Typographyへマップ)。
+- **`components/markdown.tsx`**新設: `MarkdownPage`が本文をそのまま`react-markdown`で描画(`a`要素はhttp(s)を`_blank`、各要素をMUI Typographyへマップ)。本文先頭`# 見出し`がページ見出しを兼ね、ページの`<title>`は各html側で静的に設定する。
+  - ※ md冒頭のfrontmatter(`---\ntitle/slug\n---`)は当初`parseFrontmatter`で`document.title`設定に使っていたが、各guide htmlが静的`<title>`を持つため冗長。**frontmatterはmdから削除し、`parseFrontmatter`/`document.title`設定も撤去**した。
 - **`/guide/piece`はBattleIO非依存**で`pieceRepository`を直接import(読み取り専用・Dexie初期化不要)。各駒のname/description/MaxHP/moveと内包actions(name/description/cost/baseDamage/reach/effect)をMUI Card+Tableで表示。
 - 導線: ホーム(`pages/app.tsx`)のGitHubリンクをアプリ内`/guide`へ差し替え、「遊び方」リンクboxを追加。
 - lint: react-refresh/only-export-componentsを既存パターンで回避(`markdown.tsx`はMarkdownPageのみexport / guideはcomponentを`app.tsx`へ集約しexport・`main.tsx`は描画のみ)。
