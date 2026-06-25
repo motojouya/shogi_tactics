@@ -34,7 +34,7 @@ const GuideIndex: FC = () => (
       </Typography>
       {guideEntries.map((entry) => (
         <Box key={entry.slug} sx={{ p: 1 }}>
-          <Link href={`/guide/${entry.slug}`} line>
+          <Link href={`/guide/${entry.slug}/`} line>
             <Typography>{entry.label}</Typography>
           </Link>
         </Box>
