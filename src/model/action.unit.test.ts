@@ -52,6 +52,7 @@ const buildUnits = (units: Unit[]): Unit[] => units;
 const healGetPiece: GetPiece = (key) => ({
   key,
   name: key,
+  shogiName: key,
   description: "",
   MaxHP: key === "king" ? 2 : 3,
   move: 3,
@@ -280,7 +281,15 @@ describe("Action#effectHeal", function () {
 
   it("MaxHP=2の駒(promotedLance等)は2までしか回復しない(§2.4 旧healCapバグの回帰)", function () {
     const units = buildUnits([{ side: "FIRST", piece: "promotedLance", hp: 1, steps: 0, statuses: [] }]);
-    const getPiece: GetPiece = (key) => ({ key, name: key, description: "", MaxHP: 2, move: 3, actions: [] });
+    const getPiece: GetPiece = (key) => ({
+      key,
+      name: key,
+      shogiName: key,
+      description: "",
+      MaxHP: 2,
+      move: 3,
+      actions: [],
+    });
 
     const result = effectHeal(baseAction)(
       { side: "FIRST", piece: "pawn" },

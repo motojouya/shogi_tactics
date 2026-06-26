@@ -26,6 +26,7 @@ const mkUnit = (side: Side, piece: string, leader = false): Unit => ({
 const normalPiece = (key: string, maxHP: number): Piece => ({
   key,
   name: key,
+  shogiName: key,
   description: "",
   MaxHP: maxHP,
   move: 3,

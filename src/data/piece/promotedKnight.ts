@@ -5,6 +5,7 @@ import { meleeAttack, barricade } from "../action/index";
 export const promotedKnight: Piece = {
   key: "promotedKnight",
   name: "工兵",
+  shogiName: "成桂",
   description: "防柵を築く工兵。戦乱モードで使用",
   MaxHP: 3,
   move: 3,
