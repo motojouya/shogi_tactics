@@ -145,4 +145,21 @@ plan「駒画像の導入」を実施。**駒画像**(3画面)に加え、**guid
 - **markdown連携**: `src/components/markdown.tsx`に`img`コンポーネントを追加し、`![alt](diagram:KEY)`を`GuideDiagram`へ振り分け(それ以外は通常img)。独自スキームのため`urlTransform`はidentityに。`src/guide/{tutorial,turbulent,offscreen}.md`のimgプレースホルダを`diagram:`記法へ置換(既存ASCIIは併記で残置)。
 - 検証: build OK / test 126 passed / lint 0 warning / format OK。初期配置を実画像で合成しマス整合を目視確認済み。
 - ※要目視(`npm run dev`): /guide の tutorial(初期配置・足止め)/turbulent(配置可能)/offscreen(紙)、各駒画像の表示。後手駒の180°回転表示がリスト文脈で許容かも確認。
+- 追補(レビュー後修正): 足止め図(`ashidome`)の矢印が金マス(7六)を指していた件を修正。香車(薙刀)を6筋に置き、実線=6六で停止/破線(灰)=本来進みたい6七、青ハイライト=停止マス6六、赤=足止めする金7六、に変更。`DiagramArrow`へ`dashed`/`color`追加、矢じりは`fill="context-stroke"`で線色追従。
+- 追補(画像出典): CC0で帰属表示は不要だが、礼儀として /guide 目次ページ(`pages/guide/app.tsx`)末尾に小さい灰色テキストで `sunfish-shogi/shogi-images` への出典リンクを1箇所追記。
+
+## UI調整PR 実装計画（確定スコープ）
+
+plan「UI調整」を実施。レビューに残る軽微な文言・サイズ・導線の調整を反映する(構造変更は前PRで完了済み)。
+
+### 済み分（実装メモ）
+- **ヘッダ(全体, 10–11)**: `components/utility.tsx` の `将棋タクティクス` タイトルを `noWrap`＋レスポンシブfontSize(xs1.6/sm2.4/md3rem)に。タイトルBoxに`minWidth:0`、戻るボタンBoxに`flexShrink:0`を付け、戻るボタンが出ても折り返さないように。
+- **トップページ(14–15)**: `pages/app.tsx` を `/v1`(対戦を作る)/`/list`(バトルの管理)/`/guide`(遊び方) の3つの`ButtonLink`に変更し順に並べた。`/guide/tutorial` への導線は説明文中のリンクに移した。
+- **guide(19–20)**: `pages/guide/app.tsx` のメニューを `遊び方`→`戦乱モード`→`駒の一覧`→`アプリなしでの遊び方`→`ルール` に並べ替え、`駒と行動の一覧`→`駒の一覧` にリネーム。`guide/piece` の見出し(`app.tsx`)と `<title>`(`index.html`)も `駒の一覧` に統一。
+- **list(23–24)**: `pages/list/app.tsx` に `resultLabel(battle)` を追加し、決着表示を生のresult値→勝利プレイヤー名(`〇〇 の勝利`/`引き分け`/`対戦中`)に。Deleteボタンの文言を `削除` に。
+- **v1(27–30)**: `feature/creation.tsx` の `Start The Battle`→`対戦の設定`、入力ラベルを `先手の名前`/`後手の名前`(Modeは据え置き)、`Step Base`→`基礎コスト`/`Unit Count`→`ユニット数`(placeholderは`1以上`)、開始ボタンを 通常`戦闘開始`/戦乱`ユニット選択` に。
+- **v1 key units(53–55)**: `feature/formation.tsx` の `大将`→`リーダー`(チェック文言/一覧[リーダー]/警告文)、配置済み一覧に行動順番号(`{index+1}.`)を付与、`Start Battle`→`戦闘開始` に。
+- 検証: build OK / test 126 passed / lint 0 warning / format OK。
+- ※要目視(`npm run dev`): トップ3ボタン、ヘッダ折返し(戻るボタン併存時)、/guide 並び順、/list 勝敗表示と削除、/v1 設定フォーム文言、戦乱モードの編成画面(リーダー文言・行動順番号・戦闘開始)。
+- 未処理(ドキュメント外): 戦闘中画面ヘッダの `Battle!` / `Export` ボタン文言は本ドキュメントに記載がないため未変更。要否を要確認。
 

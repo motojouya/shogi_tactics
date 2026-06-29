@@ -20,10 +20,10 @@ const markdownBySlug: Record<string, string> = Object.fromEntries(
 // 目次に並べるリンク。slugはmarkdownのファイル名、または素のreact pageの 'piece'。
 const guideEntries: { slug: string; label: string }[] = [
   { slug: 'tutorial', label: '遊び方' },
-  { slug: 'rule', label: 'ルール' },
   { slug: 'turbulent', label: '戦乱モード' },
+  { slug: 'piece', label: '駒の一覧' },
   { slug: 'offscreen', label: 'アプリなしでの遊び方' },
-  { slug: 'piece', label: '駒と行動の一覧' },
+  { slug: 'rule', label: 'ルール' },
 ];
 
 const GuideIndex: FC = () => (

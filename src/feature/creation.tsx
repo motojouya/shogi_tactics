@@ -73,7 +73,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
 
   return (
     <Container backLink="/list/">
-      <Typography>Start The Battle</Typography>
+      <Typography>対戦の設定</Typography>
       <form onSubmit={handleSubmit(create)}>
         <Stack>
           <Box sx={{ p: 1 }}>
@@ -102,8 +102,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
             <TextField
               id="first_player_name"
               error={!!errors.first_player_name}
-              label="First Player Name"
-              placeholder="先手の名前"
+              label="先手の名前"
               variant="outlined"
               {...register('first_player_name')}
               helperText={errors.first_player_name && errors.first_player_name.message}
@@ -114,8 +113,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
             <TextField
               id="second_player_name"
               error={!!errors.second_player_name}
-              label="Second Player Name"
-              placeholder="後手の名前"
+              label="後手の名前"
               variant="outlined"
               {...register('second_player_name')}
               helperText={errors.second_player_name && errors.second_player_name.message}
@@ -129,8 +127,8 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
                   id="stepBase"
                   type="number"
                   error={!!errors.stepBase}
-                  label="Step Base"
-                  placeholder="基礎コスト(1以上)"
+                  label="基礎コスト"
+                  placeholder="1以上"
                   variant="outlined"
                   {...register('stepBase', { valueAsNumber: true })}
                   helperText={errors.stepBase && errors.stepBase.message}
@@ -142,8 +140,8 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
                   id="unitCount"
                   type="number"
                   error={!!errors.unitCount}
-                  label="Unit Count"
-                  placeholder="片側のユニット数(1以上)"
+                  label="ユニット数"
+                  placeholder="1以上"
                   variant="outlined"
                   {...register('unitCount', { valueAsNumber: true })}
                   helperText={errors.unitCount && errors.unitCount.message}
@@ -154,7 +152,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
           )}
           <Box sx={{ p: 1 }}>
             <Button variant="contained" type="submit">
-              {mode === 'normal' ? 'Start Battle' : 'Register Battle'}
+              {mode === 'normal' ? '戦闘開始' : 'ユニット選択'}
             </Button>
           </Box>
         </Stack>

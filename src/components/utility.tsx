@@ -50,7 +50,7 @@ export const Header: FC<{ backLink: string | null; }> = ({ backLink }) => {
   return (
     <Stack sx={{ justifyContent: 'flex-start', alignItems: 'center', p: 1 }} direction="row" >
         {backLink && (
-          <Box sx={{ p: 1 }}>
+          <Box sx={{ p: 1, flexShrink: 0 }}>
             <Link href={backLink} line={false}>
               <SvgIcon>
                 <ArrowBackIcon />
@@ -58,9 +58,9 @@ export const Header: FC<{ backLink: string | null; }> = ({ backLink }) => {
             </Link>
           </Box>
         )}
-        <Box sx={{ p: 1 }}>
+        <Box sx={{ p: 1, minWidth: 0 }}>
           <Link href="/" line={false}>
-            <Typography variant="h3">将棋タクティクス</Typography>
+            <Typography variant="h3" noWrap sx={{ fontSize: { xs: '1.6rem', sm: '2.4rem', md: '3rem' } }}>将棋タクティクス</Typography>
           </Link>
         </Box>
       </Stack>

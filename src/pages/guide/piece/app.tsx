@@ -11,7 +11,7 @@ export const App: FC = () => (
   <Container backLink="/guide/">
     <Stack sx={{ p: 1 }}>
       <Typography variant="h4" sx={{ p: 1 }}>
-        駒と行動の一覧
+        駒の一覧
       </Typography>
       {pieceRepository.all.map((piece) => (
         <Card key={piece.key} sx={{ my: 1 }}>
