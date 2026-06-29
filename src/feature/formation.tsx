@@ -140,7 +140,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
                       onChange={(e) => field.onChange(e.target.checked)}
                     />
                   }
-                  label={currentSideHasLeader ? '大将は選択済み' : '大将にする'}
+                  label={currentSideHasLeader ? 'リーダーは選択済み' : 'リーダーにする'}
                 />
               )}
             />
@@ -157,8 +157,9 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
                 sx={{ alignItems: 'center', justifyContent: 'space-between', py: 0.5 }}
               >
                 <Stack direction="row" sx={{ alignItems: 'center', columnGap: 1 }}>
+                  <Typography sx={{ color: 'text.secondary', minWidth: 24 }}>{`${index + 1}.`}</Typography>
                   <PieceImage pieceKey={unit.piece} side={unit.side} name={piece?.name} size={28} />
-                  <Typography>{`${sideLabel(unit.side)}: ${piece ? `${piece.name}（${piece.shogiName}）` : unit.piece}${unit.leader ? ' [大将]' : ''}`}</Typography>
+                  <Typography>{`${sideLabel(unit.side)}: ${piece ? `${piece.name}（${piece.shogiName}）` : unit.piece}${unit.leader ? ' [リーダー]' : ''}`}</Typography>
                 </Stack>
                 {index === units.length - 1 && (
                   <Button variant="outlined" type="button" onClick={undo}>取消</Button>
@@ -170,13 +171,13 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
 
         {firstCount === unitCount && secondCount === unitCount && !done && (
           <Typography sx={{ pt: 2 }} color="error">
-            各陣営とも大将を1体ずつ指定してください
+            各陣営ともリーダーを1体ずつ指定してください
           </Typography>
         )}
 
         {done && (
           <Box sx={{ pt: 2 }}>
-            <Button variant="contained" type="button" onClick={startGame}>Start Battle</Button>
+            <Button variant="contained" type="button" onClick={startGame}>戦闘開始</Button>
           </Box>
         )}
       </Stack>

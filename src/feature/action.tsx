@@ -353,7 +353,7 @@ export const BattleTurn: FC<{
       <Stack>
         <Stack sx={{ pb: 1 }}>
           <Stack direction="row" sx={{ justifyContent: "space-between", width: '100%', pb: 1 }}>
-            <Stack sx={{ flex: "0 0 70px", justifyContent: "center" }}><Typography>Battle!</Typography></Stack>
+            <Stack sx={{ flex: "0 0 70px", justifyContent: "center" }}><Typography>戦闘開始</Typography></Stack>
             <Box sx={{ flex: "1 1 auto" }}>
               {battle.result !== GameOngoing && (
                 <Button type="button" variant='outlined' onClick={() => battleRepository.exportJson(battle, '')}>Export</Button>

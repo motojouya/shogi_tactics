@@ -17,6 +17,20 @@ import { Container, Link, ButtonLink } from '../../components/utility';
 // keyはuuidで人間可読でないため、各battleをロードしてplayer名・日時・状態を表示する
 type BattleSummary = { key: string; battle: Battle };
 
+// 決着状態は生のresult値ではなく、勝利したプレイヤー名(引き分け/対戦中)で表示する。
+const resultLabel = (battle: Battle): string => {
+  switch (battle.result) {
+    case 'FIRST':
+      return `${battle.first_player_name} の勝利`;
+    case 'SECOND':
+      return `${battle.second_player_name} の勝利`;
+    case 'DRAW':
+      return '引き分け';
+    default:
+      return '対戦中';
+  }
+};
+
 const BattleList: FC = () => {
   const { battle: battleRepository, local } = useIO();
 
@@ -58,11 +72,11 @@ const BattleList: FC = () => {
                   <Stack direction="column">
                     <Typography>{`${battle.first_player_name} vs ${battle.second_player_name}`}</Typography>
                     <Typography variant="caption">
-                      {`${battle.turns[0] ? new Date(battle.turns[0].datetime).toLocaleString() : ''} / ${battle.result}`}
+                      {`${battle.turns[0] ? new Date(battle.turns[0].datetime).toLocaleString() : ''} / ${resultLabel(battle)}`}
                     </Typography>
                   </Stack>
                 </Link>
-                <Button variant="outlined" type="button" onClick={() => onDelete(key)}><Typography>Delete</Typography></Button>
+                <Button variant="outlined" type="button" onClick={() => onDelete(key)}><Typography>削除</Typography></Button>
               </Stack>
             </ListItem>
           ))}
