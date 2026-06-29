@@ -126,3 +126,23 @@ plan「戦闘中画面」の確定スコープ。**piece駒名の追加＋表示
 - 検証: build OK / test 126 passed / lint 0 warning / format OK。
 - ※視覚確認は`npm run dev`で /guide/piece と戦闘中画面を要目視（アコーディオン展開・グリッド表示・プレビュー）。
 
+## 駒画像の導入PR 実装計画（確定スコープ）
+
+plan「駒画像の導入」を実施。**駒画像**(3画面)に加え、**guide解説画像**(盤面図3枚+紙の図1枚)も含める。
+
+### 確定した方針
+- **画像ソース**: `sunfish-shogi/shogi-images`(CC0, 帰属不要)。スタイルは`futamoji`(二文字)。
+- **配置**: `public/`へDL同梱(オフライン/PWA対応, 外部依存なし)。
+  - `public/piece/futamoji/{black,white}_*.png`(14駒×2=28枚, 先手=black/後手=white。white画像は180°回転済み)。
+  - `public/board/light_458x500.png`(9×9盤, 259KB)。
+- **解説図の描画**: `<img>`経由SVGは外部画像を読めない制約があるため、**インラインReactの盤面図**で「盤画像＋駒画像」を合成(DOM内描画なので制約回避)。個別駒SVGは非提供(スプライトのみ)のため不採用。
+
+### 済み分（実装メモ）
+- **駒画像の解決**: `src/components/piece_image_src.ts`(非component)に`pieceImageSrc(key, side)`とkey→画像名mapを集約。成り駒のみ別名(`promoted*`→`prom_*`)。`src/components/piece_image.tsx`の`PieceImage`がこれを利用。
+- **駒画像の組込(3画面)**: guide/piece(`pages/guide/piece/app.tsx`, 見出し横, side無→先手)/ユニット選択中(`feature/formation.tsx`, 配置済みリスト, unit.side)/戦闘中(`feature/action.tsx`, Action Ordersサマリ・行動主ターン見出し, unit.side)。後手はwhite=180°回転で表示される。
+- **盤面図コンポーネント**: `src/components/board_diagram.tsx`(`BoardDiagram`)。盤PNGを背景に駒画像を絶対配置。マス目幾何は`public/board/light_458x500.png`を画素解析して実測(縦線x:6..451 pitch49.44 / 横線y:6..493 pitch54.11)。highlight(配置可能範囲)・arrow(足止め)のSVGオーバーレイ対応。
+- **guide解説図**: `src/components/guide_diagram.tsx`(`GuideDiagram`)で4図を定義——`initial`(初期配置)/`ashidome`(足止め, 矢印+金マス強調)/`placeable`(配置可能マス, 上下2行ハイライト)/`cost-paper`(紙の行動順メモ。初期順+加算コスト例, 最小コストに「次の番」)。配置は各markdownのASCII/説明に対応。
+- **markdown連携**: `src/components/markdown.tsx`に`img`コンポーネントを追加し、`![alt](diagram:KEY)`を`GuideDiagram`へ振り分け(それ以外は通常img)。独自スキームのため`urlTransform`はidentityに。`src/guide/{tutorial,turbulent,offscreen}.md`のimgプレースホルダを`diagram:`記法へ置換(既存ASCIIは併記で残置)。
+- 検証: build OK / test 126 passed / lint 0 warning / format OK。初期配置を実画像で合成しマス整合を目視確認済み。
+- ※要目視(`npm run dev`): /guide の tutorial(初期配置・足止め)/turbulent(配置可能)/offscreen(紙)、各駒画像の表示。後手駒の180°回転表示がリスト文脈で許容かも確認。
+
