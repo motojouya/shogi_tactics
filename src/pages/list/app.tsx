@@ -27,7 +27,8 @@ const resultLabel = (battle: Battle): string => {
     case 'DRAW':
       return '引き分け';
     default:
-      return '対戦中';
+      // 先頭Turn未作成(turns.length===0)は編成段階。Turnが積まれていれば対戦中。
+      return battle.turns.length === 0 ? '編成中' : '対戦中';
   }
 };
 

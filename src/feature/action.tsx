@@ -381,7 +381,7 @@ export const BattleTurn: FC<{
                 <Typography sx={{ pr: 1 }}>
                   {`${actorPiece ? `${actorPiece.name}（${actorPiece.shogiName}）` : pieceName(piece, actorUnit.piece)}のターン`}
                 </Typography>
-                <Chip variant="outlined" color='primary' label={sideLabel(actorUnit.side)} />
+                <Chip data-testid="actor-side" variant="outlined" color='primary' label={sideLabel(actorUnit.side)} />
               </Stack>
               <Stack>
                 <ActionSelect
