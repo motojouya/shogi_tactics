@@ -39,6 +39,11 @@
     開発コマンドが定義されているので要確認  
 
 単体テストは、対象のファイルと同じディレクトリに配置する
+統合テストの実行前には以下が必要
+```
+npx playwright install chromium
+npx playwright install-deps chromium
+```
 
 ## Model
 データモデルは主にマスタ系と、実際に変化していくトランザクション系がある。

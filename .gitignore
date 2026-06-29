@@ -107,3 +107,9 @@ out
 dist
 dist-ssr
 *.local
+
+# Playwright (統合テスト実行時の生成物)
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

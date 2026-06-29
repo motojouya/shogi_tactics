@@ -104,6 +104,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
                 render={({ field }) => (
                   <TextField
                     select
+                    id="formation_piece"
                     size="small"
                     value={field.value}
                     onChange={(e) => {
