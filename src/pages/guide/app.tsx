@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography, Link as MaterialLink } from '@mui/material';
 import { Container, Link } from '../../components/utility';
 import { MarkdownPage } from '../../components/markdown';
 
@@ -39,6 +39,19 @@ const GuideIndex: FC = () => (
           </Link>
         </Box>
       ))}
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 3, textAlign: 'center' }}>
+        本サイトで使用している駒・将棋盤の画像は{' '}
+        <MaterialLink
+          href="https://sunfish-shogi.github.io/shogi-images/"
+          target="_blank"
+          rel="noreferrer"
+          color="inherit"
+          underline="always"
+        >
+          sunfish-shogi/shogi-images
+        </MaterialLink>{' '}
+        から取得しています。
+      </Typography>
     </Stack>
   </Container>
 );
