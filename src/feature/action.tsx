@@ -181,6 +181,8 @@ const ReceiverSelect: FC<{
             value={field.value ?? ''}
             onChange={onChange(field.onChange)}
           >
+            {/* 対象を選ばずに実行できる(コストのみ加算)。未選択へ戻すための空選択肢。 */}
+            <MenuItem value=''>（選択しない）</MenuItem>
             {receiverOptions.map(receiverOption => (
               <MenuItem key={`${receiverOption.value}`} value={receiverOption.value}>
                 {receiverOption.label}
@@ -331,6 +333,12 @@ export const BattleTurn: FC<{
     }
     const value = getValues(`receivers.${index}.value` as const);
     if (!value) {
+      // 「（選択しない）」に戻したらその枠のプレビューを消す。
+      const cleared = [...simulated];
+      if (index < cleared.length) {
+        cleared[index] = null;
+        setSimulated(cleared);
+      }
       return;
     }
     const index2 = value.indexOf(':');
@@ -387,6 +395,11 @@ export const BattleTurn: FC<{
                 )}
               </Stack>
               <Stack sx={{ justifyContent: "flex-start", p: 1, width: '100%' }}>
+                {selectedAction && fields.length > 0 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ pb: 0.5 }}>
+                    対象は選ばなくても実行できます（コストのみ加算）。
+                  </Typography>
+                )}
                 {selectedAction && fields.map((item, index) => {
                   const preview = simulated[index];
                   return (
