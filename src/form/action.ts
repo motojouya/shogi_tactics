@@ -8,7 +8,8 @@ import { z } from "zod";
 
 export const doActionFormSchema = z.object({
   actionKey: z.string().min(1),
-  receivers: z.array(z.object({ value: z.string().min(1).optional() }).optional()),
+  // 対象未選択(空value)も許可する。対象を選ばずに実行した場合はactorにコストのみ加算する(空valueはtoReceiversで除外)。
+  receivers: z.array(z.object({ value: z.string().optional() }).optional()),
 });
 export type DoActionForm = z.infer<typeof doActionFormSchema>;
 

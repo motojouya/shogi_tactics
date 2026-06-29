@@ -71,6 +71,24 @@ describe("act", () => {
     }
   });
 
+  it("対象を選ばなくても実行できる(コストのみ加算、対象は変化しない)", async () => {
+    const battle = makeBattle();
+    // 受け手はすべて未選択(空value)。toReceiversで除外され受け手0で実行される。
+    const form: DoActionForm = { actionKey: "meleeAttack", receivers: [{ value: "" }, {}] };
+
+    const result = await act(repository(true))(battle, actor, form);
+
+    if (result instanceof DataNotFoundError || result instanceof UserCancel || "message" in result) {
+      expect.unreachable("act should succeed without receivers");
+    } else {
+      const lastTurn = getLastTurn(result);
+      expect(lastTurn.order.type).toBe("DO_ACTION");
+      // 受け手未選択なので対象(pawn)のHPは変化しない。
+      const pawn = lastTurn.units.find((unit) => unit.side === "SECOND" && unit.piece === "pawn");
+      expect(pawn?.hp).toBe(3);
+    }
+  });
+
   it("data not found", async () => {
     const battle = makeBattle();
     const form: DoActionForm = { actionKey: "noSuchAction", receivers: [{ value: "SECOND:pawn" }] };
