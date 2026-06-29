@@ -30,7 +30,12 @@ import {
   Box,
   Stack,
   Typography,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import StarIcon from '@mui/icons-material/Star';
 
 import {
   GameOngoing,
@@ -56,6 +61,7 @@ import { UserCancel } from '../repository/error';
 import { useIO } from '../components/context';
 import { createResolvers } from '../repository';
 import { Container } from '../components/utility';
+import { ActionTable } from '../components/action_table';
 import { sideLabel } from '../components/label';
 
 // step8: battleはkeyしか持たないので、presentationでstore参照してpiece/statusを解決する。
@@ -68,14 +74,49 @@ const statusName = (statusRepository: Repository['status'], statusKey: string): 
   return status ? status.name : statusKey;
 };
 
+// 技+対象を選んだ際のプレビュー。hpの変化と、対象が除外(hp0)になるかだけを示す。
+type ReceiverPreview = { pieceKey: string; before: number; after: number; excluded: boolean };
+
 const GameStatus: FC<{ battle: Battle }> = ({ battle }) => {
   const card = `${battle.first_player_name}(先手) vs ${battle.second_player_name}(後手)`;
   switch (battle.result) {
     case GameFirst: return <Typography>{`${card} 先手の勝利`}</Typography>;
     case GameSecond: return <Typography>{`${card} 後手の勝利`}</Typography>;
     case GameDraw: return <Typography>{`${card} 引き分け`}</Typography>;
-    default: return <Typography>{`${card} Turn No.${battle.turns.length + 1}`}</Typography>;
+    // turn番号は巻き戻し時に混乱を招くため表示しない(レビュー指摘)。
+    default: return <Typography>{card}</Typography>;
   }
+};
+
+// 行動順の1エントリ。1行サマリ(順番号/リーダ/駒名/HP/コスト/移動/状態)と、
+// アコーディオン内に駒の行動表(ActionTable)を表示する。
+const ActionOrderEntry: FC<{ unit: Unit; order: number }> = ({ unit, order }) => {
+  const { piece, status } = useIO();
+  const unitPiece = piece.get(unit.piece);
+  return (
+    <Accordion disableGutters>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Stack direction="row" sx={{ alignItems: 'center', flexWrap: 'wrap', columnGap: 1, width: '100%' }}>
+          <Typography sx={{ fontWeight: 'bold' }}>{order + 1}</Typography>
+          {unit.leader && <StarIcon fontSize="small" color="warning" />}
+          <Typography>
+            {`${sideLabel(unit.side)}: ${unitPiece ? `${unitPiece.name}（${unitPiece.shogiName}）` : unit.piece}`}
+          </Typography>
+          <Typography variant="body2">{`HP ${unit.hp}`}</Typography>
+          <Typography variant="body2">{`コスト ${unit.steps}`}</Typography>
+          {unitPiece && <Typography variant="body2">{`移動 ${unitPiece.move}`}</Typography>}
+          {unit.statuses.map((statusKey) => (
+            <Chip key={statusKey} size="small" variant="outlined" label={statusName(status, statusKey)} />
+          ))}
+        </Stack>
+      </AccordionSummary>
+      <AccordionDetails>
+        {unitPiece
+          ? <ActionTable actions={unitPiece.actions} />
+          : <Typography variant="body2">行動情報がありません</Typography>}
+      </AccordionDetails>
+    </Accordion>
+  );
 };
 
 type GetReceiverError = (errors: FieldErrors, i: number, property: string) => FieldError | undefined;
@@ -100,20 +141,6 @@ const getReceiverError: GetReceiverError = (errors, i, property) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type HookOnChange = (e: any) => void;
-
-const UnitStatus: FC<{ unit: Unit }> = ({ unit }) => {
-  const { piece, status } = useIO();
-  return (
-    <Stack direction="row" sx={{ justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap' }}>
-      <Box sx={{ pr: 1 }}><Typography>{`${sideLabel(unit.side)}: ${pieceName(piece, unit.piece)}`}</Typography></Box>
-      <Box sx={{ pr: 1 }}><Typography>{`HP ${unit.hp}`}</Typography></Box>
-      <Box sx={{ pr: 1 }}><Typography>{`steps ${unit.steps}`}</Typography></Box>
-      {unit.statuses.length > 0 && (
-        <Box sx={{ pr: 1 }}><Typography>{`状態: ${unit.statuses.map((statusKey) => statusName(status, statusKey)).join(', ')}`}</Typography></Box>
-      )}
-    </Stack>
-  );
-};
 
 const ReceiverSelect: FC<{
   action: Action,
@@ -178,7 +205,8 @@ const ActionSelect: FC<{
   control: Control<DoActionForm>,
 }> = ({ actions, onSelect, errors, control }) => {
 
-  const actionOptions = actions.map(action => ({ value: action.key, label: action.name }));
+  // 技選択肢にコストを含める(レビュー指摘: コストは選択肢内で見せたい)。
+  const actionOptions = actions.map(action => ({ value: action.key, label: `${action.name}（コスト${action.cost}）` }));
   actionOptions.push({ value: ORDER_DO_NOTHING, label: '何もしない' });
 
   const onChange = (hookOnChange: HookOnChange) => (e: SelectChangeEvent<string>) => {
@@ -249,7 +277,7 @@ export const BattleTurn: FC<{
   const { fields, replace } = useFieldArray({ control, name: 'receivers' });
   const [message, setMessage] = useState<string>('');
   const [selectedAction, setSelectedAction] = useState<Action | null>(null);
-  const [simulated, setSimulated] = useState<(Unit | null)[]>([]);
+  const [simulated, setSimulated] = useState<(ReceiverPreview | null)[]>([]);
 
   const actorUnit = nextActor(lastTurn);
   const actor = actorUnit ? toUnitReference(actorUnit) : null;
@@ -305,13 +333,16 @@ export const BattleTurn: FC<{
     }
     const index2 = value.indexOf(':');
     const receiver: UnitReference = { side: value.slice(0, index2) as 'FIRST' | 'SECOND', piece: value.slice(index2 + 1) };
+    const before = lastTurn.units.find((unit) => unit.side === receiver.side && unit.piece === receiver.piece)?.hp ?? 0;
     const { survive, unit } = simulate(selectedAction, actor, receiver, lastTurn, resolvers);
 
     const newSimulated = [...simulated];
     while (newSimulated.length <= index) {
       newSimulated.push(null);
     }
-    newSimulated[index] = unit ? { ...unit, hp: survive ? unit.hp : 0 } : null;
+    newSimulated[index] = unit
+      ? { pieceKey: receiver.piece, before, after: unit.hp, excluded: !survive }
+      : null;
     setSimulated(newSimulated);
   };
 
@@ -336,7 +367,9 @@ export const BattleTurn: FC<{
             <form onSubmit={handleSubmit(doAct)}>
               {message && (<Typography>{message}</Typography>)}
               <Box sx={{ py: 1 }}>
-                <Typography sx={{ display: "inline-block", pr: 1 }}>{`${pieceName(piece, actorUnit.piece)}のターン`}</Typography>
+                <Typography sx={{ display: "inline-block", pr: 1 }}>
+                  {`${actorPiece ? `${actorPiece.name}（${actorPiece.shogiName}）` : pieceName(piece, actorUnit.piece)}のターン`}
+                </Typography>
                 <Chip variant="outlined" color='primary' label={sideLabel(actorUnit.side)} />
               </Box>
               <Stack>
@@ -346,32 +379,32 @@ export const BattleTurn: FC<{
                   errors={errors}
                   control={control}
                 />
+                {selectedAction && (
+                  <Typography variant="body2" sx={{ pt: 0.5 }}>{selectedAction.description}</Typography>
+                )}
               </Stack>
               <Stack sx={{ justifyContent: "flex-start", p: 1, width: '100%' }}>
-                {selectedAction && fields.map((item, index) => (
-                  <Stack key={item.id}>
-                    <ReceiverSelect
-                      action={selectedAction}
-                      actor={actor}
-                      lastTurn={lastTurn}
-                      index={index}
-                      errors={errors}
-                      control={control}
-                      addReceiver={addReceiver(index)}
-                    />
-                  </Stack>
-                ))}
-              </Stack>
-              <Stack>
-                <Box><UnitStatus unit={actorUnit} /></Box>
-                {selectedAction && (
-                  <Box sx={{ pt: 1 }}>
-                    <Typography>{`Action: ${selectedAction.name} cost+${selectedAction.cost} ${selectedAction.description}`}</Typography>
-                  </Box>
-                )}
-                {simulated.map((unit, index) => (
-                  unit && <Stack sx={{ pl: 5 }} key={`simulated-${index}`}><UnitStatus unit={unit} /></Stack>
-                ))}
+                {selectedAction && fields.map((item, index) => {
+                  const preview = simulated[index];
+                  return (
+                    <Stack key={item.id} sx={{ pb: 1 }}>
+                      <ReceiverSelect
+                        action={selectedAction}
+                        actor={actor}
+                        lastTurn={lastTurn}
+                        index={index}
+                        errors={errors}
+                        control={control}
+                        addReceiver={addReceiver(index)}
+                      />
+                      {preview && (
+                        <Typography variant="body2" sx={{ pl: 1, pt: 0.5 }}>
+                          {`${pieceName(piece, preview.pieceKey)}: HP ${preview.before} → ${preview.after}${preview.excluded ? '（除外）' : ''}`}
+                        </Typography>
+                      )}
+                    </Stack>
+                  );
+                })}
               </Stack>
               <Stack direction='row' sx={{ justifyContent: "flex-end", py: 1 }}>
                 <Box sx={{ px: 1 }}>
@@ -386,12 +419,7 @@ export const BattleTurn: FC<{
               <Box><Typography variant='h5'>Action Orders</Typography></Box>
               <Stack sx={{ justifyContent: "flex-start", p: 1, width: '100%' }}>
                 {sortedUnits(lastTurn).map((unit, index) => (
-                  <Box key={`unit-${unit.side}-${unit.piece}-${index}`} sx={{ pb: 2 }}>
-                    <Box sx={{ borderBottom: '1px dotted royalblue' }}>
-                      <Typography variant="h6">{index === 0 ? 'Now Actor' : `Action Order ${index}`}</Typography>
-                    </Box>
-                    <UnitStatus unit={unit} />
-                  </Box>
+                  <ActionOrderEntry key={`unit-${unit.side}-${unit.piece}-${index}`} unit={unit} order={index} />
                 ))}
               </Stack>
             </Box>

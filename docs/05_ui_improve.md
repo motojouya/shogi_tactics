@@ -79,6 +79,50 @@ pieceへの駒名追加と表示。guideと戦闘中とユニット選択中
 画像は以下を使う。先手後手でも別れるのでそこも  
 https://sunfish-shogi.github.io/shogi-images/
 
+また、guide以下の解説の画像も用意して表示する。
+画像生成がclaudeできないのでどうすべきか。将棋盤画像と駒画像はあるので、それにcanvasを組み合わせて簡単な図はかけないだろうか。
+いずれにしろ、駒の配置とかは自然な形になるように、自分で動かして配置を考えておく必要がある。
+紙をどう扱うかの画像だけはそれではできないので、chatgptでの生成でもいいかも
+
 ### UI調整
 その他すべて。基本的な文言や、サイズ感など。ここでUIは調整しきりたい
+
+## 戦闘中画面PR 実装計画（確定スコープ）
+
+plan「戦闘中画面」の確定スコープ。**piece駒名の追加＋表示**と**戦闘中画面の構造変更**に集中する。駒画像と基本文言/サイズは別PR。
+
+### 今回やる（IN）
+
+1. **pieceに将棋駒名フィールド追加**
+   - `model/piece.ts` に将棋駒名のフィールドを追加（現`name`はゲーム名「将軍/軽弓」等なので別フィールド。例: 王将/飛車/角行…）。
+   - `data/piece/*.ts` 全駒へ値を設定。
+   - 表示: guide/piece・戦闘中(action.tsx)・ユニット選択中(formation.tsx) の3画面。
+2. **共通「行動表」コンポーネント**（component層に新設）
+   - 列: 行動名 / 説明 / 基本ダメージ / 対象ユニット数(receiverCount) / コスト(cost) / 到達範囲 / 対象範囲。
+   - 到達範囲=`reachRange`(7×7)、対象範囲=`effectRange`(3×3) を **マス目グリッドで可視化**（数値ではなくグリッド描画。レビュー58を反映）。
+   - guide/piece と 戦闘中アコーディオン内で**同一コンポーネントを共用**。
+3. **戦闘中画面(action.tsx)の構造変更**（レビュー33–50, ※画像除く）
+   - turn number 非表示(33)。
+   - Action Orders: steps→**cost**表記(35) / `Action Orders 1`→`1`の1行コンパクト化(36) / リーダアイコン・ステータスバッヂ追加(34, **画像は別PR**)。
+   - unit詳細を**アコーディオン化**(37)。`move`はアコーディオン外の表示に追加(38)。アコーディオン内に上記**共通行動表**(39–46)。
+   - 技選択: 行動ユニット詳細を非表示(47) / 技選択肢に**cost**表示(49) / 技+対象選択時に**hp変化と除外のみ**プレビュー(48,50, `model/simulation.ts`の`simulate()`再利用)。
+4. **guide/piece**: 将棋駒名の表示 + アクション表を上記**共通行動表**に差し替え（マス目グリッド, 58反映）。
+
+### 今回やらない（別PR）
+
+- **駒画像すべて**（駒画像PR）: 34の画像 / 59 / 各画面の駒画像。
+- **文言・サイズ調整**（UI調整PR）: 大将→リーダー(53) / `戦闘開始`等の文言(30,55) / **ユニット選択中の行動順番号(54)** / ヘッダ折返し(10–11) / トップ導線(14–15) / guideのリネーム・並替(19–20) / list(23–24) / v1の各種文言(27–30) / guide/pieceタイトル`駒と行動の一覧`→`駒の一覧`(19)。
+
+### 補足
+- 構造変更（アコーディオン導入等）を先行させる方針のため、文言/サイズはあえて後段のUI調整PRへ送る。
+- 共通行動表は1コンポーネントに集約し、guide/pieceと戦闘中アコーディオンの二重実装を避ける。
+
+### 済み分（実装メモ）
+- **piece将棋駒名**: `model/piece.ts`に`shogiName: string`を追加。`data/piece/*.ts`全14駒へ各ファイル先頭コメントの駒名を設定（王将/金将/銀将/飛車/角行/桂馬/香車/竜王/竜馬/成銀/成桂/成香/歩兵/と金）。テストのPieceリテラル(unit/action/formationの各.unit.test.ts)にも補完。
+- **共通行動表**: `src/components/action_table.tsx`新設（`ActionTable: FC<{ actions }>`）。列= 行動/説明/基本ダメージ/対象数/コスト/到達範囲/対象範囲。到達=`reachRange`(7×7)・対象=`effectRange`(3×3)を`RangeGrid`(local)でマス目グリッド描画。bit意味付け(bit0=影響→青塗り, bit1=Actorマス→赤枠)を凡例つきで表示。guide/piece と 戦闘中アコーディオンで共用。
+- **guide/piece(`pages/guide/piece/app.tsx`)**: 駒名見出しに`（{shogiName}）`を併記。旧inline tableを`ActionTable`へ差し替え。タイトルは据え置き（リネームはUI調整PR）。
+- **戦闘中(`feature/action.tsx`)**: `GameStatus`からturn番号を除去。`UnitStatus`を廃し、Action Ordersを`ActionOrderEntry`(MUI Accordion)へ刷新——サマリ=`{order+1}`/リーダ★(`StarIcon`)/`name（shogiName）`/HP/コスト(=unit.steps)/移動/状態Chip、詳細=`ActionTable`。技選択は、行動主の詳細表示を撤去し、技選択肢に`（コスト{cost}）`を併記、技+対象選択のプレビューを各receiver直下に`HP before→after（除外）`だけ表示（`simulate()`再利用、before=lastTurnのhp）。
+- **ユニット選択中(`feature/formation.tsx`)**: 配置済みリストの駒名に`（{shogiName}）`併記（大将→リーダー文言はUI調整PR）。
+- 検証: build OK / test 126 passed / lint 0 warning / format OK。
+- ※視覚確認は`npm run dev`で /guide/piece と戦闘中画面を要目視（アコーディオン展開・グリッド表示・プレビュー）。
 

@@ -155,7 +155,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
                 direction="row"
                 sx={{ alignItems: 'center', justifyContent: 'space-between', py: 0.5 }}
               >
-                <Typography>{`${sideLabel(unit.side)}: ${piece ? piece.name : unit.piece}${unit.leader ? ' [大将]' : ''}`}</Typography>
+                <Typography>{`${sideLabel(unit.side)}: ${piece ? `${piece.name}（${piece.shogiName}）` : unit.piece}${unit.leader ? ' [大将]' : ''}`}</Typography>
                 {index === units.length - 1 && (
                   <Button variant="outlined" type="button" onClick={undo}>取消</Button>
                 )}

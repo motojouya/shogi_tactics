@@ -19,6 +19,7 @@ describe("formFormation#pieceSelectOption", function () {
     const option = pieceSelectOption({
       key: "king",
       name: "王",
+      shogiName: "王将",
       description: "",
       MaxHP: 2,
       move: 1,

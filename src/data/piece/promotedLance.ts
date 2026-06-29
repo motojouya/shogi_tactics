@@ -5,6 +5,7 @@ import { meleeAttack, puppet } from "../action/index";
 export const promotedLance: Piece = {
   key: "promotedLance",
   name: "傀儡師",
+  shogiName: "成香",
   description: "味方を操る傀儡師。戦乱モードで使用",
   MaxHP: 2,
   move: 3,
