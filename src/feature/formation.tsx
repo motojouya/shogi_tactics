@@ -24,6 +24,7 @@ import { startBattle } from '../controller/start';
 import { useIO } from '../components/context';
 import { Container } from '../components/utility';
 import { sideLabel } from '../components/label';
+import { PieceImage } from '../components/piece_image';
 
 // step6: 編成段階(battle.turns.length===0)のUI。
 // 先手→後手の交互に1unitずつ選び、双方がunitCountに達したら戦闘を開始できる。
@@ -155,7 +156,10 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
                 direction="row"
                 sx={{ alignItems: 'center', justifyContent: 'space-between', py: 0.5 }}
               >
-                <Typography>{`${sideLabel(unit.side)}: ${piece ? `${piece.name}（${piece.shogiName}）` : unit.piece}${unit.leader ? ' [大将]' : ''}`}</Typography>
+                <Stack direction="row" sx={{ alignItems: 'center', columnGap: 1 }}>
+                  <PieceImage pieceKey={unit.piece} side={unit.side} name={piece?.name} size={28} />
+                  <Typography>{`${sideLabel(unit.side)}: ${piece ? `${piece.name}（${piece.shogiName}）` : unit.piece}${unit.leader ? ' [大将]' : ''}`}</Typography>
+                </Stack>
                 {index === units.length - 1 && (
                   <Button variant="outlined" type="button" onClick={undo}>取消</Button>
                 )}

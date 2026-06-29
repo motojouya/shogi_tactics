@@ -63,6 +63,7 @@ import { createResolvers } from '../repository';
 import { Container } from '../components/utility';
 import { ActionTable } from '../components/action_table';
 import { sideLabel } from '../components/label';
+import { PieceImage } from '../components/piece_image';
 
 // step8: battleはkeyしか持たないので、presentationでstore参照してpiece/statusを解決する。
 const pieceName = (pieceRepository: Repository['piece'], pieceKey: string): string => {
@@ -99,6 +100,7 @@ const ActionOrderEntry: FC<{ unit: Unit; order: number }> = ({ unit, order }) =>
         <Stack direction="row" sx={{ alignItems: 'center', flexWrap: 'wrap', columnGap: 1, width: '100%' }}>
           <Typography sx={{ fontWeight: 'bold' }}>{order + 1}</Typography>
           {unit.leader && <StarIcon fontSize="small" color="warning" />}
+          <PieceImage pieceKey={unit.piece} side={unit.side} name={unitPiece?.name} size={28} />
           <Typography>
             {`${sideLabel(unit.side)}: ${unitPiece ? `${unitPiece.name}（${unitPiece.shogiName}）` : unit.piece}`}
           </Typography>
@@ -366,12 +368,13 @@ export const BattleTurn: FC<{
           <Stack sx={{ borderTop: '1px solid royalblue' }}>
             <form onSubmit={handleSubmit(doAct)}>
               {message && (<Typography>{message}</Typography>)}
-              <Box sx={{ py: 1 }}>
-                <Typography sx={{ display: "inline-block", pr: 1 }}>
+              <Stack direction="row" sx={{ py: 1, alignItems: 'center', columnGap: 1 }}>
+                <PieceImage pieceKey={actorUnit.piece} side={actorUnit.side} name={actorPiece?.name} size={32} />
+                <Typography sx={{ pr: 1 }}>
                   {`${actorPiece ? `${actorPiece.name}（${actorPiece.shogiName}）` : pieceName(piece, actorUnit.piece)}のターン`}
                 </Typography>
                 <Chip variant="outlined" color='primary' label={sideLabel(actorUnit.side)} />
-              </Box>
+              </Stack>
               <Stack>
                 <ActionSelect
                   actions={actorActions}

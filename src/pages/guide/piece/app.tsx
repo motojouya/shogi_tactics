@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { Stack, Typography, Card, CardContent } from '@mui/material';
 import { Container } from '../../../components/utility';
 import { ActionTable } from '../../../components/action_table';
+import { PieceImage } from '../../../components/piece_image';
 import { pieceRepository } from '../../../repository/piece';
 
 // 駒と、各駒が持つ行動(action)の一覧。data/pieceの静的データを直接参照する(BattleIO非依存)。
@@ -15,12 +16,15 @@ export const App: FC = () => (
       {pieceRepository.all.map((piece) => (
         <Card key={piece.key} sx={{ my: 1 }}>
           <CardContent>
-            <Typography variant="h5">
-              {piece.name}
-              <Typography component="span" variant="body2" color="text.secondary" sx={{ pl: 1 }}>
-                （{piece.shogiName}）
+            <Stack direction="row" sx={{ alignItems: 'center', columnGap: 1 }}>
+              <PieceImage pieceKey={piece.key} name={piece.name} size={40} />
+              <Typography variant="h5">
+                {piece.name}
+                <Typography component="span" variant="body2" color="text.secondary" sx={{ pl: 1 }}>
+                  （{piece.shogiName}）
+                </Typography>
               </Typography>
-            </Typography>
+            </Stack>
             <Typography sx={{ my: 1 }}>{piece.description}</Typography>
             <Typography variant="body2">
               最大HP: {piece.MaxHP} / 移動: {piece.move}
