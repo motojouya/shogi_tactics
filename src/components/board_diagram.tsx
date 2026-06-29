@@ -24,8 +24,8 @@ const cellCenterY = (row: number): number => GRID_Y0 + (row + 0.5) * PITCH_Y;
 export type DiagramCell = { col: number; row: number; piece: string; side: Side };
 // マスのハイライト(配置可能範囲など)。cols/rowsは[開始, 終了]の閉区間。
 export type DiagramHighlight = { cols: [number, number]; rows: [number, number]; color: string };
-// 矢印(足止めの動きなど)。from/toはマス座標(小数可)。
-export type DiagramArrow = { from: [number, number]; to: [number, number] };
+// 矢印(足止めの動きなど)。from/toはマス座標(小数可)。dashed=本来進みたいが進めない経路を破線で示す。
+export type DiagramArrow = { from: [number, number]; to: [number, number]; dashed?: boolean; color?: string };
 
 export const BoardDiagram: FC<{
   cells: DiagramCell[];
@@ -52,7 +52,7 @@ export const BoardDiagram: FC<{
       >
         <defs>
           <marker id="diagram-arrowhead" markerWidth="5" markerHeight="5" refX="3.5" refY="2.5" orient="auto">
-            <path d="M0,0 L5,2.5 L0,5 Z" fill="#d32f2f" />
+            <path d="M0,0 L5,2.5 L0,5 Z" fill="context-stroke" />
           </marker>
         </defs>
         {highlights.map((h, i) => {
@@ -69,8 +69,9 @@ export const BoardDiagram: FC<{
             y1={cellCenterY(a.from[1])}
             x2={cellCenterX(a.to[0])}
             y2={cellCenterY(a.to[1])}
-            stroke="#d32f2f"
+            stroke={a.color ?? '#d32f2f'}
             strokeWidth={5}
+            strokeDasharray={a.dashed ? '8 6' : undefined}
             markerEnd="url(#diagram-arrowhead)"
           />
         ))}
