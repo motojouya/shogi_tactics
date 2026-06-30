@@ -1,7 +1,7 @@
 # Guidelines
 
 ## Knowledge
-docs/develop.md 参照
+README.md 参照
 
 ## Prohibitions
 - 秘密情報を追加しない。生成コードにAPIキーや暗号鍵を埋め込まない。
