@@ -1,18 +1,15 @@
 version: 2
 updates:
-  # npm依存(単一package.json。workspaceは廃止済み)
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-    # 公開直後の不具合・撤回を避けるため、新バージョンは一定期間寝かせてからPRを作る
     cooldown:
       default-days: 5
       semver-major-days: 30
       semver-minor-days: 7
       semver-patch-days: 3
-  # GitHub Actionsのバージョン更新
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

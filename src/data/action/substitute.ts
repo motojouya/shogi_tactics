@@ -1,7 +1,6 @@
 import type { Action } from "../../model/action";
 import { buildAction, effectOverHeal, filterAlive } from "../../model/action";
 
-// と金の反動行動。身代わり。対象の体力を1回復する(体力の限界を超えて追加できる)。
 export const substitute: Action = buildAction(
   {
     key: "substitute",

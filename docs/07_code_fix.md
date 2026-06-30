@@ -4,16 +4,23 @@
 ディレクトリごとにメモしていく
 
 ## /
+コメント削除済み
 
 ## .github/
+コメント削除済み
 
 ## docs/
+ファイルの削除はこのPRが終わったら
+
+## test/
+コメント削除済み
+
+## src/data/
+コメント削除済み
 
 ## src/components/
 
 ## src/controller/
-
-## src/data/
 
 ## src/feature/
 
@@ -26,6 +33,4 @@
 ## src/pages/
 
 ## src/repository/
-
-## test/
 

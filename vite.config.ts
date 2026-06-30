@@ -58,8 +58,6 @@ export default defineConfig({
   },
   base: path,
   test: {
-    // 単体テストはsrcにコロケーション(*.unit.test.ts)。
-    // test/配下はPlaywrightの統合テスト(*.spec.ts)でvitestの対象外(playwright.config.tsで実行)。
     include: ["src/**/*.unit.test.ts"],
   },
 });

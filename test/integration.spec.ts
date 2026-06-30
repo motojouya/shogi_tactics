@@ -1,14 +1,8 @@
 import { test, expect, type Page, type Locator } from "@playwright/test";
 
-// docs/06_integration_senario.md のシナリオに対応する統合テスト。
-// データはIndexedDB(Dexie)に保存され、シナリオ間で状態を共有するため、1つのtest内のtest.stepで順に実行する。
-// confirm/alertダイアログはすべて承認する(降参・実行・削除の確認に使う)。
-
-// 通常モード/戦乱モードで作る対戦のプレイヤー名(行の特定に使う)。
 const NORMAL = { first: "ノーマル先", second: "ノーマル後" };
 const WAR = { first: "戦乱先", second: "戦乱後" };
 
-// MUIのSelect(combobox)を開いて指定ラベルの選択肢を選ぶ。
 const selectOption = async (page: Page, combo: Locator, optionName: string): Promise<void> => {
   await combo.click();
   await page.getByRole("option", { name: optionName, exact: true }).click();
