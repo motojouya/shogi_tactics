@@ -4,25 +4,29 @@
 ディレクトリごとにメモしていく
 
 ## /
-- コメント削除済み
+- [x] コメント削除
 
 ## .github/
-- コメント削除済み
+- [x] コメント削除
 
 ## docs/
-- ファイルの削除はこのPRが終わったら
+- [ ] ファイルの削除はこのPRが終わったら
 
-## public
-- srcの配下に移動したい
+## public/
+- [ ] ディレクトリごとsrcの配下に移動したい
+- [ ] public配下の構成が深いので、フラットにしたい
 
 ## test/
-- コメント削除済み
+- [x] コメント削除
 
 ## src/data/
-- コメント削除済み
-- Actionに引数を与えている部分だが、statusのkeyなので、data/statusをimportしてその値を入れるべき
+- [x] コメント削除
+- [ ] Actionに引数を与えている部分だが、statusのkeyなので、data/statusをimportしてその値を入れるべき
 
 ## src/repository/
+- [x] コメント削除
+- [ ] `error.ts`はmodel配下に移動したい
+- [ ] importJsonFileの帰り値はgenerics型, exportJsonFileの引数はunknownが来ているが、これをstringに変更したい。serialize,deserializeはBattleRepository側で行いたい
 
 ## src/components/
 

@@ -6,8 +6,6 @@ import { battleSchema } from "../model/battle";
 import { parseJson, importJsonFile, exportJsonFile } from "./utility";
 import { CopyFailError, JsonSchemaUnmatchError } from "./error";
 
-// battle専用のrepository。schema変換が無くなりbattle固有のロジックも無いため、Database抽象を廃しDexieを直接使う。
-// model型(Battle)をそのまま保存・取得し、取得時はbattleSchemaで検証(parseJson)するだけ。
 export type BattleRepository = {
   save: (battle: Battle) => Promise<void>;
   list: () => Promise<string[]>;
@@ -17,7 +15,6 @@ export type BattleRepository = {
   exportJson: (battle: Battle, fileName: string) => Promise<CopyFailError | null>;
 };
 
-// keyを主キーとするbattleテーブルのみ。IndexedDB(Dexie)はDateを構造化クローンでネイティブ保存する。
 class BattleDB extends Dexie {
   battle!: Dexie.Table<Battle, string>;
 
