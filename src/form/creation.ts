@@ -1,9 +1,5 @@
 import { z } from "zod";
 
-// step15(S14/§3.2 → 実利用化): battle作成フォームのzod schema。手書きバリデーションの唯一の置き換え先。
-// stepBase/unitCountはnumber。画面側はTextField type=number + register({valueAsNumber:true})で数値として受け、
-// 既定値は通常モードの値(stepBase=14, unitCount=7)を入れる(通常モードでは入力欄を出さずこの既定値を使う)。
-// モードで必須が変わる(通常: player名のみ実質必須 / 戦乱: stepBase/unitCountも1以上)ためsuperRefineで条件付き検証する。
 export const creationFormSchema = z
   .object({
     mode: z.enum(["normal", "war"]),

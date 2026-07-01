@@ -26,19 +26,30 @@
 ## src/repository/
 - [x] コメント削除
 - [ ] `error.ts`はmodel配下に移動したい
-- [ ] importJsonFileの帰り値はgenerics型, exportJsonFileの引数はunknownが来ているが、これをstringに変更したい。serialize,deserializeはBattleRepository側で行いたい
-
-## src/components/
-
-## src/controller/
-
-## src/feature/
+- [ ] importJsonFileの帰り値はgenerics型, exportJsonFileの引数はunknownが来ているが、これらをstringに変更したい。serialize,deserializeはBattleRepository側で行いたい
 
 ## src/form/
+- [x] コメント削除
+- [ ] action.tsのsideLabelで`FIRST`という定数を使っているが、modelの値をimportして利用したい
+- [ ] action.unit.test.tsにreceiverSelectOptionのテストがない
+- [ ] creation.tsは定数がstringになっているが、modelの値をimportして利用したい
+- [ ] creation.tsでformの定義だが、normal/warでそもそも型定義を別にしてunion typeとしたい。normalにはstepBaseとunitCountがない。これは可能ならするが、必要以上にややこしいならしない。
+
+## src/controller/
+- [ ] コメント削除
 
 ## src/guide/
+- [ ] コメント削除
 
 ## src/model/
+- [ ] コメント削除
+
+## src/components/
+- [ ] コメント削除
+
+## src/feature/
+- [ ] コメント削除
 
 ## src/pages/
+- [ ] コメント削除
 
