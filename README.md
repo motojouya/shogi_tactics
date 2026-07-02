@@ -49,30 +49,30 @@ https://motojouya.github.io/shogi_tactics/
   - package.json  
     開発コマンドが定義されているので要確認  
 
-単体テストは、対象のファイルと同じディレクトリに配置する
-統合テストの実行前には以下が必要
+単体テストは、対象のファイルと同じディレクトリに配置する  
+統合テストの実行前には以下が必要  
 ```
 npx playwright install chromium
 npx playwright install-deps chromium
 ```
 
 ## Model
-データモデルは主にマスタ系と、実際に変化していくトランザクション系がある。
-トランザクションデータはマスタを参照して、ロジックを実現している。
+データモデルは主にマスタ系と、実際に変化していくトランザクション系がある。  
+トランザクションデータはマスタを参照して、ロジックを実現している。  
 
-- マスタ
+- マスタ  
   - Piece  
-    駒の種類を定義する。実際に動かす駒はunitと呼び、unitはpieceという属性を持っている
+    駒の種類を定義する。実際に動かす駒はunitと呼び、unitはpieceという属性を持っている  
   - Action  
-    特定のPieceが取れる行動を定義する
+    特定のPieceが取れる行動を定義する  
   - Status  
-    unitに付与する状態を表現する
-- トランザクション
+    unitに付与する状態を表現する  
+- トランザクション  
   - Battle  
     対戦本体。内部は構造的になっていて、unitも組み込まれている  
 
 ### Battle Lifecycle
-Battleはライフサイクルがある
+Battleはライフサイクルがある  
 
 ```mermaid
 stateDiagram-v2

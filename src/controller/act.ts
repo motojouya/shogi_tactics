@@ -10,11 +10,6 @@ import { toReceivers } from "../form/action";
 import { createResolvers } from "../repository";
 import { DataNotFoundError, UserCancel } from "../repository/error";
 
-// step15(S13/S16): formからは値だけ受け取り、controllerが組み立てる。第1引数でRepositoryを丸ごと受け取る(§7.3)。
-// step15: spendTurn分割に伴い、actionKeyのDO_NOTHING判定でdoNothing/doActを呼び分ける。
-// - actionKey: ORDER_DO_NOTHINGならdoNothing(action不要)。それ以外はdoActへ。
-// - receivers: formのtoReceiversでUnitReference[]へ解決。受け手重複検証はvalidateReceivers(model)。
-// - action解決と存在チェックはdoAct内(resolvers.getAction)。日時はrepository(local.now)から取得し値で渡す。
 export type Act = (
   repository: Repository,
 ) => (
@@ -25,7 +20,6 @@ export type Act = (
 export const act: Act = (repository) => async (battle, actor, doActionForm) => {
   const { battle: battleRepository, local } = repository;
 
-  // 何もしない
   if (doActionForm.actionKey === ORDER_DO_NOTHING) {
     if (!local.confirm("実行していいですか？")) {
       return new UserCancel("Cancelされました");
@@ -35,7 +29,6 @@ export const act: Act = (repository) => async (battle, actor, doActionForm) => {
     return newBattle;
   }
 
-  // 技を実行
   const receivers = toReceivers(doActionForm.receivers);
   const duplication = validateReceivers(receivers);
   if (duplication) {
