@@ -3,7 +3,6 @@ import { Box, Stack, Typography, Link as MaterialLink } from '@mui/material';
 import { Container, Link } from '../../components/utility';
 import { MarkdownPage } from '../../components/markdown';
 
-// guide配下の全markdownを ?raw でstring取得し、slug(ファイル名)->本文 のmapにする。
 const markdownModules = import.meta.glob('../../guide/*.md', {
   eager: true,
   query: '?raw',
@@ -17,9 +16,8 @@ const markdownBySlug: Record<string, string> = Object.fromEntries(
   }),
 );
 
-// 目次に並べるリンク。slugはmarkdownのファイル名、または素のreact pageの 'piece'。
 const guideEntries: { slug: string; label: string }[] = [
-  { slug: 'tutorial', label: '遊び方' },
+  { slug: 'tutorial', label: 'はじめに' },
   { slug: 'turbulent', label: '戦乱モード' },
   { slug: 'piece', label: '駒の一覧' },
   { slug: 'offscreen', label: 'アプリなしでの遊び方' },
@@ -62,7 +60,6 @@ const NotFound: FC = () => (
   </Container>
 );
 
-// pathnameからguideのslugを取り出して描画対象を決める(VITE_URL_PREFIX付きでも 'guide' 位置で判定)。
 export const App: FC = () => {
   const segments = window.location.pathname.split('/').filter(Boolean);
   const guideIndex = segments.indexOf('guide');

@@ -14,10 +14,8 @@ import { BattleIO } from '../../components/battle_io';
 import { useIO } from '../../components/context';
 import { Container, Link, ButtonLink } from '../../components/utility';
 
-// keyはuuidで人間可読でないため、各battleをロードしてplayer名・日時・状態を表示する
 type BattleSummary = { key: string; battle: Battle };
 
-// 決着状態は生のresult値ではなく、勝利したプレイヤー名(引き分け/対戦中)で表示する。
 const resultLabel = (battle: Battle): string => {
   switch (battle.result) {
     case 'FIRST':
@@ -27,7 +25,6 @@ const resultLabel = (battle: Battle): string => {
     case 'DRAW':
       return '引き分け';
     default:
-      // 先頭Turn未作成(turns.length===0)は編成段階。Turnが積まれていれば対戦中。
       return battle.turns.length === 0 ? '編成中' : '対戦中';
   }
 };
@@ -35,8 +32,6 @@ const resultLabel = (battle: Battle): string => {
 const BattleList: FC = () => {
   const { battle: battleRepository, local } = useIO();
 
-  // step15(S21/§4.5): Delete実装。確認の上battleRepository.removeを呼ぶ。
-  // useLiveQueryがDexieのテーブル変更を検知し一覧は自動更新される。
   const onDelete = async (key: string) => {
     if (!local.confirm('このバトルを削除しますか？')) {
       return;
@@ -87,7 +82,6 @@ const BattleList: FC = () => {
   );
 };
 
-// /list : battle一覧の表示
 export const App: FC = () => (
   <BattleIO>
     <BattleList />

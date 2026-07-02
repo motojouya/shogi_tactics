@@ -10,7 +10,7 @@
 - [x] コメント削除
 
 ## docs/
-- [ ] ファイルの削除はこのPRが終わったら
+ファイルの削除はこのPRが終わったら
 
 ## public/
 - [ ] ディレクトリごとsrcの配下に移動したい
@@ -49,15 +49,28 @@
 ## src/guide/
 - [x] コメント削除
 
-## src/components/
-- [ ] コメント削除
+## src/pages/
+- [x] コメント削除
+- [ ] `guide/*`配下にindex.tsxを配置し、そこでpathを引数として渡す形を取る。stringが""ならばguideとすればいい。
+- [ ] guide/app.tsxのguideEntries,GuideIndexはfeatureに移動する
+- [ ] guide/app.tsxのNotFoundはcomponent/utility.tsxに移動して共通化
+- [ ] guide/piece/app.tsxはもしかしたら戦闘中画面と共通化できるかもだが、要検討
+- [ ] list/app.tsxで対戦中/編成中の判定ロジックはmodel側に持ちたい
+- [ ] list/app.tsxのonDeleteはcontrollerに移動
+- [ ] list/app.tsxのuseLiveQueryにわたすcallbackもcontrollerに移動する
+- [ ] v1/app.tsxにも編成中の判定ロジックがあるので、modelに
+- [ ] v1/app.tsxでlocal変数を使っているが、Contextに存在するので、Contextのコンポーネント内部に移動して、そこのlocalを使う
 
 ## src/feature/
 - [ ] コメント削除
 
-## src/pages/
+## src/components/
 - [ ] コメント削除
+- [ ] markdown.tsxのMarkdownPageはfeatureに移動
 
 ## src/model/
 未レビュー
+
+## その他
+faviconの用意。将棋の駒だが、中は漢字ではなく十字になっているというものにするか。これなら簡単だ
 

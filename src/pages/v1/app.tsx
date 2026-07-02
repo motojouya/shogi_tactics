@@ -12,7 +12,6 @@ import { useIO } from '../../components/context';
 import { Container } from '../../components/utility';
 import { local } from '../../repository/local';
 
-// /v1 : version1のbattleを表示する。?key=<uuid>で対象を指定。version不一致は表示しない。
 export const VERSION = 'v1';
 
 const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey, version }) => {
@@ -35,7 +34,6 @@ const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey,
     );
   }
 
-  // 表示ページのversionとbattleのversionが一致しないと表示しない(step10)。
   if (battle.version !== version) {
     return (
       <Container backLink="/list/">
@@ -44,7 +42,6 @@ const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey,
     );
   }
 
-  // turns.length===0は編成段階。units選択が終わって先頭Turnが積まれたら戦闘画面へ。
   if (battle.turns.length === 0) {
     return (<BattleFormation battle={battle} />);
   }
@@ -52,8 +49,6 @@ const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey,
   return (<BattleAction battle={battle} />);
 };
 
-// /v1 で creation(key無し)/ formation / action を出し分ける(S20/§7.7)。
-// key無し=新規作成(creation)。key有りはBattleExsitingがturns有無でformation/actionを出し分ける。
 export const App: FC = () => {
   const searchParams = local.getSearchParams();
   const key = searchParams.get('key');

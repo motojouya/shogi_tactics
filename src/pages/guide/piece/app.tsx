@@ -5,8 +5,6 @@ import { ActionTable } from '../../../components/action_table';
 import { PieceImage } from '../../../components/piece_image';
 import { pieceRepository } from '../../../repository/piece';
 
-// 駒と、各駒が持つ行動(action)の一覧。data/pieceの静的データを直接参照する(BattleIO非依存)。
-// 行動表は戦闘中アコーディオンと共通のActionTableを使う。
 export const App: FC = () => (
   <Container backLink="/guide/">
     <Stack sx={{ p: 1 }}>
