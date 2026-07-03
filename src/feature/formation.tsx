@@ -26,9 +26,6 @@ import { Container } from '../components/utility';
 import { sideLabel } from '../components/label';
 import { PieceImage } from '../components/piece_image';
 
-// step6: 編成段階(battle.turns.length===0)のUI。
-// 先手→後手の交互に1unitずつ選び、双方がunitCountに達したら戦闘を開始できる。
-// 「駒を追加」フォームの入力はform/formationのformationFormSchema(zodResolver)で検証する。
 export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
 
   const io = useIO();
@@ -41,18 +38,14 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
     resolver: zodResolver(formationFormSchema),
     defaultValues: { piece: pieces[0] ? pieces[0].key : '', leader: false },
   });
-  // 選択中の駒(駒重複判定に使う)はUI stateとして持つ(react-hook-formのwatchはReact Compiler非互換のため)。
   const [selectedPiece, setSelectedPiece] = useState<string>(pieces[0] ? pieces[0].key : '');
 
   const unitCount = battle.unitCount;
-  // 進捗表示用のカウント(ゲームルールではない単なる集計)。
   const firstCount = units.filter((unit) => unit.side === 'FIRST').length;
   const secondCount = units.filter((unit) => unit.side === 'SECOND').length;
 
-  // ゲームルール(次の手番/大将1体制限/編成完了/駒重複)はmodelの検証関数へ委譲する(§2.3)。
   const currentSide: Side | null = nextFormationSide(units, unitCount);
   const currentSideHasLeader = currentSide ? sideHasLeader(units, currentSide) : false;
-  // 同陣営に同じ駒は二重に置けない。選択中の駒が追加可能かを判定しUIに反映する。
   const canAddSelected = currentSide ? canAddPiece(units, currentSide, selectedPiece) : false;
   const done = isFormationComplete(units, unitCount);
 
@@ -63,7 +56,6 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
     if (!currentSide) {
       return;
     }
-    // 駒重複は不可(modelのcanAddPieceで判定済み)。
     if (!canAddPiece(units, currentSide, form.piece)) {
       return;
     }
@@ -71,20 +63,17 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
     if (!piece) {
       return;
     }
-    // leaderは陣営1体まで。既に居る場合は強制的にfalse。
     const asLeader = form.leader && !currentSideHasLeader;
     setUnits([
       ...units,
       { side: currentSide, piece: piece.key, hp: piece.MaxHP, steps: 0, statuses: [], leader: asLeader },
     ]);
-    // 駒選択は維持し、大将チェックのみ戻す。
     reset({ piece: form.piece, leader: false });
   };
 
   const undo = () => setUnits(units.slice(0, -1));
 
   const startGame = async () => {
-    // 先頭Turnを積んで保存。useLiveQueryがturns更新を検知し戦闘画面へ切り替わる。
     await startBattle(io)(battle, units);
   };
 

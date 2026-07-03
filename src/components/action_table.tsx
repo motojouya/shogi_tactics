@@ -10,7 +10,6 @@ import {
 } from '@mui/material';
 import type { Action } from '../model/action';
 
-// 1マスの一辺(px)。到達範囲(7×7)・対象範囲(3×3)を小さく描くため控えめにする。
 const CELL = 9;
 
 // action.tsのbit意味付け(bit0=影響あり, bit1=Actorのマス)に従い、1マスを色と枠で可視化する。

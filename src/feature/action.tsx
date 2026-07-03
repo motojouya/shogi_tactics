@@ -65,7 +65,6 @@ import { ActionTable } from '../components/action_table';
 import { sideLabel } from '../components/label';
 import { PieceImage } from '../components/piece_image';
 
-// step8: battleはkeyしか持たないので、presentationでstore参照してpiece/statusを解決する。
 const pieceName = (pieceRepository: Repository['piece'], pieceKey: string): string => {
   const piece = pieceRepository.get(pieceKey);
   return piece ? piece.name : pieceKey;
@@ -75,7 +74,6 @@ const statusName = (statusRepository: Repository['status'], statusKey: string): 
   return status ? status.name : statusKey;
 };
 
-// 技+対象を選んだ際のプレビュー。hpの変化と、対象が除外(hp0)になるかだけを示す。
 type ReceiverPreview = { pieceKey: string; before: number; after: number; excluded: boolean };
 
 const GameStatus: FC<{ battle: Battle }> = ({ battle }) => {
@@ -84,13 +82,10 @@ const GameStatus: FC<{ battle: Battle }> = ({ battle }) => {
     case GameFirst: return <Typography>{`${card} 先手の勝利`}</Typography>;
     case GameSecond: return <Typography>{`${card} 後手の勝利`}</Typography>;
     case GameDraw: return <Typography>{`${card} 引き分け`}</Typography>;
-    // turn番号は巻き戻し時に混乱を招くため表示しない(レビュー指摘)。
     default: return <Typography>{card}</Typography>;
   }
 };
 
-// 行動順の1エントリ。1行サマリ(順番号/リーダ/駒名/HP/コスト/移動/状態)と、
-// アコーディオン内に駒の行動表(ActionTable)を表示する。
 const ActionOrderEntry: FC<{ unit: Unit; order: number }> = ({ unit, order }) => {
   const { piece, status } = useIO();
   const unitPiece = piece.get(unit.piece);
@@ -181,7 +176,6 @@ const ReceiverSelect: FC<{
             value={field.value ?? ''}
             onChange={onChange(field.onChange)}
           >
-            {/* 対象を選ばずに実行できる(コストのみ加算)。未選択へ戻すための空選択肢。 */}
             <MenuItem value=''>（選択しない）</MenuItem>
             {receiverOptions.map(receiverOption => (
               <MenuItem key={`${receiverOption.value}`} value={receiverOption.value}>
@@ -209,7 +203,6 @@ const ActionSelect: FC<{
   control: Control<DoActionForm>,
 }> = ({ actions, onSelect, errors, control }) => {
 
-  // 技選択肢にコストを含める(レビュー指摘: コストは選択肢内で見せたい)。
   const actionOptions = actions.map(action => ({ value: action.key, label: `${action.name}（コスト${action.cost}）` }));
   actionOptions.push({ value: ORDER_DO_NOTHING, label: '何もしない' });
 
@@ -333,7 +326,6 @@ export const BattleTurn: FC<{
     }
     const value = getValues(`receivers.${index}.value` as const);
     if (!value) {
-      // 「（選択しない）」に戻したらその枠のプレビューを消す。
       const cleared = [...simulated];
       if (index < cleared.length) {
         cleared[index] = null;

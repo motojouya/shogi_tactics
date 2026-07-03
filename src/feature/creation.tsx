@@ -20,13 +20,7 @@ import { NORMAL_STEP_BASE, NORMAL_UNIT_COUNT } from '../model/battle';
 import { useIO } from '../components/context';
 import { Container } from '../components/utility';
 
-// 通常モード: unitCount=7/stepBase=14固定、units(飛->角->金->銀->桂->香->王、leader=king)もbattle作成時に登録し、編成画面を出さずそのまま開始。
-// 戦乱モード: stepBase/unitCountを入力し、登録後の編成画面でunitsを選択する。
-// step15(S19/§7.7): pages/new から feature へ移設(BattleNew → BattleCreation)。
-// step15(S21/§4.6): versionはページ側の定数を prop で受け取る。
-// 検証は form/creation の creationFormSchema(zodResolver)へ委譲し、手書きバリデーションを廃止。
 export const BattleCreation: FC<{ version: string }> = ({ version }) => {
-
   const io = useIO();
   const { local, piece: pieceRepository } = io;
 
@@ -37,16 +31,13 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
     formState: { errors },
   } = useForm<CreationForm>({
     resolver: zodResolver(creationFormSchema),
-    // stepBase/unitCountの既定値は通常モードの値(14/7)。通常モードでは入力欄を出さずこの既定値を使う。
     defaultValues: { mode: 'normal', first_player_name: '', second_player_name: '', stepBase: NORMAL_STEP_BASE, unitCount: NORMAL_UNIT_COUNT },
   });
 
-  // 条件描画(戦乱モードの追加フィールド/ボタン文言)用にmodeをUI stateとして持つ(react-hook-formのwatchはReact Compiler非互換のため)。
   const [mode, setMode] = useState<CreationForm['mode']>('normal');
 
   const create = async (form: CreationForm) => {
     if (form.mode === 'normal') {
-      // 通常モード: 固定パラメータでbattleを作り、default unitsで先頭Turnまで積んでそのまま開始する。
       const battle = await registerBattle(io)(
         form.first_player_name,
         form.second_player_name,
@@ -60,7 +51,6 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
       return;
     }
 
-    // 戦乱モード: stepBase/unitCountはschemaで1以上を保証済みのnumber。登録後の編成画面でunitsを選択する。
     const battle = await registerBattle(io)(
       form.first_player_name,
       form.second_player_name,

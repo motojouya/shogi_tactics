@@ -57,16 +57,27 @@
 - [ ] guide/piece/app.tsxはもしかしたら戦闘中画面と共通化できるかもだが、要検討
 - [ ] list/app.tsxで対戦中/編成中の判定ロジックはmodel側に持ちたい
 - [ ] list/app.tsxのonDeleteはcontrollerに移動
+- [ ] list/app.tsxのBattleSummary型は不要。battleがkeyを持っているし、不要なはず
 - [ ] list/app.tsxのuseLiveQueryにわたすcallbackもcontrollerに移動する
 - [ ] v1/app.tsxにも編成中の判定ロジックがあるので、modelに
 - [ ] v1/app.tsxでlocal変数を使っているが、Contextに存在するので、Contextのコンポーネント内部に移動して、そこのlocalを使う
 
 ## src/feature/
 - [ ] コメント削除
+- [ ] creation.tsxでformのdefault値は、form/creationに持たせるべき
+- [ ] creation.tsxでmodeをuseStateしているが、modeの値は入力されたものなので、form側の値を読み込むことでuseStateは不要にならないか。要検討。
+- [ ] creation.tsxのcreate関数は、controllerのstart.tsの修正をすることで、controllerとtransitを呼ぶだけになっているはず。
+- [ ] formation.tsxでselectedPieceのためにuseStateを使っているが、この値はformから取ることでuseStateを消せないか
+- [ ] formation.tsxで、unitsをstate管理しているが、引数のbattleがuseLiveQueryで管理されているので、battleに一つ一つunitsを追加していけばそちらでstateを管理してくれそう。画面としては、単に編成中にunitを一つ一つ選ぶだけの画面になる。ただ、これは要検討。
+- [ ] formation.tsxでaddUnitはcontrollerに移動したい。
+- [ ] formation.tsxの選択済みunits一覧は、パーツとして切り出して、componentsに移動する
+- [ ] action.tsxのpieceName, statusName, GameStatus, ActionOrderEntryはcomponentsに移動する
+- [ ] action.tsxのaddReceiverの中のreceiverの値の計算は、form側に関数を切って任せたい
 
 ## src/components/
 - [ ] コメント削除
 - [ ] markdown.tsxのMarkdownPageはfeatureに移動
+- [ ] piece_image_src.tsxの内容は、piece_image.tsxに含めてしまいたい
 
 ## src/model/
 未レビュー
