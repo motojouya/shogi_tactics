@@ -10,7 +10,7 @@
 - [x] コメント削除
 
 ## docs/
-ファイルの削除はこのPRが終わったら
+- [x] develop.mdをREADME.mdに移動
 
 ## public/
 - [ ] ディレクトリごとsrcの配下に移動したい
@@ -63,7 +63,7 @@
 - [ ] v1/app.tsxでlocal変数を使っているが、Contextに存在するので、Contextのコンポーネント内部に移動して、そこのlocalを使う
 
 ## src/feature/
-- [ ] コメント削除
+- [x] コメント削除
 - [ ] creation.tsxでformのdefault値は、form/creationに持たせるべき
 - [ ] creation.tsxでmodeをuseStateしているが、modeの値は入力されたものなので、form側の値を読み込むことでuseStateは不要にならないか。要検討。
 - [ ] creation.tsxのcreate関数は、controllerのstart.tsの修正をすることで、controllerとtransitを呼ぶだけになっているはず。
@@ -75,13 +75,16 @@
 - [ ] action.tsxのaddReceiverの中のreceiverの値の計算は、form側に関数を切って任せたい
 
 ## src/components/
-- [ ] コメント削除
+- [x] コメント削除
 - [ ] markdown.tsxのMarkdownPageはfeatureに移動
 - [ ] piece_image_src.tsxの内容は、piece_image.tsxに含めてしまいたい
+- [ ] guide_diagram.tsxのCostPaperDiagramは、独立したファイルに切り出したい。ファイル名もcost_paper_diagram.tsxで
+- [ ] 文字列だけを出力するものは、label.tsに集めておきたい
 
 ## src/model/
-未レビュー
+- 未レビュー
 
 ## その他
-faviconの用意。将棋の駒だが、中は漢字ではなく十字になっているというものにするか。これなら簡単だ
+- faviconの用意。将棋の駒だが、中は漢字ではなく十字になっているというものにするか。これなら簡単だ
+- docsディレクトリ以下のファイルの削除はこのPRが終わったら。.gitkeepだけ残す
 

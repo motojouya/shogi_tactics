@@ -6,8 +6,6 @@ import remarkGfm from 'remark-gfm';
 import { Container } from './utility';
 import { GuideDiagram } from './guide_diagram';
 
-// markdownの各要素をMUIのTypography/Linkへマップし、アプリのデザインに揃える。
-// 本文先頭の `# 見出し` がページ見出しを兼ねる(各ページの<title>はhtml側で静的に設定済み)。
 const markdownComponents: Components = {
   h1: ({ children }) => (
     <Typography variant="h4" sx={{ mt: 3, mb: 1 }}>
@@ -43,7 +41,6 @@ const markdownComponents: Components = {
       </MaterialLink>
     );
   },
-  // `![alt](diagram:KEY)` は解説図(GuideDiagram)へ、それ以外は通常の画像として表示する。
   img: ({ src, alt }) => {
     const url = typeof src === 'string' ? src : '';
     if (url.startsWith('diagram:')) {

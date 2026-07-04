@@ -5,8 +5,10 @@ import { BoardDiagram } from './board_diagram';
 import type { DiagramCell, DiagramHighlight, DiagramArrow } from './board_diagram';
 import { PieceImage } from './piece_image';
 
-// guide(markdown)に埋め込む解説図。markdownのimage `![alt](diagram:KEY)` から本コンポーネントへ振り分ける。
-// 盤面図は実際の駒画像と盤画像を組み合わせる(board_diagram)。配置は各markdownのASCII/説明に対応。
+/*
+ * guide(markdown)に埋め込む解説図。markdownのimage `![alt](diagram:KEY)` から本コンポーネントへ振り分ける。
+ * 盤面図は実際の駒画像と盤画像を組み合わせる(board_diagram)。配置は各markdownのASCII/説明に対応。
+ */
 
 // #1 初期配置(tutorial.md)。上=後手(奥)/下=先手(手前)。
 const INITIAL_CELLS: DiagramCell[] = [

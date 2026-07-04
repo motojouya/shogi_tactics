@@ -12,9 +12,11 @@ import type { Action } from '../model/action';
 
 const CELL = 9;
 
-// action.tsのbit意味付け(bit0=影響あり, bit1=Actorのマス)に従い、1マスを色と枠で可視化する。
-// - 影響あり: 塗り(青)
-// - Actorのマス: 赤枠
+/*
+ * action.tsのbit意味付け(bit0=影響あり, bit1=Actorのマス)に従い、1マスを色と枠で可視化する。
+ * - 影響あり: 塗り(青)
+ * - Actorのマス: 赤枠
+ */
 const RangeGrid: FC<{ grid: number[][] }> = ({ grid }) => {
   const cols = grid[0]?.length ?? 0;
   return (
@@ -47,8 +49,6 @@ const RangeGrid: FC<{ grid: number[][] }> = ({ grid }) => {
   );
 };
 
-// 駒が持つ行動(action)の一覧表。guide/pieceと戦闘中アコーディオンで共用する。
-// 到達範囲/対象範囲は数値ではなくマス目グリッドで可視化する。
 export const ActionTable: FC<{ actions: Action[] }> = ({ actions }) => (
   <Box>
     <Typography variant="caption" color="text.secondary">
