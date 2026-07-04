@@ -28,5 +28,5 @@ export const pieceImageSrc = (pieceKey: string, side?: Side): string | null => {
   if (!imageName) {
     return null;
   }
-  return `${import.meta.env.BASE_URL}piece/futamoji/${colorBySide(side)}_${imageName}.png`;
+  return `${import.meta.env.BASE_URL}piece/${colorBySide(side)}_${imageName}.png`;
 };

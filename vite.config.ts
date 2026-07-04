@@ -25,7 +25,7 @@ export default defineConfig({
       },
     }),
   ],
-  publicDir: resolve(__dirname, "public"),
+  publicDir: resolve(__dirname, "src/public"),
   build: {
     outDir: resolve(__dirname, "dist"),
     emptyOutDir: true,
