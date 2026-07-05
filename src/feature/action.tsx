@@ -53,11 +53,11 @@ import {
 } from '../form/action';
 import { ORDER_DO_NOTHING } from '../model/turn';
 import { ReceiverDuplicationError } from '../model/action';
-import { DataNotFoundError } from '../repository/error';
+import { DataNotFoundError } from '../model/error';
 import { act } from '../controller/act';
 import { surrender } from '../controller/surrender';
 import { simulate } from '../model/simulation';
-import { UserCancel } from '../repository/error';
+import { UserCancel } from '../model/error';
 import { useIO } from '../components/context';
 import { createResolvers } from '../repository';
 import { Container } from '../components/utility';

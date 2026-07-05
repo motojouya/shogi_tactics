@@ -8,7 +8,7 @@ import { ORDER_DO_NOTHING } from "../model/turn";
 import { validateReceivers, ReceiverDuplicationError } from "../model/action";
 import { toReceivers } from "../form/action";
 import { createResolvers } from "../repository";
-import { DataNotFoundError, UserCancel } from "../repository/error";
+import { DataNotFoundError, UserCancel } from "../model/error";
 
 export type Act = (
   repository: Repository,

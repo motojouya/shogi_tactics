@@ -25,8 +25,8 @@
 
 ## src/repository/
 - [x] コメント削除
-- [ ] `error.ts`はmodel配下に移動したい
-- [ ] importJsonFileの帰り値はgenerics型, exportJsonFileの引数はunknownが来ているが、これらをstringに変更したい。serialize,deserializeはBattleRepository側で行いたい
+- [x] `error.ts`はmodel配下に移動したい
+- [x] importJsonFileの帰り値はgenerics型, exportJsonFileの引数はunknownが来ているが、これらをstringに変更したい。serialize,deserializeはBattleRepository側で行いたい
 
 ## src/form/
 - [x] コメント削除

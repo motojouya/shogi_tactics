@@ -3,7 +3,7 @@ import type { UnitReference } from "../model/unit";
 import type { Repository } from "../repository";
 
 import { GameFirst, GameSecond, copyBattle, surrender as modelSurrender } from "../model/battle";
-import { UserCancel } from "../repository/error";
+import { UserCancel } from "../model/error";
 
 export type Surrender = (
   repository: Repository,

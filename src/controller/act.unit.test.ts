@@ -11,7 +11,7 @@ import { act } from "./act";
 import { actionRepository } from "../repository/action";
 import { pieceRepository } from "../repository/piece";
 import { statusRepository } from "../repository/status";
-import { DataNotFoundError, UserCancel } from "../repository/error";
+import { DataNotFoundError, UserCancel } from "../model/error";
 
 const makeBattle = (): Battle => {
   const battle = createBattle("key", "first", "second", 2, 2, "v1");

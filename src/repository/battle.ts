@@ -4,7 +4,7 @@ import Dexie from "dexie";
 
 import { battleSchema } from "../model/battle";
 import { parseJson, importJsonFile, exportJsonFile } from "./utility";
-import { CopyFailError, JsonSchemaUnmatchError } from "./error";
+import { CopyFailError, JsonSchemaUnmatchError } from "../model/error";
 
 export type BattleRepository = {
   save: (battle: Battle) => Promise<void>;
@@ -47,7 +47,10 @@ export const createBattleRepository: CreateBattleRepository = async () => {
     remove: async (key) => {
       await db.battle.delete(key);
     },
-    importJson: async (_fileName) => importJsonFile(battleSchema),
-    exportJson: async (battle, fileName) => exportJsonFile(battle, fileName),
+    importJson: async (_fileName) => {
+      const text = await importJsonFile();
+      return parseJson(battleSchema)(JSON.parse(text));
+    },
+    exportJson: async (battle, fileName) => exportJsonFile(JSON.stringify(battle), fileName),
   };
 };

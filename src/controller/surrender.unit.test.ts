@@ -7,7 +7,7 @@ import type { Battle } from "../model/battle";
 
 import { createBattle, start, GameFirst, GameSecond } from "../model/battle";
 import { surrender } from "./surrender";
-import { UserCancel } from "../repository/error";
+import { UserCancel } from "../model/error";
 
 const makeBattle = (): Battle => {
   const battle = createBattle("key", "first", "second", 2, 2, "v1");

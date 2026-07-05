@@ -7,7 +7,7 @@ import { BattleIO } from '../../components/battle_io';
 import { BattleAction } from '../../feature/action';
 import { BattleFormation } from '../../feature/formation';
 import { BattleCreation } from '../../feature/creation';
-import { JsonSchemaUnmatchError } from '../../repository/error';
+import { JsonSchemaUnmatchError } from '../../model/error';
 import { useIO } from '../../components/context';
 import { Container } from '../../components/utility';
 import { local } from '../../repository/local';

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { CopyFailError, JsonSchemaUnmatchError } from "./error";
+import { CopyFailError, JsonSchemaUnmatchError } from "../model/error";
 
 export function parseJson<S extends z.ZodTypeAny>(schema: S): (json: unknown) => z.infer<S> | JsonSchemaUnmatchError {
   return function (json) {
@@ -25,21 +25,20 @@ const pickerOpts = {
   excludeAcceptAllOption: true,
 };
 
-export type ImportJsonFile = <S extends z.ZodTypeAny>(schema: S) => Promise<z.infer<S> | JsonSchemaUnmatchError>;
-export const importJsonFile: ImportJsonFile = async (schema) => {
+export type ImportJsonFile = () => Promise<string>;
+export const importJsonFile: ImportJsonFile = async () => {
   // @ts-expect-error window is not defined
   const [fileHandle] = await window.showOpenFilePicker({ ...pickerOpts, multiple: false });
   const file = await fileHandle.getFile();
-  const text = await file.text();
-  return parseJson(schema)(JSON.parse(text));
+  return file.text();
 };
 
-export type ExportJsonFile = (data: unknown, fileName: string) => Promise<CopyFailError | null>;
+export type ExportJsonFile = (data: string, fileName: string) => Promise<CopyFailError | null>;
 export const exportJsonFile: ExportJsonFile = async (data, fileName) => {
   // @ts-expect-error window is not defined
   const newHandle = await window.showSaveFilePicker({ ...pickerOpts, suggestedName: `${fileName}.json` });
   const writableStream = await newHandle.createWritable();
-  await writableStream.write(JSON.stringify(data));
+  await writableStream.write(data);
   await writableStream.close();
   return null;
 };

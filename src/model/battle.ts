@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { copyTurn, turnSchema, clearActorStatuses, applyActorCost } from "./turn";
 import { copyUnit } from "./unit";
-import { DataNotFoundError } from "../repository/error";
+import { DataNotFoundError } from "./error";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
 
