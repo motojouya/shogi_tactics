@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { modeSchema, WAR_MODE } from "../model/battle";
+import { modeSchema, WAR_MODE, NORMAL_MODE, NORMAL_STEP_BASE, NORMAL_UNIT_COUNT } from "../model/battle";
 
 export const creationFormSchema = z
   .object({
@@ -23,3 +23,11 @@ export const creationFormSchema = z
     }
   });
 export type CreationForm = z.infer<typeof creationFormSchema>;
+
+export const creationFormDefault: CreationForm = {
+  mode: NORMAL_MODE,
+  first_player_name: "",
+  second_player_name: "",
+  stepBase: NORMAL_STEP_BASE,
+  unitCount: NORMAL_UNIT_COUNT,
+};

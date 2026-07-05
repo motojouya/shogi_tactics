@@ -1,9 +1,20 @@
 import type { Side } from "../model/unit";
 import type { Battle } from "../model/battle";
+import type { Repository } from "../repository";
 
 import { isFormation } from "../model/battle";
 
 export const sideLabel = (side: Side): string => (side === "FIRST" ? "先手" : "後手");
+
+export const pieceName = (pieceRepository: Repository["piece"], pieceKey: string): string => {
+  const piece = pieceRepository.get(pieceKey);
+  return piece ? piece.name : pieceKey;
+};
+
+export const statusName = (statusRepository: Repository["status"], statusKey: string): string => {
+  const status = statusRepository.get(statusKey);
+  return status ? status.name : statusKey;
+};
 
 export const resultLabel = (battle: Battle): string => {
   switch (battle.result) {

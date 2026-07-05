@@ -6,7 +6,7 @@ import type { FormationForm } from '../form/formation';
 import { nextFormationSide, sideHasLeader, canAddPiece, isFormationComplete } from '../model/unit';
 
 import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
@@ -24,7 +24,7 @@ import { formatBattle } from '../controller/format';
 import { useIO } from '../components/context';
 import { Container } from '../components/utility';
 import { sideLabel } from '../components/label';
-import { PieceImage } from '../components/piece_image';
+import { FormationUnitList } from '../components/formation_unit_list';
 
 export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
 
@@ -38,7 +38,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
     resolver: zodResolver(formationFormSchema),
     defaultValues: { piece: pieces[0] ? pieces[0].key : '', leader: false },
   });
-  const [selectedPiece, setSelectedPiece] = useState<string>(pieces[0] ? pieces[0].key : '');
+  const selectedPiece = useWatch({ control, name: 'piece' });
 
   const unitCount = battle.unitCount;
   const firstCount = units.filter((unit) => unit.side === 'FIRST').length;
@@ -96,10 +96,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
                     id="formation_piece"
                     size="small"
                     value={field.value}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      setSelectedPiece(e.target.value);
-                    }}
+                    onChange={field.onChange}
                     sx={{ minWidth: 160 }}
                   >
                     {pieces.map((piece) => {
@@ -137,27 +134,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
           </Stack>
         )}
 
-        <Stack direction="column" sx={{ pt: 2 }}>
-          {units.map((unit, index) => {
-            const piece = pieceRepository.get(unit.piece);
-            return (
-              <Stack
-                key={`formation-unit-${index}`}
-                direction="row"
-                sx={{ alignItems: 'center', justifyContent: 'space-between', py: 0.5 }}
-              >
-                <Stack direction="row" sx={{ alignItems: 'center', columnGap: 1 }}>
-                  <Typography sx={{ color: 'text.secondary', minWidth: 24 }}>{`${index + 1}.`}</Typography>
-                  <PieceImage pieceKey={unit.piece} side={unit.side} name={piece?.name} size={28} />
-                  <Typography>{`${sideLabel(unit.side)}: ${piece ? `${piece.name}（${piece.shogiName}）` : unit.piece}${unit.leader ? ' [リーダー]' : ''}`}</Typography>
-                </Stack>
-                {index === units.length - 1 && (
-                  <Button variant="outlined" type="button" onClick={undo}>取消</Button>
-                )}
-              </Stack>
-            );
-          })}
-        </Stack>
+        <FormationUnitList units={units} getPiece={pieceRepository.get} onUndo={undo} />
 
         {firstCount === unitCount && secondCount === unitCount && !done && (
           <Typography sx={{ pt: 2 }} color="error">

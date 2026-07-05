@@ -1,8 +1,7 @@
 import type { FC } from 'react';
 import type { CreationForm } from '../form/creation';
 
-import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
@@ -13,9 +12,8 @@ import {
   Typography,
 } from '@mui/material';
 
-import { creationFormSchema } from '../form/creation';
+import { creationFormSchema, creationFormDefault } from '../form/creation';
 import { createBattle } from '../controller/create';
-import { NORMAL_STEP_BASE, NORMAL_UNIT_COUNT } from '../model/battle';
 import { DataExistError } from '../model/error';
 import { useIO } from '../components/context';
 import { Container } from '../components/utility';
@@ -31,10 +29,10 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
     formState: { errors },
   } = useForm<CreationForm>({
     resolver: zodResolver(creationFormSchema),
-    defaultValues: { mode: 'normal', first_player_name: '', second_player_name: '', stepBase: NORMAL_STEP_BASE, unitCount: NORMAL_UNIT_COUNT },
+    defaultValues: creationFormDefault,
   });
 
-  const [mode, setMode] = useState<CreationForm['mode']>('normal');
+  const mode = useWatch({ control, name: 'mode' });
 
   const create = async (form: CreationForm) => {
     const battle = await createBattle(io)(form, version);
@@ -59,10 +57,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
                   id="mode"
                   label="Mode"
                   value={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    setMode(e.target.value as CreationForm['mode']);
-                  }}
+                  onChange={field.onChange}
                   sx={{ width: '100%' }}
                 >
                   <MenuItem value="normal">通常モード(7駒固定)</MenuItem>
