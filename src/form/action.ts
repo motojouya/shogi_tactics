@@ -4,6 +4,8 @@ import type { Repository } from "../repository";
 
 import { z } from "zod";
 
+import { FIRST } from "../model/unit";
+
 export const doActionFormSchema = z.object({
   actionKey: z.string().min(1),
   receivers: z.array(z.object({ value: z.string().optional() }).optional()),
@@ -18,7 +20,7 @@ export const selectUnit: SelectUnit = (value) => {
   return { side, piece };
 };
 
-const sideLabel = (reference: UnitReference): string => (reference.side === "FIRST" ? "先" : "後");
+const sideLabel = (reference: UnitReference): string => (reference.side === FIRST ? "先" : "後");
 
 export type ReceiverSelectOption = (pieceRepository: Repository["piece"]) => (reference: UnitReference) => SelectOption;
 export const receiverSelectOption: ReceiverSelectOption = (pieceRepository) => (reference) => {

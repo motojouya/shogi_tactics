@@ -22,6 +22,12 @@ export const GameDraw: GameResult = "DRAW";
 export const NORMAL_UNIT_COUNT = 7;
 export const NORMAL_STEP_BASE = 14;
 
+// 対戦モード。normal=7駒固定/war=駒数自由。
+export const modeSchema = z.enum(["normal", "war"]);
+export type Mode = z.infer<typeof modeSchema>;
+export const NORMAL_MODE: Mode = "normal";
+export const WAR_MODE: Mode = "war";
+
 // step6: home/visitor(PartyBattling)を廃止。ロスターは先頭Turnのunitsが持つ(types.md準拠)。
 export const battleSchema = z.object({
   turns: z.array(turnSchema), // turns.length===0は編成段階。先頭Turn.unitsがロスター

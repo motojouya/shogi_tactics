@@ -5,6 +5,8 @@ import { z } from "zod";
 // step12: modelの型はzod schemaから導出する(型の単一の真実)。保存値はすべてキー参照(piece/status)なのでmodelとjsonの形はdatetime以外一致する。
 export const sideSchema = z.enum(["FIRST", "SECOND"]);
 export type Side = z.infer<typeof sideSchema>;
+export const FIRST: Side = "FIRST";
+export const SECOND: Side = "SECOND";
 
 export const unitSchema = z.object({
   side: sideSchema,

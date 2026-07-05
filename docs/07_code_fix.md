@@ -30,10 +30,10 @@
 
 ## src/form/
 - [x] コメント削除
-- [ ] action.tsのsideLabelで`FIRST`という定数を使っているが、modelの値をimportして利用したい
-- [ ] action.unit.test.tsにreceiverSelectOptionのテストがない
-- [ ] creation.tsは定数がstringになっているが、modelの値をimportして利用したい
-- [ ] creation.tsでformの定義だが、normal/warでそもそも型定義を別にしてunion typeとしたい。normalにはstepBaseとunitCountがない。これは可能ならするが、必要以上にややこしいならしない。
+- [x] action.tsのsideLabelで`FIRST`という定数を使っているが、modelの値をimportして利用したい
+- [x] action.unit.test.tsにreceiverSelectOptionのテストがない
+- [x] creation.tsは定数がstringになっているが、modelの値をimportして利用したい
+- [-] creation.tsでformの定義だが、normal/warでそもそも型定義を別にしてunion typeとしたい。normalにはstepBaseとunitCountがない。これは可能ならするが、必要以上にややこしいならしない。
 
 ## src/controller/
 - [x] コメント削除
