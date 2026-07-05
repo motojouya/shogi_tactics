@@ -10,11 +10,12 @@ import {
 } from '@mui/material';
 import { useLiveQuery } from "dexie-react-hooks";
 
+import { isFormation } from '../../model/battle';
+import { listBattles } from '../../controller/list';
+import { removeBattle } from '../../controller/remove';
 import { BattleIO } from '../../components/battle_io';
 import { useIO } from '../../components/context';
 import { Container, Link, ButtonLink } from '../../components/utility';
-
-type BattleSummary = { key: string; battle: Battle };
 
 const resultLabel = (battle: Battle): string => {
   switch (battle.result) {
@@ -25,33 +26,14 @@ const resultLabel = (battle: Battle): string => {
     case 'DRAW':
       return '引き分け';
     default:
-      return battle.turns.length === 0 ? '編成中' : '対戦中';
+      return isFormation(battle) ? '編成中' : '対戦中';
   }
 };
 
 const BattleList: FC = () => {
-  const { battle: battleRepository, local } = useIO();
-
-  const onDelete = async (key: string) => {
-    if (!local.confirm('このバトルを削除しますか？')) {
-      return;
-    }
-    await battleRepository.remove(key);
-  };
-
-  const battles = useLiveQuery(async () => {
-    const keys = await battleRepository.list();
-    const loaded = await Promise.all(keys.map((key) => battleRepository.get(key)));
-    const summaries: BattleSummary[] = [];
-    keys.forEach((key, index) => {
-      const battle = loaded[index];
-      // 取得失敗(error/null)は一覧から除外する
-      if (battle && typeof battle === 'object' && 'turns' in battle) {
-        summaries.push({ key, battle: battle as Battle });
-      }
-    });
-    return summaries;
-  }, []);
+  const io = useIO();
+  const onDelete = (key: string) => removeBattle(io)(key);
+  const battles = useLiveQuery(listBattles(io), []);
 
   return (
     <Container backLink="/">
@@ -61,10 +43,10 @@ const BattleList: FC = () => {
           <ButtonLink href='/v1/'><Typography>新しく作る</Typography></ButtonLink>
         </Stack>
         <List sx={{ width: "100%" }}>
-          {battles && battles.map(({ key, battle }: BattleSummary, index: number) => (
+          {battles && battles.map((battle: Battle, index: number) => (
             <ListItem key={`battle-${index}`}  sx={{ listStyle: 'none', py: '1', px: '5', }}>
               <Stack direction="row" sx={{ justifyContent: 'space-between', width: "100%", alignItems: "center" }}>
-                <Link href={`/v1/?key=${key}`} line>
+                <Link href={`/v1/?key=${battle.key}`} line>
                   <Stack direction="column">
                     <Typography>{`${battle.first_player_name} vs ${battle.second_player_name}`}</Typography>
                     <Typography variant="caption">
@@ -72,7 +54,7 @@ const BattleList: FC = () => {
                     </Typography>
                   </Stack>
                 </Link>
-                <Button variant="outlined" type="button" onClick={() => onDelete(key)}><Typography>削除</Typography></Button>
+                <Button variant="outlined" type="button" onClick={() => onDelete(battle.key)}><Typography>削除</Typography></Button>
               </Stack>
             </ListItem>
           ))}

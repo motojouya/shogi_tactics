@@ -55,10 +55,10 @@
 - [x] guide/app.tsxのguideEntries,GuideIndexはfeatureに移動する
 - [x] guide/app.tsxのNotFoundはcomponent/utility.tsxに移動して共通化
 - [-] guide/piece/app.tsxはもしかしたら戦闘中画面と共通化できるかもだが、要検討
-- [ ] list/app.tsxで対戦中/編成中の判定ロジックはmodel側に持ちたい
-- [ ] list/app.tsxのonDeleteはcontrollerに移動
-- [ ] list/app.tsxのBattleSummary型は不要。battleがkeyを持っているし、不要なはず
-- [ ] list/app.tsxのuseLiveQueryにわたすcallbackもcontrollerに移動する
+- [x] list/app.tsxで対戦中/編成中の判定ロジックはmodel側に持ちたい
+- [x] list/app.tsxのonDeleteはcontrollerに移動
+- [x] list/app.tsxのBattleSummary型は不要。battleがkeyを持っているし、不要なはず
+- [x] list/app.tsxのuseLiveQueryにわたすcallbackもcontrollerに移動する
 - [ ] v1/app.tsxにも編成中の判定ロジックがあるので、modelに
 - [ ] v1/app.tsxでlocal変数を使っているが、Contextに存在するので、Contextのコンポーネント内部に移動して、そこのlocalを使う
 

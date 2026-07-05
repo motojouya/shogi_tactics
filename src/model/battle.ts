@@ -59,6 +59,10 @@ export const copyBattle: CopyBattle = (battle) => ({
 export type GetLastTurn = (battle: Battle) => Turn;
 export const getLastTurn: GetLastTurn = (battle) => arrayLast(battle.turns);
 
+// turns.length===0は編成段階(先頭Turn未生成)。対戦開始後(先頭Turnあり)はfalse。
+export type IsFormation = (battle: Battle) => boolean;
+export const isFormation: IsFormation = (battle) => battle.turns.length === 0;
+
 // step7: 行動ポイント方式。steps最小の駒が次に行動。同点はTurn.unitsのindex(初期順)で決着。
 // Array.prototype.sortは安定なので、steps同点は元配列の順序(=前ターンまでの並び)を保つ。
 export type SortedUnits = (turn: Turn) => Unit[];
@@ -111,7 +115,7 @@ export const start: Start = (units, datetime) => ({
 // 編成中(先頭Turn未生成)でなければ既に開始済みなのでエラー(二重開始の防止)。
 export type Format = (battle: Battle, units: Unit[], datetime: Date) => Battle | DataExistError;
 export const format: Format = (battle, units, datetime) => {
-  if (battle.turns.length !== 0) {
+  if (!isFormation(battle)) {
     return new DataExistError(battle.key, "battle", "この対戦は既に開始されています");
   }
   const newBattle = copyBattle(battle);
