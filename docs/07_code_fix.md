@@ -21,7 +21,7 @@
 
 ## src/data/
 - [x] コメント削除
-- [ ] Actionに引数を与えている部分だが、statusのkeyなので、data/statusをimportしてその値を入れるべき
+- [x] Actionに引数を与えている部分だが、statusのkeyなので、data/statusをimportしてその値を入れるべき
 
 ## src/repository/
 - [x] コメント削除

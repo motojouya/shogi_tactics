@@ -1,5 +1,6 @@
 import type { Action } from "../../model/action";
 import { buildAction, effectGrantStatus, filterActor } from "../../model/action";
+import { interception } from "../status";
 
 export const interceptionStance: Action = buildAction(
   {
@@ -26,6 +27,6 @@ export const interceptionStance: Action = buildAction(
       [0, 0, 0, 0, 0, 0, 0],
     ],
   },
-  effectGrantStatus("interception"),
+  effectGrantStatus(interception.key),
   filterActor,
 );

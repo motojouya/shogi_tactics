@@ -1,5 +1,6 @@
 import type { Action } from "../../model/action";
 import { buildAction, effectGrantStatus, filterActor } from "../../model/action";
+import { arrowDodge } from "../status";
 
 export const arrowDodgeStance: Action = buildAction(
   {
@@ -26,6 +27,6 @@ export const arrowDodgeStance: Action = buildAction(
       [0, 0, 0, 0, 0, 0, 0],
     ],
   },
-  effectGrantStatus("arrowDodge"),
+  effectGrantStatus(arrowDodge.key),
   filterActor,
 );
