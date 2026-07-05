@@ -10,25 +10,12 @@ import {
 } from '@mui/material';
 import { useLiveQuery } from "dexie-react-hooks";
 
-import { isFormation } from '../../model/battle';
 import { listBattles } from '../../controller/list';
 import { removeBattle } from '../../controller/remove';
 import { BattleIO } from '../../components/battle_io';
 import { useIO } from '../../components/context';
 import { Container, Link, ButtonLink } from '../../components/utility';
-
-const resultLabel = (battle: Battle): string => {
-  switch (battle.result) {
-    case 'FIRST':
-      return `${battle.first_player_name} の勝利`;
-    case 'SECOND':
-      return `${battle.second_player_name} の勝利`;
-    case 'DRAW':
-      return '引き分け';
-    default:
-      return isFormation(battle) ? '編成中' : '対戦中';
-  }
-};
+import { resultLabel } from '../../components/label';
 
 const BattleList: FC = () => {
   const io = useIO();
