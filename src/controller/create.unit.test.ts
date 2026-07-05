@@ -8,6 +8,7 @@ import { describe, it, expect } from "vitest";
 import { createBattle } from "./create";
 import { pieceRepository } from "../repository/piece";
 import { GameOngoing, NORMAL_STEP_BASE, NORMAL_UNIT_COUNT } from "../model/battle";
+import { DataExistError } from "../model/error";
 
 const battleRepository: BattleRepository = {
   save: async () => {},
@@ -41,15 +42,19 @@ describe("createBattle", () => {
     };
     const battle = await createBattle(repository)(form, "v1");
 
-    expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
-    expect(battle.first_player_name).toBe("first");
-    expect(battle.second_player_name).toBe("second");
-    expect(battle.stepBase).toBe(4);
-    expect(battle.unitCount).toBe(4);
-    expect(battle.version).toBe("v1");
-    expect(battle.result).toBe(GameOngoing);
-    // 戦乱モードは編成を別画面で行うので登録時点は編成段階(turns空)。
-    expect(battle.turns.length).toBe(0);
+    if (battle instanceof DataExistError) {
+      expect.unreachable("createBattle should succeed");
+    } else {
+      expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
+      expect(battle.first_player_name).toBe("first");
+      expect(battle.second_player_name).toBe("second");
+      expect(battle.stepBase).toBe(4);
+      expect(battle.unitCount).toBe(4);
+      expect(battle.version).toBe("v1");
+      expect(battle.result).toBe(GameOngoing);
+      // 戦乱モードは編成を別画面で行うので登録時点は編成段階(turns空)。
+      expect(battle.turns.length).toBe(0);
+    }
   });
 
   it("通常モードは固定編成まで行う(先頭Turn生成・stepBase/unitCountは既定値)", async () => {
@@ -62,10 +67,14 @@ describe("createBattle", () => {
     };
     const battle = await createBattle(repository)(form, "v1");
 
-    expect(battle.stepBase).toBe(NORMAL_STEP_BASE);
-    expect(battle.unitCount).toBe(NORMAL_UNIT_COUNT);
-    // 通常モードは編成まで済ませるので先頭Turnが積まれ、両陣営7駒(=14 unit)が並ぶ。
-    expect(battle.turns.length).toBe(1);
-    expect(battle.turns[0].units.length).toBe(NORMAL_UNIT_COUNT * 2);
+    if (battle instanceof DataExistError) {
+      expect.unreachable("createBattle should succeed");
+    } else {
+      expect(battle.stepBase).toBe(NORMAL_STEP_BASE);
+      expect(battle.unitCount).toBe(NORMAL_UNIT_COUNT);
+      // 通常モードは編成まで済ませるので先頭Turnが積まれ、両陣営7駒(=14 unit)が並ぶ。
+      expect(battle.turns.length).toBe(1);
+      expect(battle.turns[0].units.length).toBe(NORMAL_UNIT_COUNT * 2);
+    }
   });
 });

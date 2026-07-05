@@ -8,7 +8,7 @@ import { z } from "zod";
 import { copyTurn, turnSchema, clearActorStatuses, applyActorCost } from "./turn";
 import { copyUnit, buildNormalUnits } from "./unit";
 import { validateReceivers, ReceiverDuplicationError } from "./action";
-import { DataNotFoundError } from "./error";
+import { DataNotFoundError, DataExistError } from "./error";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
 
@@ -108,15 +108,19 @@ export const start: Start = (units, datetime) => ({
 });
 
 // 編成中のbattleに編成済みunitsで先頭Turnを積み、対戦を開始する(copyBattle + start を一つにまとめる)。
-export type Format = (battle: Battle, units: Unit[], datetime: Date) => Battle;
+// 編成中(先頭Turn未生成)でなければ既に開始済みなのでエラー(二重開始の防止)。
+export type Format = (battle: Battle, units: Unit[], datetime: Date) => Battle | DataExistError;
 export const format: Format = (battle, units, datetime) => {
+  if (battle.turns.length !== 0) {
+    return new DataExistError(battle.key, "battle", "この対戦は既に開始されています");
+  }
   const newBattle = copyBattle(battle);
   newBattle.turns.push(start(units, datetime));
   return newBattle;
 };
 
 // 通常モードの編成: 固定の駒構成(buildNormalUnits)で開始する。unitsを引数に取らない。
-export type FormatNormal = (battle: Battle, getPiece: GetPiece, datetime: Date) => Battle;
+export type FormatNormal = (battle: Battle, getPiece: GetPiece, datetime: Date) => Battle | DataExistError;
 export const formatNormal: FormatNormal = (battle, getPiece, datetime) =>
   format(battle, buildNormalUnits(getPiece), datetime);
 

@@ -10,11 +10,10 @@ export type FormatBattle = (
 ) => (battle: Battle, units: Unit[]) => Promise<Battle | DataExistError>;
 export const formatBattle: FormatBattle = (repository) => async (battle, units) => {
   const { battle: battleRepository, local } = repository;
-  // 編成中(先頭Turn未生成)でなければ既に開始済み。二重開始を防ぐ。
-  if (battle.turns.length !== 0) {
-    return new DataExistError(battle.key, "battle", "この対戦は既に開始されています");
+  const result = format(battle, units, local.now());
+  if (result instanceof DataExistError) {
+    return result;
   }
-  const newBattle = format(battle, units, local.now());
-  await battleRepository.save(newBattle);
-  return newBattle;
+  await battleRepository.save(result);
+  return result;
 };
