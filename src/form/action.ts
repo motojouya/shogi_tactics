@@ -1,10 +1,12 @@
 import type { Side, UnitReference } from "../model/unit";
+import type { Action } from "../model/action";
 import type { SelectOption } from "../repository/utility";
 import type { Repository } from "../repository";
 
 import { z } from "zod";
 
 import { FIRST } from "../model/unit";
+import { ORDER_DO_NOTHING } from "../model/turn";
 
 export const doActionFormSchema = z.object({
   actionKey: z.string().min(1),
@@ -30,6 +32,12 @@ export const receiverSelectOption: ReceiverSelectOption = (pieceRepository) => (
     label: `${sideLabel(reference)}:${piece ? piece.name : reference.piece}`,
   };
 };
+
+export type ActionSelectOptions = (actions: Action[]) => SelectOption[];
+export const actionSelectOptions: ActionSelectOptions = (actions) => [
+  ...actions.map((action) => ({ value: action.key, label: `${action.name}（コスト${action.cost}）` })),
+  { value: ORDER_DO_NOTHING, label: "何もしない" },
+];
 
 export type ToReceivers = (receivers: DoActionForm["receivers"]) => UnitReference[];
 export const toReceivers: ToReceivers = (receivers) =>

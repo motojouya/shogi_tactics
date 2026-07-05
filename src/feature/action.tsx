@@ -42,8 +42,8 @@ import {
   doActionFormSchema,
   receiverSelectOption,
   selectUnit,
+  actionSelectOptions,
 } from '../form/action';
-import { ORDER_DO_NOTHING } from '../model/turn';
 import { ReceiverDuplicationError } from '../model/action';
 import { DataNotFoundError } from '../model/error';
 import { act } from '../controller/act';
@@ -146,8 +146,7 @@ const ActionSelect: FC<{
   control: Control<DoActionForm>,
 }> = ({ actions, onSelect, errors, control }) => {
 
-  const actionOptions = actions.map(action => ({ value: action.key, label: `${action.name}（コスト${action.cost}）` }));
-  actionOptions.push({ value: ORDER_DO_NOTHING, label: '何もしない' });
+  const actionOptions = actionSelectOptions(actions);
 
   const onChange = (hookOnChange: HookOnChange) => (e: SelectChangeEvent<string>) => {
     const actionKey = e.target.value;
