@@ -59,8 +59,8 @@
 - [x] list/app.tsxのonDeleteはcontrollerに移動
 - [x] list/app.tsxのBattleSummary型は不要。battleがkeyを持っているし、不要なはず
 - [x] list/app.tsxのuseLiveQueryにわたすcallbackもcontrollerに移動する
-- [ ] v1/app.tsxにも編成中の判定ロジックがあるので、modelに
-- [ ] v1/app.tsxでlocal変数を使っているが、Contextに存在するので、Contextのコンポーネント内部に移動して、そこのlocalを使う
+- [x] v1/app.tsxにも編成中の判定ロジックがあるので、modelに
+- [x] v1/app.tsxでlocal変数を使っているが、Contextに存在するので、Contextのコンポーネント内部に移動して、そこのlocalを使う
 
 ## src/feature/
 - [x] コメント削除

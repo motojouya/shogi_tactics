@@ -8,15 +8,21 @@ import { BattleAction } from '../../feature/action';
 import { BattleFormation } from '../../feature/formation';
 import { BattleCreation } from '../../feature/creation';
 import { JsonSchemaUnmatchError } from '../../model/error';
+import { isFormation } from '../../model/battle';
 import { useIO } from '../../components/context';
 import { Container } from '../../components/utility';
-import { local } from '../../repository/local';
 
 export const VERSION = 'v1';
 
-const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey, version }) => {
-  const { battle: battleRepository } = useIO();
-  const battle = useLiveQuery(() => battleRepository.get(battleKey), [battleKey]);
+const BattleRoot: FC<{ version: string }> = ({ version }) => {
+  const { local, battle: battleRepository } = useIO();
+  const key = local.getSearchParams().get('key');
+  // フックは無条件に呼ぶ(Rules of Hooks)。keyが無い場合はquerierでnullを返し、分岐はフックの後で行う。
+  const battle = useLiveQuery(() => (key ? battleRepository.get(key) : null), [key]);
+
+  if (!key) {
+    return (<BattleCreation version={version} />);
+  }
 
   if (battle instanceof JsonSchemaUnmatchError) {
     return (
@@ -29,7 +35,7 @@ const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey,
   if (!battle) {
     return (
       <Container backLink="/list/">
-        <Typography>{`${battleKey}というbattleは見つかりません`}</Typography>
+        <Typography>{`${key}というbattleは見つかりません`}</Typography>
       </Container>
     );
   }
@@ -42,20 +48,15 @@ const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey,
     );
   }
 
-  if (battle.turns.length === 0) {
+  if (isFormation(battle)) {
     return (<BattleFormation battle={battle} />);
   }
 
   return (<BattleAction battle={battle} />);
 };
 
-export const App: FC = () => {
-  const searchParams = local.getSearchParams();
-  const key = searchParams.get('key');
-
-  return (
-    <BattleIO>
-      {key ? <BattleExsiting battleKey={key} version={VERSION} /> : <BattleCreation version={VERSION} />}
-    </BattleIO>
-  );
-};
+export const App: FC = () => (
+  <BattleIO>
+    <BattleRoot version={VERSION} />
+  </BattleIO>
+);
