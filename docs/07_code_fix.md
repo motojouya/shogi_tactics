@@ -76,10 +76,10 @@
 
 ## src/components/
 - [x] コメント削除
-- [ ] markdown.tsxのMarkdownPageはfeatureに移動
-- [ ] piece_image_src.tsxの内容は、piece_image.tsxに含めてしまいたい
-- [ ] guide_diagram.tsxのCostPaperDiagramは、独立したファイルに切り出したい。ファイル名もcost_paper_diagram.tsxで
-- [ ] 文字列だけを出力するものは、label.tsに集めておきたい
+- [x] markdown.tsxのMarkdownPageはfeatureに移動
+- [x] piece_image_src.tsxの内容は、piece_image.tsxに含めてしまいたい
+- [x] guide_diagram.tsxのCostPaperDiagramは、独立したファイルに切り出したい。ファイル名もcost_paper_diagram.tsxで
+- [x] 文字列だけを出力するものは、label.tsに集めておきたい
 
 ## src/model/
 - 未レビュー

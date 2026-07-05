@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { NotFound } from '../../components/utility';
-import { MarkdownPage } from '../../components/markdown';
+import { MarkdownPage } from '../../feature/markdown';
 import { GuideIndex } from '../../feature/guide';
 
 const markdownModules = import.meta.glob('../../guide/*.md', {

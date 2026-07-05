@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import type { Side } from '../model/unit';
 import { Box, Typography } from '@mui/material';
-import { pieceImageSrc } from './piece_image_src';
+import { pieceImageSrc } from './piece_image';
 
 /*
  * 9x9将棋盤の解説図。盤画像(CC0, public/board)を背景に、駒画像を実測したマス目へ重ねる。

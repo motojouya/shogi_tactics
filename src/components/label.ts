@@ -6,6 +6,9 @@ import { isFormation } from "../model/battle";
 
 export const sideLabel = (side: Side): string => (side === "FIRST" ? "先手" : "後手");
 
+// 短縮表記(先/後)。狭い表示(図など)向け。
+export const sideMark = (side: Side): string => (side === "FIRST" ? "先" : "後");
+
 export const pieceName = (pieceRepository: Repository["piece"], pieceKey: string): string => {
   const piece = pieceRepository.get(pieceKey);
   return piece ? piece.name : pieceKey;

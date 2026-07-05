@@ -3,8 +3,8 @@ import { Box, Typography, Link as MaterialLink } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import type { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Container } from './utility';
-import { GuideDiagram } from './guide_diagram';
+import { Container } from '../components/utility';
+import { GuideDiagram } from '../components/guide_diagram';
 
 const markdownComponents: Components = {
   h1: ({ children }) => (
