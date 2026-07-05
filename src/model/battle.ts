@@ -1,12 +1,12 @@
 import type { Turn, Order } from "./turn";
-import type { Unit, UnitReference } from "./unit";
-import type { GetPiece } from "./piece";
+import type { Unit, UnitReference, Side } from "./unit";
+import type { GetPiece, Piece } from "./piece";
 import type { Resolvers } from "./resolver";
 
 import { z } from "zod";
 
 import { copyTurn, turnSchema, clearActorStatuses, applyActorCost } from "./turn";
-import { copyUnit, buildNormalUnits, isFormationComplete } from "./unit";
+import { copyUnit, buildNormalUnits, isFormationComplete, canAddPiece, sideHasLeader } from "./unit";
 import { validateReceivers, ReceiverDuplicationError } from "./action";
 import { DataNotFoundError } from "./error";
 
@@ -129,11 +129,24 @@ export type FormatNormal = (battle: Battle, getPiece: GetPiece, datetime: Date) 
 export const formatNormal: FormatNormal = (battle, getPiece, datetime) =>
   format(battle, buildNormalUnits(getPiece), datetime);
 
-// 編成中のrosterにunitを1体追加する(先頭FORMATION turnのunitsへ追記)。
-export type AddFormationUnit = (battle: Battle, unit: Unit) => Battle;
-export const addFormationUnit: AddFormationUnit = (battle, unit) => {
+// 編成中のrosterに駒を1体追加する(先頭FORMATION turnのunitsへ追記)。
+// 同じ陣営に同じ駒は置けない(追加不可なら変更なし)。leaderは各陣営1体までで、既に居ればisLeaderは無視する。
+export type AddFormationUnit = (battle: Battle, side: Side, piece: Piece, isLeader: boolean) => Battle;
+export const addFormationUnit: AddFormationUnit = (battle, side, piece, isLeader) => {
+  const units = getFormationUnits(battle);
+  if (!canAddPiece(units, side, piece.key)) {
+    return battle;
+  }
+  const asLeader = isLeader && !sideHasLeader(units, side);
   const newBattle = copyBattle(battle);
-  newBattle.turns[0].units.push(unit);
+  newBattle.turns[0].units.push({
+    side,
+    piece: piece.key,
+    hp: piece.MaxHP,
+    steps: 0,
+    statuses: [],
+    leader: asLeader,
+  });
   return newBattle;
 };
 

@@ -39,7 +39,6 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
   });
   const selectedPiece = useWatch({ control, name: 'piece' });
 
-  // rosterは編成中battleの先頭Turnが保持する(useLiveQueryが更新を反映)。ローカルstateは持たない。
   const units = getFormationUnits(battle);
   const unitCount = battle.unitCount;
   const firstCount = units.filter((unit) => unit.side === 'FIRST').length;
@@ -48,6 +47,8 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
   const currentSide: Side | null = nextFormationSide(units, unitCount);
   const currentSideHasLeader = currentSide ? sideHasLeader(units, currentSide) : false;
   const canAddSelected = currentSide ? canAddPiece(units, currentSide, selectedPiece) : false;
+  // 後手の最後の1枠(先手満杯・後手が残り1)。ここで追加するとrosterが揃い、そのまま戦闘開始になる。
+  const isLastUnit = currentSide === 'SECOND' && firstCount === unitCount && secondCount === unitCount - 1;
 
   const playerName = (side: Side): string =>
     side === 'FIRST' ? battle.first_player_name : battle.second_player_name;
@@ -56,7 +57,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
     if (!currentSide) {
       return;
     }
-    await addUnit(io)(battle, currentSide, form.piece, form.leader);
+    await addUnit(io)(battle, currentSide, form);
     reset({ piece: form.piece, leader: false });
   };
 
@@ -96,7 +97,9 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
                 )}
               />
               <Box sx={{ pl: 1 }}>
-                <Button variant="contained" type="submit" disabled={!canAddSelected}>この駒を追加</Button>
+                <Button variant="contained" type="submit" disabled={!canAddSelected}>
+                  {isLastUnit ? 'この駒を選んで戦闘開始' : 'この駒を追加'}
+                </Button>
               </Box>
             </Stack>
             {!canAddSelected && (

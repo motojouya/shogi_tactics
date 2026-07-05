@@ -68,8 +68,8 @@
 - [x] creation.tsxでmodeをuseStateしているが、modeの値は入力されたものなので、form側の値を読み込むことでuseStateは不要にならないか。要検討。
 - [x] creation.tsxのcreate関数は、controllerのstart.tsの修正をすることで、controllerとtransitを呼ぶだけになっているはず。
 - [x] formation.tsxでselectedPieceのためにuseStateを使っているが、この値はformから取ることでuseStateを消せないか
-- [ ] formation.tsxで、unitsをstate管理しているが、引数のbattleがuseLiveQueryで管理されているので、battleに一つ一つunitsを追加していけばそちらでstateを管理してくれそう。画面としては、単に編成中にunitを一つ一つ選ぶだけの画面になる。ただ、これは要検討。
-- [ ] formation.tsxでaddUnitはcontrollerに移動したい。
+- [x] formation.tsxで、unitsをstate管理しているが、引数のbattleがuseLiveQueryで管理されているので、battleに一つ一つunitsを追加していけばそちらでstateを管理してくれそう。画面としては、単に編成中にunitを一つ一つ選ぶだけの画面になる。ただ、これは要検討。
+- [x] formation.tsxでaddUnitはcontrollerに移動したい。
 - [x] formation.tsxの選択済みunits一覧は、パーツとして切り出して、componentsに移動する
 - [x] action.tsxのpieceName, statusName, GameStatus, ActionOrderEntryはcomponentsに移動する
 - [x] action.tsxのaddReceiverの中のreceiverの値の計算は、form側に関数を切って任せたい

@@ -29,7 +29,7 @@ const buildRepository = (saved: Battle[]): Repository => {
 describe("addUnit", () => {
   it("rosterに駒を追加して保存する", async () => {
     const saved: Battle[] = [];
-    const result = await addUnit(buildRepository(saved))(emptyBattle(), "FIRST", "king", true);
+    const result = await addUnit(buildRepository(saved))(emptyBattle(), "FIRST", { piece: "king", leader: true });
 
     expect(result.turns[0].units.length).toBe(1);
     const unit = result.turns[0].units[0];
@@ -42,9 +42,9 @@ describe("addUnit", () => {
   it("同じ陣営に同じ駒は追加できない(元のbattleを返し保存しない)", async () => {
     const saved: Battle[] = [];
     const repository = buildRepository(saved);
-    const once = await addUnit(repository)(emptyBattle(), "FIRST", "king", true);
+    const once = await addUnit(repository)(emptyBattle(), "FIRST", { piece: "king", leader: true });
     saved.length = 0;
-    const twice = await addUnit(repository)(once, "FIRST", "king", false);
+    const twice = await addUnit(repository)(once, "FIRST", { piece: "king", leader: false });
 
     expect(twice.turns[0].units.length).toBe(1);
     expect(saved.length).toBe(0);
@@ -53,8 +53,8 @@ describe("addUnit", () => {
   it("既にleaderが居る陣営ではleader指定は無効化される", async () => {
     const saved: Battle[] = [];
     const repository = buildRepository(saved);
-    const once = await addUnit(repository)(emptyBattle(), "FIRST", "king", true);
-    const twice = await addUnit(repository)(once, "FIRST", "rook", true);
+    const once = await addUnit(repository)(emptyBattle(), "FIRST", { piece: "king", leader: true });
+    const twice = await addUnit(repository)(once, "FIRST", { piece: "rook", leader: true });
 
     expect(twice.turns[0].units[1].leader).toBe(false);
   });
