@@ -1,7 +1,7 @@
 import type { Action } from "../../model/action";
 import { buildAction, effectGrantStatus, filterActor } from "../../model/action";
+import { interception } from "../status";
 
-// 金将の反動行動。迎撃体制。自分にinterception statusを付与する。
 export const interceptionStance: Action = buildAction(
   {
     key: "interceptionStance",
@@ -27,6 +27,6 @@ export const interceptionStance: Action = buildAction(
       [0, 0, 0, 0, 0, 0, 0],
     ],
   },
-  effectGrantStatus("interception"),
+  effectGrantStatus(interception.key),
   filterActor,
 );

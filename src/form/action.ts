@@ -1,20 +1,19 @@
 import type { Side, UnitReference } from "../model/unit";
+import type { Action } from "../model/action";
 import type { SelectOption } from "../repository/utility";
 import type { Repository } from "../repository";
 
 import { z } from "zod";
 
-// 「何もしない」のactionKey sentinelは model/turn の ORDER_DO_NOTHING を単一の真実とする(S15/§4.4で間接re-exportを廃止)。
+import { FIRST } from "../model/unit";
+import { ORDER_DO_NOTHING } from "../model/turn";
 
 export const doActionFormSchema = z.object({
   actionKey: z.string().min(1),
-  // 対象未選択(空value)も許可する。対象を選ばずに実行した場合はactorにコストのみ加算する(空valueはtoReceiversで除外)。
   receivers: z.array(z.object({ value: z.string().optional() }).optional()),
 });
 export type DoActionForm = z.infer<typeof doActionFormSchema>;
 
-// step15(S13/§7.1e): `${side}:${piece}` 形式のフォーム値文字列からUnitReferenceを復元する(model→form移設)。
-// 値(string)の解釈はform層の責務。formはmodelの型を知ってよい(逆は不可)。
 export type SelectUnit = (value: string) => UnitReference;
 export const selectUnit: SelectUnit = (value) => {
   const index = value.indexOf(":");
@@ -23,10 +22,8 @@ export const selectUnit: SelectUnit = (value) => {
   return { side, piece };
 };
 
-const sideLabel = (reference: UnitReference): string => (reference.side === "FIRST" ? "先" : "後");
+const sideLabel = (reference: UnitReference): string => (reference.side === FIRST ? "先" : "後");
 
-// UnitReferenceを受け手選択肢に変換する。value形式は `${side}:${piece}` (selectUnit互換)。
-// piece repositoryはDIで受け取る(直接importしない)。
 export type ReceiverSelectOption = (pieceRepository: Repository["piece"]) => (reference: UnitReference) => SelectOption;
 export const receiverSelectOption: ReceiverSelectOption = (pieceRepository) => (reference) => {
   const piece = pieceRepository.get(reference.piece);
@@ -36,9 +33,12 @@ export const receiverSelectOption: ReceiverSelectOption = (pieceRepository) => (
   };
 };
 
-// step15(S13/§7.2b): toActionは解体した。formの責務は受け手フォーム値(`${side}:${piece}`の配列)を
-// UnitReference[]へ解決することのみ。actionKeyはmodelがそのまま受け取れる値なので関数で包まず、controllerが直接渡す。
-// action解決(repository経由)・受け手重複検証(model)はform外の責務。
+export type ActionSelectOptions = (actions: Action[]) => SelectOption[];
+export const actionSelectOptions: ActionSelectOptions = (actions) => [
+  ...actions.map((action) => ({ value: action.key, label: `${action.name}（コスト${action.cost}）` })),
+  { value: ORDER_DO_NOTHING, label: "何もしない" },
+];
+
 export type ToReceivers = (receivers: DoActionForm["receivers"]) => UnitReference[];
 export const toReceivers: ToReceivers = (receivers) =>
   receivers

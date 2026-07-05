@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 
-import { selectUnit, toReceivers } from "./action";
+import { selectUnit, toReceivers, receiverSelectOption } from "./action";
+import { pieceRepository } from "../repository/piece";
 
 describe("formAction#selectUnit", function () {
   it("`${side}:${piece}` のvalueからUnitReferenceを復元する", function () {
@@ -21,5 +22,21 @@ describe("formAction#toReceivers", function () {
   it("undefinedや空valueは除外する", function () {
     const result = toReceivers([undefined, { value: "FIRST:king" }, { value: undefined }, {}]);
     expect(result).toEqual([{ side: "FIRST", piece: "king" }]);
+  });
+});
+
+describe("formAction#receiverSelectOption", function () {
+  const toOption = receiverSelectOption(pieceRepository);
+
+  it("UnitReferenceをvalue/labelのSelectOptionへ変換する(先手は`先`、labelは駒名)", function () {
+    expect(toOption({ side: "FIRST", piece: "king" })).toEqual({ value: "FIRST:king", label: "先:将軍" });
+  });
+
+  it("後手は`後`、labelは駒名になる", function () {
+    expect(toOption({ side: "SECOND", piece: "gold" })).toEqual({ value: "SECOND:gold", label: "後:重装兵" });
+  });
+
+  it("未知の駒キーはlabelにキーをそのまま使う", function () {
+    expect(toOption({ side: "FIRST", piece: "unknown" })).toEqual({ value: "FIRST:unknown", label: "先:unknown" });
   });
 });

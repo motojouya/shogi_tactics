@@ -1,10 +1,9 @@
 import type { FC } from 'react';
 import type { Battle } from '../model/battle';
-import type { Unit, UnitReference } from '../model/unit';
+import type { UnitReference } from '../model/unit';
 import type { Turn } from '../model/turn';
 import type { Action } from '../model/action';
 import type { DoActionForm } from '../form/action';
-import type { Repository } from '../repository';
 import type { SelectChangeEvent } from '@mui/material';
 
 import { useState, useCallback } from 'react';
@@ -30,18 +29,10 @@ import {
   Box,
   Stack,
   Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import StarIcon from '@mui/icons-material/Star';
 
 import {
   GameOngoing,
-  GameFirst,
-  GameSecond,
-  GameDraw,
   nextActor,
   sortedUnits,
   getLastTurn,
@@ -50,76 +41,23 @@ import { toUnitReference } from '../model/unit';
 import {
   doActionFormSchema,
   receiverSelectOption,
+  selectUnit,
+  actionSelectOptions,
 } from '../form/action';
-import { ORDER_DO_NOTHING } from '../model/turn';
 import { ReceiverDuplicationError } from '../model/action';
-import { DataNotFoundError } from '../repository/error';
+import { DataNotFoundError } from '../model/error';
 import { act } from '../controller/act';
 import { surrender } from '../controller/surrender';
 import { simulate } from '../model/simulation';
-import { UserCancel } from '../repository/error';
+import { UserCancel } from '../model/error';
 import { useIO } from '../components/context';
 import { createResolvers } from '../repository';
 import { Container } from '../components/utility';
-import { ActionTable } from '../components/action_table';
-import { sideLabel } from '../components/label';
+import { sideLabel, pieceName } from '../components/label';
 import { PieceImage } from '../components/piece_image';
+import { GameStatus, ActionOrderEntry } from '../components/battle_status';
 
-// step8: battleはkeyしか持たないので、presentationでstore参照してpiece/statusを解決する。
-const pieceName = (pieceRepository: Repository['piece'], pieceKey: string): string => {
-  const piece = pieceRepository.get(pieceKey);
-  return piece ? piece.name : pieceKey;
-};
-const statusName = (statusRepository: Repository['status'], statusKey: string): string => {
-  const status = statusRepository.get(statusKey);
-  return status ? status.name : statusKey;
-};
-
-// 技+対象を選んだ際のプレビュー。hpの変化と、対象が除外(hp0)になるかだけを示す。
 type ReceiverPreview = { pieceKey: string; before: number; after: number; excluded: boolean };
-
-const GameStatus: FC<{ battle: Battle }> = ({ battle }) => {
-  const card = `${battle.first_player_name}(先手) vs ${battle.second_player_name}(後手)`;
-  switch (battle.result) {
-    case GameFirst: return <Typography>{`${card} 先手の勝利`}</Typography>;
-    case GameSecond: return <Typography>{`${card} 後手の勝利`}</Typography>;
-    case GameDraw: return <Typography>{`${card} 引き分け`}</Typography>;
-    // turn番号は巻き戻し時に混乱を招くため表示しない(レビュー指摘)。
-    default: return <Typography>{card}</Typography>;
-  }
-};
-
-// 行動順の1エントリ。1行サマリ(順番号/リーダ/駒名/HP/コスト/移動/状態)と、
-// アコーディオン内に駒の行動表(ActionTable)を表示する。
-const ActionOrderEntry: FC<{ unit: Unit; order: number }> = ({ unit, order }) => {
-  const { piece, status } = useIO();
-  const unitPiece = piece.get(unit.piece);
-  return (
-    <Accordion disableGutters>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Stack direction="row" sx={{ alignItems: 'center', flexWrap: 'wrap', columnGap: 1, width: '100%' }}>
-          <Typography sx={{ fontWeight: 'bold' }}>{order + 1}</Typography>
-          {unit.leader && <StarIcon fontSize="small" color="warning" />}
-          <PieceImage pieceKey={unit.piece} side={unit.side} name={unitPiece?.name} size={28} />
-          <Typography>
-            {`${sideLabel(unit.side)}: ${unitPiece ? `${unitPiece.name}（${unitPiece.shogiName}）` : unit.piece}`}
-          </Typography>
-          <Typography variant="body2">{`HP ${unit.hp}`}</Typography>
-          <Typography variant="body2">{`コスト ${unit.steps}`}</Typography>
-          {unitPiece && <Typography variant="body2">{`移動 ${unitPiece.move}`}</Typography>}
-          {unit.statuses.map((statusKey) => (
-            <Chip key={statusKey} size="small" variant="outlined" label={statusName(status, statusKey)} />
-          ))}
-        </Stack>
-      </AccordionSummary>
-      <AccordionDetails>
-        {unitPiece
-          ? <ActionTable actions={unitPiece.actions} />
-          : <Typography variant="body2">行動情報がありません</Typography>}
-      </AccordionDetails>
-    </Accordion>
-  );
-};
 
 type GetReceiverError = (errors: FieldErrors, i: number, property: string) => FieldError | undefined;
 const getReceiverError: GetReceiverError = (errors, i, property) => {
@@ -181,7 +119,6 @@ const ReceiverSelect: FC<{
             value={field.value ?? ''}
             onChange={onChange(field.onChange)}
           >
-            {/* 対象を選ばずに実行できる(コストのみ加算)。未選択へ戻すための空選択肢。 */}
             <MenuItem value=''>（選択しない）</MenuItem>
             {receiverOptions.map(receiverOption => (
               <MenuItem key={`${receiverOption.value}`} value={receiverOption.value}>
@@ -198,7 +135,7 @@ const ReceiverSelect: FC<{
 
 const SurrenderButton: FC<{ battle: Battle, actor: UnitReference }> = ({ battle, actor }) => {
   const io = useIO();
-  const doSurrender = () => surrender(io)(battle, actor, new Date());
+  const doSurrender = () => surrender(io)(battle, actor);
   return <Button variant='outlined' type="button" onClick={doSurrender}>降参</Button>;
 };
 
@@ -209,9 +146,7 @@ const ActionSelect: FC<{
   control: Control<DoActionForm>,
 }> = ({ actions, onSelect, errors, control }) => {
 
-  // 技選択肢にコストを含める(レビュー指摘: コストは選択肢内で見せたい)。
-  const actionOptions = actions.map(action => ({ value: action.key, label: `${action.name}（コスト${action.cost}）` }));
-  actionOptions.push({ value: ORDER_DO_NOTHING, label: '何もしない' });
+  const actionOptions = actionSelectOptions(actions);
 
   const onChange = (hookOnChange: HookOnChange) => (e: SelectChangeEvent<string>) => {
     const actionKey = e.target.value;
@@ -333,7 +268,6 @@ export const BattleTurn: FC<{
     }
     const value = getValues(`receivers.${index}.value` as const);
     if (!value) {
-      // 「（選択しない）」に戻したらその枠のプレビューを消す。
       const cleared = [...simulated];
       if (index < cleared.length) {
         cleared[index] = null;
@@ -341,8 +275,7 @@ export const BattleTurn: FC<{
       }
       return;
     }
-    const index2 = value.indexOf(':');
-    const receiver: UnitReference = { side: value.slice(0, index2) as 'FIRST' | 'SECOND', piece: value.slice(index2 + 1) };
+    const receiver = selectUnit(value);
     const before = lastTurn.units.find((unit) => unit.side === receiver.side && unit.piece === receiver.piece)?.hp ?? 0;
     const { survive, unit } = simulate(selectedAction, actor, receiver, lastTurn, resolvers);
 

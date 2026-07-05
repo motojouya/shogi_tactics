@@ -1,6 +1,3 @@
-// repository層のエラー表現(class)を集約する。BattleDB以外のclass構文はすべてここに置く。
-
-// json schema検証に失敗(保存データが想定の型でない)。
 export class JsonSchemaUnmatchError {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly error: any;
@@ -15,7 +12,6 @@ export class JsonSchemaUnmatchError {
   }
 }
 
-// 指定のデータが見つからない(piece/action等のkey参照解決失敗)。
 export class DataNotFoundError {
   readonly name: string;
   readonly type: string;
@@ -27,7 +23,6 @@ export class DataNotFoundError {
   }
 }
 
-// 既に存在するデータを重複登録しようとした。
 export class DataExistError {
   readonly name: string;
   readonly type: string;
@@ -39,7 +34,6 @@ export class DataExistError {
   }
 }
 
-// export(file system access API)に失敗した。
 export class CopyFailError {
   readonly fileName: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,7 +51,6 @@ export class CopyFailError {
   }
 }
 
-// ユーザーが操作をキャンセルした。
 export class UserCancel {
   readonly message: string;
   constructor(message: string) {
@@ -65,7 +58,6 @@ export class UserCancel {
   }
 }
 
-// 必須パラメータが空。
 export class EmptyParameter {
   readonly name: string;
   readonly message: string;

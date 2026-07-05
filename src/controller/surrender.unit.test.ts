@@ -7,7 +7,7 @@ import type { Battle } from "../model/battle";
 
 import { createBattle, start, GameFirst, GameSecond } from "../model/battle";
 import { surrender } from "./surrender";
-import { UserCancel } from "../repository/error";
+import { UserCancel } from "../model/error";
 
 const makeBattle = (): Battle => {
   const battle = createBattle("key", "first", "second", 2, 2, "v1");
@@ -51,7 +51,7 @@ describe("surrender", () => {
   it("first surrender", async () => {
     saved = null;
     const battle = makeBattle();
-    const result = await surrender(repository(true))(battle, { side: "FIRST", piece: "king" }, new Date());
+    const result = await surrender(repository(true))(battle, { side: "FIRST", piece: "king" });
     expect(result).toBe(null);
     expect(saved?.result).toBe(GameSecond); // 先手が降参 → 後手の勝ち
   });
@@ -59,7 +59,7 @@ describe("surrender", () => {
   it("second surrender", async () => {
     saved = null;
     const battle = makeBattle();
-    const result = await surrender(repository(true))(battle, { side: "SECOND", piece: "pawn" }, new Date());
+    const result = await surrender(repository(true))(battle, { side: "SECOND", piece: "pawn" });
     expect(result).toBe(null);
     expect(saved?.result).toBe(GameFirst); // 後手が降参 → 先手の勝ち
   });
@@ -67,7 +67,7 @@ describe("surrender", () => {
   it("cancel", async () => {
     saved = null;
     const battle = makeBattle();
-    const result = await surrender(repository(false))(battle, { side: "FIRST", piece: "king" }, new Date());
+    const result = await surrender(repository(false))(battle, { side: "FIRST", piece: "king" });
     expect(result instanceof UserCancel).toBe(true);
     expect(saved).toBe(null);
   });

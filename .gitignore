@@ -108,7 +108,7 @@ dist
 dist-ssr
 *.local
 
-# Playwright (統合テスト実行時の生成物)
+# Playwright
 test-results/
 playwright-report/
 blob-report/

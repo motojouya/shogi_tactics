@@ -1,12 +1,14 @@
 import type { Turn, Order } from "./turn";
-import type { Unit, UnitReference } from "./unit";
+import type { Unit, UnitReference, Side } from "./unit";
+import type { GetPiece, Piece } from "./piece";
 import type { Resolvers } from "./resolver";
 
 import { z } from "zod";
 
 import { copyTurn, turnSchema, clearActorStatuses, applyActorCost } from "./turn";
-import { copyUnit } from "./unit";
-import { DataNotFoundError } from "../repository/error";
+import { copyUnit, buildNormalUnits, isFormationComplete, canAddPiece, sideHasLeader } from "./unit";
+import { validateReceivers, ReceiverDuplicationError } from "./action";
+import { DataNotFoundError } from "./error";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
 
@@ -21,6 +23,12 @@ export const GameDraw: GameResult = "DRAW";
 // note.md「通常モード」準拠。片側7駒固定、stepBaseは14(=unitCount*2)。
 export const NORMAL_UNIT_COUNT = 7;
 export const NORMAL_STEP_BASE = 14;
+
+// 対戦モード。normal=7駒固定/war=駒数自由。
+export const modeSchema = z.enum(["normal", "war"]);
+export type Mode = z.infer<typeof modeSchema>;
+export const NORMAL_MODE: Mode = "normal";
+export const WAR_MODE: Mode = "war";
 
 // step6: home/visitor(PartyBattling)を廃止。ロスターは先頭Turnのunitsが持つ(types.md準拠)。
 export const battleSchema = z.object({
@@ -50,6 +58,15 @@ export const copyBattle: CopyBattle = (battle) => ({
 
 export type GetLastTurn = (battle: Battle) => Turn;
 export const getLastTurn: GetLastTurn = (battle) => arrayLast(battle.turns);
+
+// 編成中のroster(先頭FORMATION turnのunits)。作成直後や未生成時は空配列を返す。
+export type GetFormationUnits = (battle: Battle) => Unit[];
+export const getFormationUnits: GetFormationUnits = (battle) => (battle.turns[0] ? battle.turns[0].units : []);
+
+// roster(先頭Turnのunits)が編成完了(両陣営unitCount揃い+各leader1体)に達していなければ編成中。
+// 完了した時点で対戦中に切り替わる(明示的な「戦闘開始」操作は持たない)。
+export type IsFormation = (battle: Battle) => boolean;
+export const isFormation: IsFormation = (battle) => !isFormationComplete(getFormationUnits(battle), battle.unitCount);
 
 // step7: 行動ポイント方式。steps最小の駒が次に行動。同点はTurn.unitsのindex(初期順)で決着。
 // Array.prototype.sortは安定なので、steps同点は元配列の順序(=前ターンまでの並び)を保つ。
@@ -99,6 +116,48 @@ export const start: Start = (units, datetime) => ({
   units: units.map(copyUnit),
 });
 
+// battle骨格に先頭FORMATION turnを積む(作成時に呼ぶ)。warは空units、normalは固定編成で開始する。
+export type Format = (battle: Battle, units: Unit[], datetime: Date) => Battle;
+export const format: Format = (battle, units, datetime) => {
+  const newBattle = copyBattle(battle);
+  newBattle.turns.push(start(units, datetime));
+  return newBattle;
+};
+
+// 通常モードの編成: 固定の駒構成(buildNormalUnits)で先頭Turnを積む。unitsを引数に取らない。
+export type FormatNormal = (battle: Battle, getPiece: GetPiece, datetime: Date) => Battle;
+export const formatNormal: FormatNormal = (battle, getPiece, datetime) =>
+  format(battle, buildNormalUnits(getPiece), datetime);
+
+// 編成中のrosterに駒を1体追加する(先頭FORMATION turnのunitsへ追記)。
+// 同じ陣営に同じ駒は置けない(追加不可なら変更なし)。leaderは各陣営1体までで、既に居ればisLeaderは無視する。
+export type AddFormationUnit = (battle: Battle, side: Side, piece: Piece, isLeader: boolean) => Battle;
+export const addFormationUnit: AddFormationUnit = (battle, side, piece, isLeader) => {
+  const units = getFormationUnits(battle);
+  if (!canAddPiece(units, side, piece.key)) {
+    return battle;
+  }
+  const asLeader = isLeader && !sideHasLeader(units, side);
+  const newBattle = copyBattle(battle);
+  newBattle.turns[0].units.push({
+    side,
+    piece: piece.key,
+    hp: piece.MaxHP,
+    steps: 0,
+    statuses: [],
+    leader: asLeader,
+  });
+  return newBattle;
+};
+
+// 編成中のrosterから最後に追加したunitを取り消す。
+export type UndoFormationUnit = (battle: Battle) => Battle;
+export const undoFormationUnit: UndoFormationUnit = (battle) => {
+  const newBattle = copyBattle(battle);
+  newBattle.turns[0].units = newBattle.turns[0].units.slice(0, -1);
+  return newBattle;
+};
+
 export type IsSettlement = (battle: Battle) => GameResult;
 export const isSettlement: IsSettlement = (battle) => {
   const lastTurn = arrayLast(battle.turns);
@@ -131,6 +190,15 @@ export const surrender: ModelSurrender = (battle, actor, datetime) => {
     order: { type: "SURRENDER", actor },
     units: lastTurn.units.map(copyUnit),
   };
+};
+
+// 投了: copyBattle・投了Turn追加・決着記録(isSettlement)を一つにまとめる。決着はisSettlementのSURRENDER分岐が判定する。
+export type SurrenderBattle = (battle: Battle, actor: UnitReference, datetime: Date) => Battle;
+export const surrenderBattle: SurrenderBattle = (battle, actor, datetime) => {
+  const newBattle = copyBattle(battle);
+  newBattle.turns.push(surrender(newBattle, actor, datetime));
+  newBattle.result = isSettlement(newBattle);
+  return newBattle;
 };
 
 // step15: spendTurnを doNothing / doAct に分割。共通処理(statusクリア→効果適用→cost消費→Turn追加→勝敗判定)はappendTurnへ。
@@ -173,8 +241,13 @@ export type DoAct = (
   receivers: UnitReference[],
   resolvers: Resolvers,
   datetime: Date,
-) => Battle | DataNotFoundError;
+) => Battle | DataNotFoundError | ReceiverDuplicationError;
 export const doAct: DoAct = (battle, actor, actionKey, receivers, resolvers, datetime) => {
+  // 受け手の重複はドメイン制約。技解決の前に検証する(旧controller act側の検証をここへ集約)。
+  const duplication = validateReceivers(receivers);
+  if (duplication) {
+    return duplication;
+  }
   const action = resolvers.getAction(actionKey);
   if (!action) {
     return new DataNotFoundError(actionKey, "action", `${actionKey}というactionは存在しません`);

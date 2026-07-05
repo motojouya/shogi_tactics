@@ -7,17 +7,22 @@ import { BattleIO } from '../../components/battle_io';
 import { BattleAction } from '../../feature/action';
 import { BattleFormation } from '../../feature/formation';
 import { BattleCreation } from '../../feature/creation';
-import { JsonSchemaUnmatchError } from '../../repository/error';
+import { JsonSchemaUnmatchError } from '../../model/error';
+import { isFormation } from '../../model/battle';
 import { useIO } from '../../components/context';
 import { Container } from '../../components/utility';
-import { local } from '../../repository/local';
 
-// /v1 : version1のbattleを表示する。?key=<uuid>で対象を指定。version不一致は表示しない。
 export const VERSION = 'v1';
 
-const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey, version }) => {
-  const { battle: battleRepository } = useIO();
-  const battle = useLiveQuery(() => battleRepository.get(battleKey), [battleKey]);
+const BattleRoot: FC<{ version: string }> = ({ version }) => {
+  const { local, battle: battleRepository } = useIO();
+  const key = local.getSearchParams().get('key');
+  // フックは無条件に呼ぶ(Rules of Hooks)。keyが無い場合はquerierでnullを返し、分岐はフックの後で行う。
+  const battle = useLiveQuery(() => (key ? battleRepository.get(key) : null), [key]);
+
+  if (!key) {
+    return (<BattleCreation version={version} />);
+  }
 
   if (battle instanceof JsonSchemaUnmatchError) {
     return (
@@ -30,12 +35,11 @@ const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey,
   if (!battle) {
     return (
       <Container backLink="/list/">
-        <Typography>{`${battleKey}というbattleは見つかりません`}</Typography>
+        <Typography>{`${key}というbattleは見つかりません`}</Typography>
       </Container>
     );
   }
 
-  // 表示ページのversionとbattleのversionが一致しないと表示しない(step10)。
   if (battle.version !== version) {
     return (
       <Container backLink="/list/">
@@ -44,23 +48,15 @@ const BattleExsiting: FC<{ battleKey: string; version: string }> = ({ battleKey,
     );
   }
 
-  // turns.length===0は編成段階。units選択が終わって先頭Turnが積まれたら戦闘画面へ。
-  if (battle.turns.length === 0) {
+  if (isFormation(battle)) {
     return (<BattleFormation battle={battle} />);
   }
 
   return (<BattleAction battle={battle} />);
 };
 
-// /v1 で creation(key無し)/ formation / action を出し分ける(S20/§7.7)。
-// key無し=新規作成(creation)。key有りはBattleExsitingがturns有無でformation/actionを出し分ける。
-export const App: FC = () => {
-  const searchParams = local.getSearchParams();
-  const key = searchParams.get('key');
-
-  return (
-    <BattleIO>
-      {key ? <BattleExsiting battleKey={key} version={VERSION} /> : <BattleCreation version={VERSION} />}
-    </BattleIO>
-  );
-};
+export const App: FC = () => (
+  <BattleIO>
+    <BattleRoot version={VERSION} />
+  </BattleIO>
+);

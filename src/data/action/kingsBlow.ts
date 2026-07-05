@@ -1,7 +1,6 @@
 import type { Action } from "../../model/action";
 import { buildAction, effectBaseDamage, filterAlive } from "../../model/action";
 
-// 王将の反動行動。王の一撃。近接の相手に攻撃3。
 export const kingsBlow: Action = buildAction(
   {
     key: "kingsBlow",

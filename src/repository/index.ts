@@ -8,8 +8,13 @@ import { actionRepository } from "./action";
 import { statusRepository } from "./status";
 import { local } from "./local";
 
-// 全repositoryを1つのオブジェクトに束ねたcontext値。
-// piece/action/statusは静的データのmemory repository、localはブラウザ環境provider、battleのみDexie初期化のため生成は非同期。
+/**
+ * Repository
+ *
+ * Repositoryの中身は静的に、あるいはグローバル変数で解決できるものだが、それらをラップするために用意している。
+ * BattleRepositoryのみ、IndexedDBを利用するので、非同期で解決される。
+ * BattleRepository以外は静的に解決できるので存在しても害はなく、BattleRepositoryはほとんどの場面で利用するので、利便性のためにまとめておく
+ */
 export type Repository = {
   battle: BattleRepository;
   piece: typeof pieceRepository;
@@ -23,8 +28,6 @@ export const createRepository = async (): Promise<Repository> => {
   return { battle, piece: pieceRepository, action: actionRepository, status: statusRepository, local };
 };
 
-// step15(S8/§7.1b): modelが要求するResolvers束を、repositoryのmemory get(メソッド)から取得して生成する。
-// 静的関数を別途定義せず、各memory repositoryのgetメソッドをそのまま束ねる。
 export type CreateResolvers = (repository: Repository) => Resolvers;
 export const createResolvers: CreateResolvers = (repository) => ({
   getAction: repository.action.get,

@@ -1,7 +1,6 @@
 import type { Piece } from "../../model/piece";
 import { meleeAttack, chargeMelee } from "../action/index";
 
-// 桂馬。機動力に優れた騎馬。通常/戦乱モードで使用。
 export const knight: Piece = {
   key: "knight",
   name: "騎馬",

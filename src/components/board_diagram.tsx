@@ -1,15 +1,19 @@
 import type { FC } from 'react';
 import type { Side } from '../model/unit';
 import { Box, Typography } from '@mui/material';
-import { pieceImageSrc } from './piece_image_src';
+import { pieceImageSrc } from './piece_image';
 
-// 9x9将棋盤の解説図。盤画像(CC0, public/board)を背景に、駒画像を実測したマス目へ重ねる。
-// <img>経由のSVGは外部画像を読めない制約があるため、DOM内のインライン描画(背景+絶対配置)で実現する。
+/*
+ * 9x9将棋盤の解説図。盤画像(CC0, public/board)を背景に、駒画像を実測したマス目へ重ねる。
+ * <img>経由のSVGは外部画像を読めない制約があるため、DOM内のインライン描画(背景+絶対配置)で実現する。
+ */
 
 const BOARD_SRC = `${import.meta.env.BASE_URL}board/light_458x500.png`;
 
-// public/board/light_458x500.png をピクセル解析して得たマス目の幾何。
-// 縦線 x:6..451(pitch49.44) / 横線 y:6..493(pitch54.11)。
+/*
+ * public/board/light_458x500.png をピクセル解析して得たマス目の幾何。
+ * 縦線 x:6..451(pitch49.44) / 横線 y:6..493(pitch54.11)。
+ */
 const IMG_W = 458;
 const IMG_H = 500;
 const GRID_X0 = 6;

@@ -7,11 +7,12 @@ import type { Battle } from "../model/battle";
 import type { DoActionForm } from "../form/action";
 
 import { createBattle, start, getLastTurn } from "../model/battle";
+import { ORDER_DO_NOTHING } from "../model/turn";
 import { act } from "./act";
 import { actionRepository } from "../repository/action";
 import { pieceRepository } from "../repository/piece";
 import { statusRepository } from "../repository/status";
-import { DataNotFoundError, UserCancel } from "../repository/error";
+import { DataNotFoundError, UserCancel } from "../model/error";
 
 const makeBattle = (): Battle => {
   const battle = createBattle("key", "first", "second", 2, 2, "v1");
@@ -87,6 +88,27 @@ describe("act", () => {
       const pawn = lastTurn.units.find((unit) => unit.side === "SECOND" && unit.piece === "pawn");
       expect(pawn?.hp).toBe(3);
     }
+  });
+
+  it("何もしない(ORDER_DO_NOTHING)は確認後に保存される", async () => {
+    const battle = makeBattle();
+    const form: DoActionForm = { actionKey: ORDER_DO_NOTHING, receivers: [] };
+
+    const result = await act(repository(true))(battle, actor, form);
+
+    if (result instanceof DataNotFoundError || result instanceof UserCancel || "message" in result) {
+      expect.unreachable("doNothing should succeed");
+    } else {
+      expect(getLastTurn(result).order.type).toBe("DO_NOTHING");
+    }
+  });
+
+  it("何もしない(ORDER_DO_NOTHING)でcancelするとUserCancelを返す", async () => {
+    const battle = makeBattle();
+    const form: DoActionForm = { actionKey: ORDER_DO_NOTHING, receivers: [] };
+
+    const result = await act(repository(false))(battle, actor, form);
+    expect(result instanceof UserCancel).toBe(true);
   });
 
   it("data not found", async () => {

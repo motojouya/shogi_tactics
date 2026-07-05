@@ -46,6 +46,12 @@ export const Container: FC<{ backLink: string | null; children: ReactNode; }> = 
   </MaterialContainer>
 );
 
+export const NotFound: FC<{ backLink?: string | null }> = ({ backLink = null }) => (
+  <Container backLink={backLink}>
+    <Typography sx={{ p: 2 }}>ページが見つかりませんでした。</Typography>
+  </Container>
+);
+
 export const Header: FC<{ backLink: string | null; }> = ({ backLink }) => {
   return (
     <Stack sx={{ justifyContent: 'flex-start', alignItems: 'center', p: 1 }} direction="row" >

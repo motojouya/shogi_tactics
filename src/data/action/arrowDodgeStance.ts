@@ -1,7 +1,7 @@
 import type { Action } from "../../model/action";
 import { buildAction, effectGrantStatus, filterActor } from "../../model/action";
+import { arrowDodge } from "../status";
 
-// 銀将の反動行動。矢かわし。自分にarrowDodge statusを付与する。
 export const arrowDodgeStance: Action = buildAction(
   {
     key: "arrowDodgeStance",
@@ -27,6 +27,6 @@ export const arrowDodgeStance: Action = buildAction(
       [0, 0, 0, 0, 0, 0, 0],
     ],
   },
-  effectGrantStatus("arrowDodge"),
+  effectGrantStatus(arrowDodge.key),
   filterActor,
 );
