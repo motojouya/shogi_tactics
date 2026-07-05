@@ -1,11 +1,10 @@
 import type { FC } from 'react';
 import type { Battle } from '../model/battle';
-import type { Unit, Side } from '../model/unit';
+import type { Side } from '../model/unit';
 import type { FormationForm } from '../form/formation';
 
 import { nextFormationSide, sideHasLeader, canAddPiece, isFormationComplete } from '../model/unit';
 
-import { useState } from 'react';
 import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -20,7 +19,9 @@ import {
 } from '@mui/material';
 
 import { formationFormSchema, pieceSelectOption } from '../form/formation';
-import { formatBattle } from '../controller/format';
+import { getFormationUnits } from '../model/battle';
+import { addUnit } from '../controller/add_unit';
+import { undoUnit } from '../controller/undo_unit';
 import { useIO } from '../components/context';
 import { Container } from '../components/utility';
 import { sideLabel } from '../components/label';
@@ -32,14 +33,14 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
   const { piece: pieceRepository } = io;
   const pieces = pieceRepository.all;
 
-  const [units, setUnits] = useState<Unit[]>([]);
-
   const { control, handleSubmit, reset } = useForm<FormationForm>({
     resolver: zodResolver(formationFormSchema),
     defaultValues: { piece: pieces[0] ? pieces[0].key : '', leader: false },
   });
   const selectedPiece = useWatch({ control, name: 'piece' });
 
+  // rosterは編成中battleの先頭Turnが保持する(useLiveQueryが更新を反映)。ローカルstateは持たない。
+  const units = getFormationUnits(battle);
   const unitCount = battle.unitCount;
   const firstCount = units.filter((unit) => unit.side === 'FIRST').length;
   const secondCount = units.filter((unit) => unit.side === 'SECOND').length;
@@ -47,34 +48,20 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
   const currentSide: Side | null = nextFormationSide(units, unitCount);
   const currentSideHasLeader = currentSide ? sideHasLeader(units, currentSide) : false;
   const canAddSelected = currentSide ? canAddPiece(units, currentSide, selectedPiece) : false;
-  const done = isFormationComplete(units, unitCount);
 
   const playerName = (side: Side): string =>
     side === 'FIRST' ? battle.first_player_name : battle.second_player_name;
 
-  const addUnit = (form: FormationForm) => {
+  const onAddUnit = async (form: FormationForm) => {
     if (!currentSide) {
       return;
     }
-    if (!canAddPiece(units, currentSide, form.piece)) {
-      return;
-    }
-    const piece = pieceRepository.get(form.piece);
-    if (!piece) {
-      return;
-    }
-    const asLeader = form.leader && !currentSideHasLeader;
-    setUnits([
-      ...units,
-      { side: currentSide, piece: piece.key, hp: piece.MaxHP, steps: 0, statuses: [], leader: asLeader },
-    ]);
+    await addUnit(io)(battle, currentSide, form.piece, form.leader);
     reset({ piece: form.piece, leader: false });
   };
 
-  const undo = () => setUnits(units.slice(0, -1));
-
-  const startGame = async () => {
-    await formatBattle(io)(battle, units);
+  const undo = async () => {
+    await undoUnit(io)(battle);
   };
 
   return (
@@ -83,8 +70,8 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
         <Typography>{`${battle.first_player_name}(先手) vs ${battle.second_player_name}(後手) の編成`}</Typography>
         <Typography>{`先手 ${firstCount}/${unitCount} 後手 ${secondCount}/${unitCount}`}</Typography>
 
-        {!done && currentSide && (
-          <Stack direction="column" component="form" onSubmit={handleSubmit(addUnit)} sx={{ pt: 2 }}>
+        {currentSide && (
+          <Stack direction="column" component="form" onSubmit={handleSubmit(onAddUnit)} sx={{ pt: 2 }}>
             <Typography>{`次は ${sideLabel(currentSide)}(${playerName(currentSide)}) の番です`}</Typography>
             <Stack direction="row" sx={{ alignItems: 'center', pt: 1 }}>
               <Controller
@@ -136,16 +123,10 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
 
         <FormationUnitList units={units} getPiece={pieceRepository.get} onUndo={undo} />
 
-        {firstCount === unitCount && secondCount === unitCount && !done && (
+        {firstCount === unitCount && secondCount === unitCount && !isFormationComplete(units, unitCount) && (
           <Typography sx={{ pt: 2 }} color="error">
             各陣営ともリーダーを1体ずつ指定してください
           </Typography>
-        )}
-
-        {done && (
-          <Box sx={{ pt: 2 }}>
-            <Button variant="contained" type="button" onClick={startGame}>戦闘開始</Button>
-          </Box>
         )}
       </Stack>
     </Container>

@@ -14,7 +14,6 @@ import {
 
 import { creationFormSchema, creationFormDefault } from '../form/creation';
 import { createBattle } from '../controller/create';
-import { DataExistError } from '../model/error';
 import { useIO } from '../components/context';
 import { Container } from '../components/utility';
 
@@ -36,9 +35,6 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
 
   const create = async (form: CreationForm) => {
     const battle = await createBattle(io)(form, version);
-    if (battle instanceof DataExistError) {
-      return;
-    }
     local.transit(`/v1/?key=${battle.key}`);
   };
 

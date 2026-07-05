@@ -6,9 +6,9 @@ import type { Resolvers } from "./resolver";
 import { z } from "zod";
 
 import { copyTurn, turnSchema, clearActorStatuses, applyActorCost } from "./turn";
-import { copyUnit, buildNormalUnits } from "./unit";
+import { copyUnit, buildNormalUnits, isFormationComplete } from "./unit";
 import { validateReceivers, ReceiverDuplicationError } from "./action";
-import { DataNotFoundError, DataExistError } from "./error";
+import { DataNotFoundError } from "./error";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
 
@@ -59,9 +59,14 @@ export const copyBattle: CopyBattle = (battle) => ({
 export type GetLastTurn = (battle: Battle) => Turn;
 export const getLastTurn: GetLastTurn = (battle) => arrayLast(battle.turns);
 
-// turns.length===0は編成段階(先頭Turn未生成)。対戦開始後(先頭Turnあり)はfalse。
+// 編成中のroster(先頭FORMATION turnのunits)。作成直後や未生成時は空配列を返す。
+export type GetFormationUnits = (battle: Battle) => Unit[];
+export const getFormationUnits: GetFormationUnits = (battle) => (battle.turns[0] ? battle.turns[0].units : []);
+
+// roster(先頭Turnのunits)が編成完了(両陣営unitCount揃い+各leader1体)に達していなければ編成中。
+// 完了した時点で対戦中に切り替わる(明示的な「戦闘開始」操作は持たない)。
 export type IsFormation = (battle: Battle) => boolean;
-export const isFormation: IsFormation = (battle) => battle.turns.length === 0;
+export const isFormation: IsFormation = (battle) => !isFormationComplete(getFormationUnits(battle), battle.unitCount);
 
 // step7: 行動ポイント方式。steps最小の駒が次に行動。同点はTurn.unitsのindex(初期順)で決着。
 // Array.prototype.sortは安定なので、steps同点は元配列の順序(=前ターンまでの並び)を保つ。
@@ -111,22 +116,34 @@ export const start: Start = (units, datetime) => ({
   units: units.map(copyUnit),
 });
 
-// 編成中のbattleに編成済みunitsで先頭Turnを積み、対戦を開始する(copyBattle + start を一つにまとめる)。
-// 編成中(先頭Turn未生成)でなければ既に開始済みなのでエラー(二重開始の防止)。
-export type Format = (battle: Battle, units: Unit[], datetime: Date) => Battle | DataExistError;
+// battle骨格に先頭FORMATION turnを積む(作成時に呼ぶ)。warは空units、normalは固定編成で開始する。
+export type Format = (battle: Battle, units: Unit[], datetime: Date) => Battle;
 export const format: Format = (battle, units, datetime) => {
-  if (!isFormation(battle)) {
-    return new DataExistError(battle.key, "battle", "この対戦は既に開始されています");
-  }
   const newBattle = copyBattle(battle);
   newBattle.turns.push(start(units, datetime));
   return newBattle;
 };
 
-// 通常モードの編成: 固定の駒構成(buildNormalUnits)で開始する。unitsを引数に取らない。
-export type FormatNormal = (battle: Battle, getPiece: GetPiece, datetime: Date) => Battle | DataExistError;
+// 通常モードの編成: 固定の駒構成(buildNormalUnits)で先頭Turnを積む。unitsを引数に取らない。
+export type FormatNormal = (battle: Battle, getPiece: GetPiece, datetime: Date) => Battle;
 export const formatNormal: FormatNormal = (battle, getPiece, datetime) =>
   format(battle, buildNormalUnits(getPiece), datetime);
+
+// 編成中のrosterにunitを1体追加する(先頭FORMATION turnのunitsへ追記)。
+export type AddFormationUnit = (battle: Battle, unit: Unit) => Battle;
+export const addFormationUnit: AddFormationUnit = (battle, unit) => {
+  const newBattle = copyBattle(battle);
+  newBattle.turns[0].units.push(unit);
+  return newBattle;
+};
+
+// 編成中のrosterから最後に追加したunitを取り消す。
+export type UndoFormationUnit = (battle: Battle) => Battle;
+export const undoFormationUnit: UndoFormationUnit = (battle) => {
+  const newBattle = copyBattle(battle);
+  newBattle.turns[0].units = newBattle.turns[0].units.slice(0, -1);
+  return newBattle;
+};
 
 export type IsSettlement = (battle: Battle) => GameResult;
 export const isSettlement: IsSettlement = (battle) => {
