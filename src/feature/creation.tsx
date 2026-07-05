@@ -14,15 +14,14 @@ import {
 } from '@mui/material';
 
 import { creationFormSchema } from '../form/creation';
-import { registerBattle, startBattle } from '../controller/start';
-import { buildNormalUnits } from '../model/unit';
+import { createBattle } from '../controller/create';
 import { NORMAL_STEP_BASE, NORMAL_UNIT_COUNT } from '../model/battle';
 import { useIO } from '../components/context';
 import { Container } from '../components/utility';
 
 export const BattleCreation: FC<{ version: string }> = ({ version }) => {
   const io = useIO();
-  const { local, piece: pieceRepository } = io;
+  const { local } = io;
 
   const {
     handleSubmit,
@@ -37,27 +36,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
   const [mode, setMode] = useState<CreationForm['mode']>('normal');
 
   const create = async (form: CreationForm) => {
-    if (form.mode === 'normal') {
-      const battle = await registerBattle(io)(
-        form.first_player_name,
-        form.second_player_name,
-        NORMAL_STEP_BASE,
-        NORMAL_UNIT_COUNT,
-        version,
-      );
-      const units = buildNormalUnits((key) => pieceRepository.get(key));
-      await startBattle(io)(battle, units);
-      local.transit(`/v1/?key=${battle.key}`);
-      return;
-    }
-
-    const battle = await registerBattle(io)(
-      form.first_player_name,
-      form.second_player_name,
-      form.stepBase,
-      form.unitCount,
-      version,
-    );
+    const battle = await createBattle(io)(form, version);
     local.transit(`/v1/?key=${battle.key}`);
   };
 

@@ -192,7 +192,7 @@ const ReceiverSelect: FC<{
 
 const SurrenderButton: FC<{ battle: Battle, actor: UnitReference }> = ({ battle, actor }) => {
   const io = useIO();
-  const doSurrender = () => surrender(io)(battle, actor, new Date());
+  const doSurrender = () => surrender(io)(battle, actor);
   return <Button variant='outlined' type="button" onClick={doSurrender}>降参</Button>;
 };
 

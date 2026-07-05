@@ -5,7 +5,7 @@ import type { Repository } from "../repository";
 
 import { doNothing, doAct } from "../model/battle";
 import { ORDER_DO_NOTHING } from "../model/turn";
-import { validateReceivers, ReceiverDuplicationError } from "../model/action";
+import { ReceiverDuplicationError } from "../model/action";
 import { toReceivers } from "../form/action";
 import { createResolvers } from "../repository";
 import { DataNotFoundError, UserCancel } from "../model/error";
@@ -20,27 +20,19 @@ export type Act = (
 export const act: Act = (repository) => async (battle, actor, doActionForm) => {
   const { battle: battleRepository, local } = repository;
 
+  if (!local.confirm("実行していいですか？")) {
+    return new UserCancel("Cancelされました");
+  }
+
   if (doActionForm.actionKey === ORDER_DO_NOTHING) {
-    if (!local.confirm("実行していいですか？")) {
-      return new UserCancel("Cancelされました");
-    }
     const newBattle = doNothing(battle, actor, local.now());
     await battleRepository.save(newBattle);
     return newBattle;
   }
 
   const receivers = toReceivers(doActionForm.receivers);
-  const duplication = validateReceivers(receivers);
-  if (duplication) {
-    return duplication;
-  }
-
-  if (!local.confirm("実行していいですか？")) {
-    return new UserCancel("Cancelされました");
-  }
-
   const result = doAct(battle, actor, doActionForm.actionKey, receivers, createResolvers(repository), local.now());
-  if (result instanceof DataNotFoundError) {
+  if (result instanceof DataNotFoundError || result instanceof ReceiverDuplicationError) {
     return result;
   }
 

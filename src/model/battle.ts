@@ -1,11 +1,13 @@
 import type { Turn, Order } from "./turn";
 import type { Unit, UnitReference } from "./unit";
+import type { GetPiece } from "./piece";
 import type { Resolvers } from "./resolver";
 
 import { z } from "zod";
 
 import { copyTurn, turnSchema, clearActorStatuses, applyActorCost } from "./turn";
-import { copyUnit } from "./unit";
+import { copyUnit, buildNormalUnits } from "./unit";
+import { validateReceivers, ReceiverDuplicationError } from "./action";
 import { DataNotFoundError } from "./error";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
@@ -105,6 +107,19 @@ export const start: Start = (units, datetime) => ({
   units: units.map(copyUnit),
 });
 
+// 編成中のbattleに編成済みunitsで先頭Turnを積み、対戦を開始する(copyBattle + start を一つにまとめる)。
+export type Format = (battle: Battle, units: Unit[], datetime: Date) => Battle;
+export const format: Format = (battle, units, datetime) => {
+  const newBattle = copyBattle(battle);
+  newBattle.turns.push(start(units, datetime));
+  return newBattle;
+};
+
+// 通常モードの編成: 固定の駒構成(buildNormalUnits)で開始する。unitsを引数に取らない。
+export type FormatNormal = (battle: Battle, getPiece: GetPiece, datetime: Date) => Battle;
+export const formatNormal: FormatNormal = (battle, getPiece, datetime) =>
+  format(battle, buildNormalUnits(getPiece), datetime);
+
 export type IsSettlement = (battle: Battle) => GameResult;
 export const isSettlement: IsSettlement = (battle) => {
   const lastTurn = arrayLast(battle.turns);
@@ -137,6 +152,15 @@ export const surrender: ModelSurrender = (battle, actor, datetime) => {
     order: { type: "SURRENDER", actor },
     units: lastTurn.units.map(copyUnit),
   };
+};
+
+// 投了: copyBattle・投了Turn追加・決着記録(isSettlement)を一つにまとめる。決着はisSettlementのSURRENDER分岐が判定する。
+export type SurrenderBattle = (battle: Battle, actor: UnitReference, datetime: Date) => Battle;
+export const surrenderBattle: SurrenderBattle = (battle, actor, datetime) => {
+  const newBattle = copyBattle(battle);
+  newBattle.turns.push(surrender(newBattle, actor, datetime));
+  newBattle.result = isSettlement(newBattle);
+  return newBattle;
 };
 
 // step15: spendTurnを doNothing / doAct に分割。共通処理(statusクリア→効果適用→cost消費→Turn追加→勝敗判定)はappendTurnへ。
@@ -179,8 +203,13 @@ export type DoAct = (
   receivers: UnitReference[],
   resolvers: Resolvers,
   datetime: Date,
-) => Battle | DataNotFoundError;
+) => Battle | DataNotFoundError | ReceiverDuplicationError;
 export const doAct: DoAct = (battle, actor, actionKey, receivers, resolvers, datetime) => {
+  // 受け手の重複はドメイン制約。技解決の前に検証する(旧controller act側の検証をここへ集約)。
+  const duplication = validateReceivers(receivers);
+  if (duplication) {
+    return duplication;
+  }
   const action = resolvers.getAction(actionKey);
   if (!action) {
     return new DataNotFoundError(actionKey, "action", `${actionKey}というactionは存在しません`);

@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 
 import { formationFormSchema, pieceSelectOption } from '../form/formation';
-import { startBattle } from '../controller/start';
+import { formatBattle } from '../controller/format';
 import { useIO } from '../components/context';
 import { Container } from '../components/utility';
 import { sideLabel } from '../components/label';
@@ -74,7 +74,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
   const undo = () => setUnits(units.slice(0, -1));
 
   const startGame = async () => {
-    await startBattle(io)(battle, units);
+    await formatBattle(io)(battle, units);
   };
 
   return (
