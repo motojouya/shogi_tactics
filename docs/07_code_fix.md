@@ -51,10 +51,10 @@
 
 ## src/pages/
 - [x] コメント削除
-- [ ] `guide/*`配下にindex.tsxを配置し、そこでpathを引数として渡す形を取る。stringが""ならばguideとすればいい。
-- [ ] guide/app.tsxのguideEntries,GuideIndexはfeatureに移動する
-- [ ] guide/app.tsxのNotFoundはcomponent/utility.tsxに移動して共通化
-- [ ] guide/piece/app.tsxはもしかしたら戦闘中画面と共通化できるかもだが、要検討
+- [x] `guide/*`配下にindex.tsxを配置し、そこでpathを引数として渡す形を取る。stringが""ならばguideとすればいい。
+- [x] guide/app.tsxのguideEntries,GuideIndexはfeatureに移動する
+- [x] guide/app.tsxのNotFoundはcomponent/utility.tsxに移動して共通化
+- [-] guide/piece/app.tsxはもしかしたら戦闘中画面と共通化できるかもだが、要検討
 - [ ] list/app.tsxで対戦中/編成中の判定ロジックはmodel側に持ちたい
 - [ ] list/app.tsxのonDeleteはcontrollerに移動
 - [ ] list/app.tsxのBattleSummary型は不要。battleがkeyを持っているし、不要なはず
