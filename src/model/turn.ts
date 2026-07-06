@@ -4,18 +4,13 @@ import { z } from "zod";
 
 import { copyUnit, sameUnit, unitSchema, unitReferenceSchema } from "./unit";
 
-// 何もしないを表すOrderのキー(form/UIの選択肢として利用)
 export const ORDER_DO_NOTHING = "DO_NOTHING";
 
-// step12: Order/Turnもzod schemaから型導出する。
-
-// 編成段階(unit決定中)。先頭Turnの初期状態にも用いる。
 export const formationSchema = z.object({
   type: z.literal("FORMATION"),
 });
 export type Formation = z.infer<typeof formationSchema>;
 
-// 技の実行。actionKey(過渡的にキー保持。実体解決はpresentation/step8)とactor/receiversはUnitReferenceで持つ。
 export const doActionSchema = z.object({
   type: z.literal("DO_ACTION"),
   actionKey: z.string(),
@@ -44,12 +39,11 @@ export const orderSchema = z.discriminatedUnion("type", [
 ]);
 export type Order = z.infer<typeof orderSchema>;
 
-// datetimeはmodel型(=保存型)でDateに統一。z.coerce.date()でJSON import時の文字列もDate化する。
 export const turnSchema = z.object({
   datetime: z.coerce.date(),
   previous: z.number().default(0), // 巻き戻し用。このTurnの直前Turnのindex(先頭=0)。default(0)で旧データ互換
   order: orderSchema,
-  units: z.array(unitSchema), // 行動適用・死亡除外後の全生存駒。steps昇順=次の行動順。初期値はlength=0
+  units: z.array(unitSchema),
 });
 export type Turn = z.infer<typeof turnSchema>;
 
@@ -88,14 +82,10 @@ export const copyTurn: CopyTurn = (turn) => ({
   units: turn.units.map(copyUnit),
 });
 
-// step15(S7/§7.4c): actorの行動進行(status失効・cost消費)はTurnの責務(actionはTurnを知らない)。
-
-// actorの持続statusは「次の自分の行動まで」有効なので、自分の行動開始時にクリアする。全unitをcopyして返す。
 export type ClearActorStatuses = (units: Unit[], actor: UnitReference) => Unit[];
 export const clearActorStatuses: ClearActorStatuses = (units, actor) =>
   units.map((unit) => (sameUnit(unit, actor) ? { ...copyUnit(unit), statuses: [] } : copyUnit(unit)));
 
-// 行動したactorのstepsをstepBase+cost進める(行動順が後ろへ下がる)。死亡除外・並べ替えはしない(行動順は算出側)。
 export type ApplyActorCost = (units: Unit[], actor: UnitReference, stepBase: number, cost: number) => Unit[];
 export const applyActorCost: ApplyActorCost = (units, actor, stepBase, cost) =>
   units.map((unit) => (sameUnit(unit, actor) ? { ...unit, steps: unit.steps + stepBase + cost } : unit));

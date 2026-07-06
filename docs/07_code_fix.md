@@ -82,6 +82,34 @@
 - [x] 文字列だけを出力するものは、label.tsに集めておきたい
 
 ## src/model/
+- [ ] src/feature/action.tsxのlastTurn,reload関数は不要な気がする。もともと最新turnを表示するか、現在ターンのままかをコントロールするためのものだったが、action実行したら、最新ターン表示になっているので、turnをstate管理する意味がない。
+- [ ] action.ts
+  - [x] コメント削除
+  - [ ] ReceiverDuplicationErrorはerror.tsに移動
+- [ ] battle.ts
+  - [x] コメント削除
+  - [ ] getFormationUnitsはturnに移動し、また判定としてOrderがformationのものを抽出。
+  - [ ] sortedUnits, nextActorは、feature/action.tsxの修正ができたらturnに移動する。またbattleからそれらを呼び出す関数(引数battle)を用意し、feature/action.tsxからはそちらを呼び出す。
+  - [ ] start関数はturn.tsに移動
+  - [ ] formatNormal,format,addFormationUnitのテストがない
+- [x] error.ts
+  - [x] コメント削除
+- [x] piece.ts
+  - [x] コメント削除
+- [x] resolver.ts
+  - [x] コメント削除
+- [ ] simulation.ts
+  - [x] コメント削除
+  - [ ] 内容はbattle.tsに移動する
+- [x] status.ts
+  - [x] コメント削除
+- [ ] turn.ts
+  - [x] コメント削除
+  - [ ] 関数にはテストを記述する
+  - [ ] applyActorCostでcopyUnit使ってない
+  - [ ] applyActorCost,clearActorStatusesは、unit.tsに移動
+- [ ] unit.ts
+  - [x] コメント削除
 
 ## その他
 - faviconの用意。将棋の駒だが、中は漢字ではなく十字になっているというものにするか。これなら簡単だ
