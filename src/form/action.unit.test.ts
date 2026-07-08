@@ -28,12 +28,12 @@ describe("formAction#toReceivers", function () {
 describe("formAction#receiverSelectOption", function () {
   const toOption = receiverSelectOption(pieceRepository);
 
-  it("UnitReferenceをvalue/labelのSelectOptionへ変換する(先手は`先`、labelは駒名)", function () {
-    expect(toOption({ side: "FIRST", piece: "king" })).toEqual({ value: "FIRST:king", label: "先:将軍" });
+  it("UnitReferenceをvalue/labelのSelectOptionへ変換する(先手は`先`、labelはname（shogiName）)", function () {
+    expect(toOption({ side: "FIRST", piece: "king" })).toEqual({ value: "FIRST:king", label: "先:将軍（王将）" });
   });
 
-  it("後手は`後`、labelは駒名になる", function () {
-    expect(toOption({ side: "SECOND", piece: "gold" })).toEqual({ value: "SECOND:gold", label: "後:重装兵" });
+  it("後手は`後`、labelはname（shogiName）になる", function () {
+    expect(toOption({ side: "SECOND", piece: "gold" })).toEqual({ value: "SECOND:gold", label: "後:重装兵（金将）" });
   });
 
   it("未知の駒キーはlabelにキーをそのまま使う", function () {

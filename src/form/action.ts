@@ -29,7 +29,7 @@ export const receiverSelectOption: ReceiverSelectOption = (pieceRepository) => (
   const piece = pieceRepository.get(reference.piece);
   return {
     value: `${reference.side}:${reference.piece}`,
-    label: `${sideLabel(reference)}:${piece ? piece.name : reference.piece}`,
+    label: `${sideLabel(reference)}:${piece ? `${piece.name}（${piece.shogiName}）` : reference.piece}`,
   };
 };
 

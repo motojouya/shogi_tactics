@@ -74,13 +74,13 @@ test("docs/06 シナリオ: 通常モード(降参) / 戦乱モード(対戦し�
       }
       await page.getByRole("button", { name: "この駒" }).click();
     };
-    await addUnit("将軍", true); // 先手1: リーダー
-    await addUnit("軽弓", true); // 後手1: リーダー(遠隔攻撃)
-    await addUnit("重装兵", false); // 先手2
-    await addUnit("薬師", false); // 後手2(近接攻撃)
-    await addUnit("強弓", false); // 先手3
+    await addUnit("将軍（王将）", true); // 先手1: リーダー
+    await addUnit("軽弓（飛車）", true); // 後手1: リーダー(遠隔攻撃)
+    await addUnit("重装兵（金将）", false); // 先手2
+    await addUnit("薬師（歩兵）", false); // 後手2(近接攻撃)
+    await addUnit("強弓（角行）", false); // 先手3
     // 後手3(最後の駒)。追加した時点でrosterが揃い、そのまま対戦画面へ自動遷移する。
-    await addUnit("野伏", false); // 後手3
+    await addUnit("野伏（銀将）", false); // 後手3
 
     // 対戦中画面の表示(行動主のサイドバッヂが出る)。
     await expect(page.getByTestId("actor-side")).toBeVisible();
@@ -113,7 +113,7 @@ test("docs/06 シナリオ: 通常モード(降参) / 戦乱モード(対戦し�
         } else {
           await page.getByRole("option", { name: "遠隔攻撃（コスト2）", exact: true }).click();
         }
-        await selectOption(page, receiverSelect(page), "先:将軍");
+        await selectOption(page, receiverSelect(page), "先:将軍（王将）");
       }
       await page.getByRole("button", { name: "実行" }).click();
       await page.waitForTimeout(300);
