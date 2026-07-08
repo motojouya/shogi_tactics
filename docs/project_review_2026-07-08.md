@@ -100,13 +100,15 @@
 
   > 対応内容: battle.ts に検証を追加し `InvalidArgumentError` を値で返す既存規約で防御。doAct/doNothing は「決着済み」「actorが手番(nextActor)のunitか」を検証(nextActorは生存unitのみから算出されるため死亡actorも弾かれる)。doAct はさらに「receiverCountの上限」「全receiverが action.filter の候補に含まれるか」を検証(死亡unitの蘇生防止)。surrenderBattle は「決着済み」を検証。controller(act.ts/surrender.ts)とUI(action.tsx)にエラー伝搬の分岐を追加し、ガード6件の単体テストを新設(計189件)。テスト・lint・build・E2Eで確認済み。なお編成系API(addFormationUnit等)のガードは指摘7として別途。
 - 【中】~~**chargeMelee の name/description が heavyMelee と完全重複**【検証済み】(`src/data/action/chargeMelee.ts:7-8`): 違いはkeyとcost(7 vs 2)のみ。UIでは「近接強撃(コスト7)」と「近接強撃(コスト2)」が同名で並ぶ。桂馬用の技名のコピペ漏れの可能性が高い。~~(2026-07-08 オーナー確認: 意図的な仕様のため対応不要)
-- 【中】**substitute の reachLength:0 と reachRange の不整合**(`src/data/action/substitute.ts:13,19-27`): 他の自己対象アクション(arrowDodgeStance等)は中心のみだが、substituteだけ隣接4マスにも到達可の行列。healing.tsからのコピペ疑い。reachRangeはアクション表として表示されるためどちらかが誤り。
-- 【中/要仕様確認】**spearAttack/strongSpear の receiverCount:2 と説明文の不整合**: 説明「2マス先まで届く攻撃」に対し受け手2体選択可・2体ともダメージ。effectLength=1 とも食い違う。貫通仕様なら piercingArrow と表現を揃えるべき。
-- 【低】`arrayLast` の型の嘘(`src/model/battle.ts:31`): 戻り値 `T` 実際は `T | undefined`。`battleSchema` は `turns: []` を許容するため、保存データ経由で `turns[0]` アクセスがTypeErrorになる経路が存在。
+- 【中】**substitute の reachLength:0 と reachRange の不整合**(`src/data/action/substitute.ts:13,19-27`): 他の自己対象アクション(arrowDodgeStance等)は中心のみだが、substituteだけ隣接4マスにも到達可の行列。healing.tsからのコピペ疑い。reachRangeはアクション表として表示されるためどちらかが誤り。(2026-07-08 オーナー判断: 対応しない)
+- 【中/要仕様確認】**spearAttack/strongSpear の receiverCount:2 と説明文の不整合**: 説明「2マス先まで届く攻撃」に対し受け手2体選択可・2体ともダメージ。~~effectLength=1 とも食い違う~~(H1対応でeffectLength=2に変更済み)。貫通仕様なら piercingArrow と表現を揃えるべき。(2026-07-08 オーナー判断: 対応しない)
+- 【低】`arrayLast` の型の嘘(`src/model/battle.ts:31`): 戻り値 `T` 実際は `T | undefined`。`battleSchema` は `turns: []` を許容するため、保存データ経由で `turns[0]` アクセスがTypeErrorになる経路が存在。(2026-07-08 オーナー判断: 対応しない)
 - 【低】~~編成系API(`addFormationUnit`/`undoFormationUnit`)に状態遷移ガードなし。対戦開始後でも編成turnを書き換え可能。unitCount上限・手番チェックもUI側のみ。~~(対応済み 2026-07-08)
 
   > 対応内容: addFormationUnit に「編成中のみ」「手番のside(nextFormationSide)のみ」「同一駒の重複不可」のガードを追加(上限到達は手番ガードで弾かれる)。undoFormationUnit に「編成中のみ」「空編成では不可」のガードを追加。いずれも `InvalidArgumentError` を値で返し、controller(add_unit.ts/undo_unit.ts)がsaveせず伝搬する。既存テストを手番ルール(先手→後手の交互)に沿ったフィクスチャに修正し、ガードテストを追加(計195件)。あわせてE2Eの手番間待機を300ms→1000msに延長(保存→liveQuery反映前に次の手を打つレースの解消)。テスト・lint・build・E2E(2回連続)で確認済み。
-- 【低】`effectHeal` のresolver欠損時サイレントno-op(`src/model/action.ts:72`)。他所の DataNotFoundError 方針と不一致。
+- 【低】~~`effectHeal` のresolver欠損時サイレントno-op(`src/model/action.ts:72`)。他所の DataNotFoundError 方針と不一致。~~(対応済み 2026-07-08)
+
+  > 対応内容: `Act` 関数の戻り値にはエラーチャネルがないため、エラーを返せる `doAct` 側で「全receiverのpieceがresolverで解決できること」を検証し、解決できない場合は `DataNotFoundError` を返すようにした(battle.ts)。effectHeal内の `?? unit.hp` フォールバックはsimulate(プレビュー)経路の防御として残置。テストのresolversフィクスチャを実pieceを返す形に更新し、ガードのテストを追加(計196件)。テスト・lint・build・E2Eで確認済み。
 - 【低】`simulate` は `clearActorStatuses` を通さないため、actor自身をreceiverにした場合プレビューと実行結果がズレ得る(`src/model/battle.ts:289-297`)。
 - 【低】error.ts のエラークラスが `Error` 非継承。stackが取れず、テストの判別方法(`"message" in result`)が脆い。
 - 【低】`Action.effectLength` はどこからも参照されない死にフィールド。値の狂いに気づけない温床。

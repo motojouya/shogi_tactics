@@ -319,6 +319,11 @@ export const doAct: DoAct = (battle, actor, actionKey, receivers, resolvers, dat
   if (!receivers.every((receiver) => candidates.some((candidate) => sameUnit(candidate, receiver)))) {
     return new InvalidArgumentError("receivers", "対象にできないunitが含まれています");
   }
+  for (const receiver of receivers) {
+    if (!resolvers.getPiece(receiver.piece)) {
+      return new DataNotFoundError(receiver.piece, "piece", `${receiver.piece}というpieceは存在しません`);
+    }
+  }
   const order: Order = { type: "DO_ACTION", actionKey: action.key, actor, receivers };
   return appendTurn(battle, actor, order, action.cost, datetime, (units) =>
     action.act(actor, receivers, units, resolvers.getPiece),

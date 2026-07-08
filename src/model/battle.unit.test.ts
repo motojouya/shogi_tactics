@@ -30,7 +30,7 @@ import {
 } from "./battle";
 import { start } from "./turn";
 import { buildAction, effectBaseDamage, filterAlive } from "./action";
-import { InvalidArgumentError } from "./error";
+import { InvalidArgumentError, DataNotFoundError } from "./error";
 
 // createBattleはBattle | InvalidArgumentErrorを返す。正常入力を前提とするテスト向けにBattleへ絞り込む。
 const mustCreate = (
@@ -80,10 +80,20 @@ const makeBattle = (units: Unit[], stepBase = 2): Battle => {
 
 const ref = (side: "FIRST" | "SECOND", piece: string): UnitReference => ({ side, piece });
 
-// doActはresolvers.getActionでactionを解決する。テスト用Action(key="atk")を返す。getPieceは未使用(null固定)。
+const mkPiece = (key: string, maxHP = 3): Piece => ({
+  key,
+  name: key,
+  shogiName: key,
+  description: "",
+  MaxHP: maxHP,
+  move: 3,
+  actions: [],
+});
+
+// doActはresolvers.getActionでactionを解決し、getPieceでreceiverのpieceの存在を検証する。
 const resolvers = {
   getAction: (key: string) => (key === "atk" ? attack : null),
-  getPiece: () => null,
+  getPiece: (key: string) => mkPiece(key),
   getStatus: () => null,
 };
 
@@ -267,6 +277,16 @@ describe("Battle#doAct/doNothing/surrenderBattle 検証", function () {
     }
   });
 
+  it("pieceが解決できないreceiverはDataNotFoundErrorを返す(healの回復量0でのサイレント成功を防ぐ)", function () {
+    const battle = makeBattle(aliveUnits());
+    const noPiece = { ...resolvers, getPiece: () => null };
+    const result = doAct(battle, ref("FIRST", "king"), "atk", [ref("SECOND", "pawn")], noPiece, new Date());
+    expect(result).toBeInstanceOf(DataNotFoundError);
+    if (result instanceof DataNotFoundError) {
+      expect(result.type).toBe("piece");
+    }
+  });
+
   it("決着済み/手番でないunitはdoNothingできない", function () {
     const settled = makeBattle(aliveUnits());
     settled.result = GameFirst;
@@ -362,16 +382,6 @@ describe("Battle#通常モード定数", function () {
     expect(NORMAL_UNIT_COUNT).toBe(7);
     expect(NORMAL_STEP_BASE).toBe(14);
   });
-});
-
-const mkPiece = (key: string, maxHP = 3): Piece => ({
-  key,
-  name: key,
-  shogiName: key,
-  description: "",
-  MaxHP: maxHP,
-  move: 3,
-  actions: [],
 });
 
 describe("Battle#format / formatNormal", function () {
