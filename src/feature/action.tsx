@@ -47,6 +47,7 @@ import {
 } from '../form/action';
 import { ReceiverDuplicationError, DataNotFoundError, UserCancel, InvalidArgumentError } from '../model/error';
 import { act } from '../controller/act';
+import { undoAct } from '../controller/undo_act';
 import { surrender } from '../controller/surrender';
 import { useIO } from '../components/context';
 import { createResolvers } from '../repository';
@@ -248,6 +249,19 @@ export const BattleAction: FC<{ battle: Battle }> = ({ battle }) => {
     reset();
   };
 
+  const doUndoTurn = async () => {
+    const result = await undoAct(io)(battle);
+    if (result instanceof InvalidArgumentError || result instanceof UserCancel) {
+      setMessage(result.message);
+      return;
+    }
+    setMessage('');
+    setSelectedAction(null);
+    setSimulated([]);
+    replace([]);
+    reset();
+  };
+
   const addReceiver = (index: number) => () => {
     if (!actor || !selectedAction) {
       return;
@@ -283,7 +297,12 @@ export const BattleAction: FC<{ battle: Battle }> = ({ battle }) => {
             <Stack sx={{ flex: "0 0 70px", justifyContent: "center" }}><Typography>戦闘開始</Typography></Stack>
             <Box sx={{ flex: "1 1 auto" }}>
               {battle.result !== GameOngoing && (
-                <Button type="button" variant='outlined' onClick={() => battleRepository.exportJson(battle, '')}>Export</Button>
+                <Stack direction="row" sx={{ columnGap: 1 }}>
+                  {battle.turns.length >= 2 && (
+                    <Button type="button" variant='outlined' onClick={doUndoTurn}>1手戻す</Button>
+                  )}
+                  <Button type="button" variant='outlined' onClick={() => battleRepository.exportJson(battle, '')}>Export</Button>
+                </Stack>
               )}
             </Box>
           </Stack>
@@ -345,6 +364,11 @@ export const BattleAction: FC<{ battle: Battle }> = ({ battle }) => {
                 <Box sx={{ px: 1 }}>
                   <Button type="submit" variant='outlined' sx={{ px: 1 }}>実行</Button>
                 </Box>
+                {battle.turns.length >= 2 && (
+                  <Box sx={{ px: 1 }}>
+                    <Button type="button" variant='outlined' onClick={doUndoTurn}>1手戻す</Button>
+                  </Box>
+                )}
                 <Box sx={{ px: 1 }}>
                   <SurrenderButton battle={battle} actor={actor} />
                 </Box>

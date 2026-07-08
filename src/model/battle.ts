@@ -330,6 +330,17 @@ export const doAct: DoAct = (battle, actor, actionKey, receivers, resolvers, dat
   );
 };
 
+export type UndoTurn = (battle: Battle) => Battle | InvalidArgumentError;
+export const undoTurn: UndoTurn = (battle) => {
+  if (battle.turns.length < 2) {
+    return new InvalidArgumentError("battle", "取り消せる行動がありません");
+  }
+  const newBattle = copyBattle(battle);
+  newBattle.turns = newBattle.turns.slice(0, -1);
+  newBattle.result = isSettlement(newBattle);
+  return newBattle;
+};
+
 export type Simulated = { survive: boolean; unit: Unit | null };
 
 export type Simulate = (

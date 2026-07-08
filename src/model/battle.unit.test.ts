@@ -8,6 +8,7 @@ import {
   createBattle,
   doNothing,
   doAct,
+  undoTurn,
   surrender,
   surrenderBattle,
   isSettlement,
@@ -226,6 +227,56 @@ describe("Battle#doNothing", function () {
     const king = last.units.find((unit) => unit.piece === "king");
     expect(king?.statuses).toEqual([]); // 自分の行動で失効
     expect(king?.steps).toBe(2); // 0 + stepBase2 + cost0
+  });
+});
+
+describe("Battle#undoTurn", function () {
+  const units = (): Unit[] => [
+    { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+    { side: "SECOND", piece: "pawn", hp: 2, steps: 2, statuses: [], leader: true },
+  ];
+
+  it("直前の行動を取り消して1手前の状態に戻す(元battleは不変)", function () {
+    const battle = makeBattle(units());
+    const acted = doNothing(battle, ref("FIRST", "king"), new Date());
+    if (acted instanceof InvalidArgumentError) {
+      expect.unreachable("doNothing should succeed");
+      return;
+    }
+    expect(acted.turns.length).toBe(2);
+
+    const undone = undoTurn(acted);
+    if (undone instanceof InvalidArgumentError) {
+      expect.unreachable("undoTurn should succeed");
+      return;
+    }
+    expect(undone.turns.length).toBe(1);
+    expect(getLastTurn(undone).units).toEqual(getLastTurn(battle).units); // steps加算前に戻る
+    expect(acted.turns.length).toBe(2); // 元battleは不変
+  });
+
+  it("決着した最後の一手を取り消すとONGOINGに戻る(誤入力での決着から復帰できる)", function () {
+    const battle = makeBattle(units());
+    const acted = doAct(battle, ref("FIRST", "king"), "atk", [ref("SECOND", "pawn")], resolvers, new Date());
+    if (acted instanceof Error || "message" in acted) {
+      expect.unreachable("doAct should succeed");
+      return;
+    }
+    expect(acted.result).toBe(GameFirst); // pawn(hp2)がbaseDamage2で死亡し決着
+
+    const undone = undoTurn(acted);
+    if (undone instanceof InvalidArgumentError) {
+      expect.unreachable("undoTurn should succeed");
+      return;
+    }
+    expect(undone.result).toBe(GameOngoing);
+    const pawn = getLastTurn(undone).units.find((unit) => unit.piece === "pawn");
+    expect(pawn?.hp).toBe(2);
+  });
+
+  it("編成turnしかない場合は取り消せない", function () {
+    const battle = makeBattle(units());
+    expect(undoTurn(battle)).toBeInstanceOf(InvalidArgumentError);
   });
 });
 

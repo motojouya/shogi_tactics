@@ -93,6 +93,14 @@ test("docs/06 シナリオ: 通常モード(降参) / 戦乱モード(対戦し�
     await page.getByRole("link", { name: warRowText }).click();
     await expect(page.getByTestId("actor-side")).toBeVisible();
 
+    // 1手戻す: 先手が「何もしない」を実行した後に取り消すと、先手のターンに戻る。
+    await expect(page.getByTestId("actor-side")).toHaveText("先手");
+    await selectOption(page, actionSelect(page), "何もしない");
+    await page.getByRole("button", { name: "実行" }).click();
+    await expect(page.getByTestId("actor-side")).toHaveText("後手");
+    await page.getByRole("button", { name: "1手戻す" }).click();
+    await expect(page.getByTestId("actor-side")).toHaveText("先手");
+
     // ターンを経過させ、後手の攻撃で先手の将軍(リーダー)を倒す。
     // 先手のターンは何もしない、後手のターンは先手の将軍を攻撃する。
     for (let i = 0; i < 12; i++) {

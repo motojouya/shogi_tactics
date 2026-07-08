@@ -37,7 +37,7 @@
 |---|---|---|---|
 | H1 | ロジック | ~~`arrowDodge`(矢かわし)が軽弓の「遠隔範囲」に効かない~~(対応済み 2026-07-08) | `src/model/action.ts:38,45` / `src/data/action/rangedSpread.ts:13` |
 | H2 | 運用 | ~~デプロイが check.yml の成否と無関係に実行される~~(対応済み 2026-07-08) | `.github/workflows/gh-pages.yml` |
-| H3 | 機能デザイン | 対戦中の誤入力を訂正する手段がない | `src/model/battle.ts:185-190` / `src/controller/act.ts:22` |
+| H3 | 機能デザイン | ~~対戦中の誤入力を訂正する手段がない~~(対応済み 2026-07-08) | `src/model/battle.ts:185-190` / `src/controller/act.ts:22` |
 | H4 | UI | ~~ロード中に「〜というbattleは見つかりません」が一瞬表示される~~(対応済み 2026-07-08) | `src/pages/v1/app.tsx:20,35` |
 
 ### ~~H1. arrowDodge が rangedSpread に効かない(データ不整合)~~【検証済み】(対応済み 2026-07-08)
@@ -56,9 +56,11 @@
 
 > 対応内容: `gh-pages.yml` のトリガーを `push` から `workflow_run`(Check完了時)に変更し、`if` でCheck成功(push起因)のみ実行するよう条件付け。checkoutは検証済みコミット(`workflow_run.head_sha`)を使用。`workflow_dispatch` による手動デプロイは従来どおり可能。
 
-### H3. 対戦中の誤入力を訂正できない
+### ~~H3. 対戦中の誤入力を訂正できない~~(対応済み 2026-07-08)
 
-取り消しは編成中の「1手戻し」のみ(`src/controller/undo_unit.ts`)。対戦開始後は `confirm("実行していいですか？")`(`src/controller/act.ts:22`)が唯一の防御。本アプリはHP・行動順の**唯一の記録者**であり、1プレイ30分〜1時間(`src/guide/tutorial.md:6`)の終盤での誤入力はセッションを台無しにしうる。Battleは全ターンを追記型配列で保持しており(`src/model/battle.ts:143-159`)、「直前ターンの取り消し」は構造上実装しやすい。目的に照らして最も欠けている機能。
+~~取り消しは編成中の「1手戻し」のみ(`src/controller/undo_unit.ts`)。対戦開始後は `confirm("実行していいですか？")`(`src/controller/act.ts:22`)が唯一の防御。本アプリはHP・行動順の**唯一の記録者**であり、1プレイ30分〜1時間(`src/guide/tutorial.md:6`)の終盤での誤入力はセッションを台無しにしうる。Battleは全ターンを追記型配列で保持しており(`src/model/battle.ts:143-159`)、「直前ターンの取り消し」は構造上実装しやすい。目的に照らして最も欠けている機能。~~
+
+> 対応内容: 「1手戻す」機能を追加。model `undoTurn`(battle.ts)が最後のターンを取り除き `result` を再計算する(編成turnのみの場合はエラー)。決着済みでも取り消せるため、誤入力で決着してしまった場合も復帰できる。controller `undoAct`(undo_act.ts)は確認ダイアログ「直前の行動を取り消しますか？」を挟んで保存。UI(action.tsx)は対戦中の実行/降参ボタン列と決着後のExport横に「1手戻す」ボタンを表示し、取り消し後はフォーム状態をリセットする。単体テスト(model 3件+controller 3件、計206件)とE2Eの取り消し往復ステップを追加。テスト・lint・build・E2E(2回連続)で確認済み。
 
 ### ~~H4. useLiveQuery のロード中と not found を区別していない~~(対応済み 2026-07-08)
 
@@ -76,7 +78,7 @@
 
 指摘:
 
-- 【高】対戦中の訂正手段なし(→ H3)
+- 【高】~~対戦中の訂正手段なし~~(→ H3、対応済み)
 - 【中】**Export/Importが非対称で引き継ぎ手段が実質未完成**: `importJson` はリポジトリ層に実装済み(`src/repository/battle.ts:50-53`)だがUIから呼ぶ箇所がゼロ(デッドコード)。Exportも決着後のみ表示(`src/feature/action.tsx:281-284`)。端末変更・ブラウザデータ消去への備えがなく、対戦中のバックアップも取れない。
 - 【中】**Export/ImportがFile System Access API依存**(`src/repository/utility.ts:29-44`): `showSaveFilePicker` はSafari(iOS含む)・Firefox未対応のため、卓上でスマホ/タブレットを使うシーンで動作しない環境が多い。Blobダウンロード方式への変更を推奨。
 - 【中】**PWAマニフェストに icons がない**(`vite.config.ts` のmanifest定義)【検証済み】: Chromeのインストール要件(192px/512px)を満たさず、「ホーム画面に追加して卓上で使う」というPWAの目的を損なう。
@@ -246,7 +248,7 @@ strict TypeScript で全体の規律は良好。`any` は実質 `src/feature/act
    - chargeMelee の name/description 修正、substitute の reachRange 修正
    - markdown.tsx の urlTransform を defaultUrlTransform ラップに
 2. **次に(機能の完成度)**
-   - H3: 対戦中の直前ターン取り消し機能
+   - ~~H3: 対戦中の直前ターン取り消し機能~~(対応済み)
    - importJson のUI配線(またはexport含め機能ごと削除の判断)+ Blobダウンロード方式化 + PWA icons追加
    - ErrorBoundary導入、Exportキャンセルのcatch
 3. **継続的に(構造・保守性)**
