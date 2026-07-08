@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import type { CreationForm } from '../form/creation';
 
+import { useState } from 'react';
 import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -14,6 +15,7 @@ import {
 
 import { creationFormSchema, creationFormDefault } from '../form/creation';
 import { createBattle } from '../controller/create';
+import { InvalidArgumentError } from '../model/error';
 import { useIO } from '../components/context';
 import { Container } from '../components/utility';
 
@@ -33,14 +35,26 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
 
   const mode = useWatch({ control, name: 'mode' });
 
+  const [message, setMessage] = useState('');
+
   const create = async (form: CreationForm) => {
     const battle = await createBattle(io)(form, version);
+    if (battle instanceof InvalidArgumentError) {
+      setMessage(battle.message);
+      return;
+    }
+    setMessage('');
     local.transit(`/v1/?key=${battle.key}`);
   };
 
   return (
     <Container backLink="/list/">
       <Typography>対戦の設定</Typography>
+      {message && (
+        <Typography color="error" sx={{ p: 1 }}>
+          {message}
+        </Typography>
+      )}
       <form onSubmit={handleSubmit(create)}>
         <Stack>
           <Box sx={{ p: 1 }}>
@@ -92,7 +106,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
                   type="number"
                   error={!!errors.stepBase}
                   label="基礎コスト"
-                  placeholder="1以上"
+                  placeholder="1〜999"
                   variant="outlined"
                   {...register('stepBase', { valueAsNumber: true })}
                   helperText={errors.stepBase && errors.stepBase.message}
@@ -105,7 +119,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
                   type="number"
                   error={!!errors.unitCount}
                   label="ユニット数"
-                  placeholder="1以上"
+                  placeholder="1〜14"
                   variant="outlined"
                   {...register('unitCount', { valueAsNumber: true })}
                   helperText={errors.unitCount && errors.unitCount.message}

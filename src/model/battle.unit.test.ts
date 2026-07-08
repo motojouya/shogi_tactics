@@ -22,11 +22,29 @@ import {
   GameFirst,
   GameSecond,
   GameDraw,
+  validateBattleArgs,
   NORMAL_UNIT_COUNT,
   NORMAL_STEP_BASE,
 } from "./battle";
 import { start } from "./turn";
 import { buildAction, effectBaseDamage, filterAlive } from "./action";
+import { InvalidArgumentError } from "./error";
+
+// createBattleはBattle | InvalidArgumentErrorを返す。正常入力を前提とするテスト向けにBattleへ絞り込む。
+const mustCreate = (
+  key: string,
+  first: string,
+  second: string,
+  stepBase: number,
+  unitCount: number,
+  version: string,
+): Battle => {
+  const battle = createBattle(key, first, second, stepBase, unitCount, version);
+  if (battle instanceof InvalidArgumentError) {
+    throw battle;
+  }
+  return battle;
+};
 
 const zeros7 = Array.from({ length: 7 }, () => [0, 0, 0, 0, 0, 0, 0]);
 
@@ -53,7 +71,7 @@ const attack = buildAction(
 );
 
 const makeBattle = (units: Unit[], stepBase = 2): Battle => {
-  const battle = createBattle("key", "first", "second", stepBase, units.length, "v1");
+  const battle = mustCreate("key", "first", "second", stepBase, units.length, "v1");
   battle.turns.push(start(units, new Date("2024-01-01T00:00:00")));
   return battle;
 };
@@ -69,11 +87,57 @@ const resolvers = {
 
 describe("Battle#createBattle", function () {
   it("骨格(turns=[])を生成する", function () {
-    const battle = createBattle("key", "first", "second", 4, 2, "v1");
+    const battle = mustCreate("key", "first", "second", 4, 2, "v1");
     expect(battle.turns.length).toBe(0);
     expect(battle.result).toBe(GameOngoing);
     expect(battle.stepBase).toBe(4);
     expect(battle.unitCount).toBe(2);
+  });
+
+  it("不正な引数ならInvalidArgumentErrorを返す(名前31文字/stepBase範囲外/unitCount範囲外)", function () {
+    const longName = "あ".repeat(31);
+    const nameError = createBattle("key", longName, "second", 4, 2, "v1");
+    expect(nameError).toBeInstanceOf(InvalidArgumentError);
+    if (nameError instanceof InvalidArgumentError) {
+      expect(nameError.name).toBe("first_player_name");
+    }
+
+    expect(createBattle("key", "first", "second", 1000, 2, "v1")).toBeInstanceOf(InvalidArgumentError);
+    expect(createBattle("key", "first", "second", 0, 2, "v1")).toBeInstanceOf(InvalidArgumentError);
+    expect(createBattle("key", "first", "second", 4, 15, "v1")).toBeInstanceOf(InvalidArgumentError);
+    expect(createBattle("key", "first", "second", 4, 0, "v1")).toBeInstanceOf(InvalidArgumentError);
+  });
+
+  it("境界値(名前30文字/stepBase1・999/unitCount1・14)は許容する", function () {
+    expect(mustCreate("key", "あ".repeat(30), "second", 999, 14, "v1").stepBase).toBe(999);
+    expect(mustCreate("key", "first", "second", 1, 1, "v1").unitCount).toBe(1);
+  });
+});
+
+describe("Battle#validateBattleArgs", function () {
+  it("正常な引数ならnullを返す", function () {
+    expect(validateBattleArgs("first", "second", 4, 2)).toBeNull();
+  });
+
+  it("先手名が空ならfirst_player_nameのエラー", function () {
+    const error = validateBattleArgs("", "second", 4, 2);
+    expect(error).toBeInstanceOf(InvalidArgumentError);
+    expect(error?.name).toBe("first_player_name");
+  });
+
+  it("後手名が31文字ならsecond_player_nameのエラー", function () {
+    const error = validateBattleArgs("first", "い".repeat(31), 4, 2);
+    expect(error?.name).toBe("second_player_name");
+  });
+
+  it("stepBaseが非整数ならstepBaseのエラー", function () {
+    const error = validateBattleArgs("first", "second", 1.5, 2);
+    expect(error?.name).toBe("stepBase");
+  });
+
+  it("unitCountが15ならunitCountのエラー", function () {
+    const error = validateBattleArgs("first", "second", 4, 15);
+    expect(error?.name).toBe("unitCount");
   });
 });
 
@@ -237,7 +301,7 @@ const mkPiece = (key: string, maxHP = 3): Piece => ({
 
 describe("Battle#format / formatNormal", function () {
   it("formatは先頭にFORMATION turnを追加する(元battleは不変)", function () {
-    const skeleton = createBattle("key", "first", "second", 2, 3, "v1");
+    const skeleton = mustCreate("key", "first", "second", 2, 3, "v1");
     const units: Unit[] = [{ side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true }];
     const battle = format(skeleton, units, new Date("2024-01-01T00:00:00"));
     expect(battle.turns.length).toBe(1);
@@ -247,7 +311,7 @@ describe("Battle#format / formatNormal", function () {
   });
 
   it("formatNormalは固定7種×2陣営=14駒でFORMATION turnを作る", function () {
-    const skeleton = createBattle("key", "first", "second", 14, 7, "v1");
+    const skeleton = mustCreate("key", "first", "second", 14, 7, "v1");
     const battle = formatNormal(skeleton, mkPiece, new Date("2024-01-01T00:00:00"));
     const units = getFormationUnits(battle);
     expect(units.length).toBe(14);
@@ -258,7 +322,7 @@ describe("Battle#format / formatNormal", function () {
 
 describe("Battle#addFormationUnit", function () {
   const emptyFormation = (): Battle =>
-    format(createBattle("key", "first", "second", 2, 3, "v1"), [], new Date("2024-01-01T00:00:00"));
+    format(mustCreate("key", "first", "second", 2, 3, "v1"), [], new Date("2024-01-01T00:00:00"));
 
   it("駒を編成turnに追加する(hp=MaxHP・leader反映、元battleは不変)", function () {
     const before = emptyFormation();
