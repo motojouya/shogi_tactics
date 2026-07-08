@@ -38,7 +38,7 @@
 | H1 | ロジック | `arrowDodge`(矢かわし)が軽弓の「遠隔範囲」に効かない | `src/model/action.ts:38,45` / `src/data/action/rangedSpread.ts:13` |
 | H2 | 運用 | ~~デプロイが check.yml の成否と無関係に実行される~~(対応済み 2026-07-08) | `.github/workflows/gh-pages.yml` |
 | H3 | 機能デザイン | 対戦中の誤入力を訂正する手段がない | `src/model/battle.ts:185-190` / `src/controller/act.ts:22` |
-| H4 | UI | ロード中に「〜というbattleは見つかりません」が一瞬表示される | `src/pages/v1/app.tsx:20,35` |
+| H4 | UI | ~~ロード中に「〜というbattleは見つかりません」が一瞬表示される~~(対応済み 2026-07-08) | `src/pages/v1/app.tsx:20,35` |
 
 ### H1. arrowDodge が rangedSpread に効かない(データ不整合)【検証済み】
 
@@ -60,9 +60,11 @@
 
 取り消しは編成中の「1手戻し」のみ(`src/controller/undo_unit.ts`)。対戦開始後は `confirm("実行していいですか？")`(`src/controller/act.ts:22`)が唯一の防御。本アプリはHP・行動順の**唯一の記録者**であり、1プレイ30分〜1時間(`src/guide/tutorial.md:6`)の終盤での誤入力はセッションを台無しにしうる。Battleは全ターンを追記型配列で保持しており(`src/model/battle.ts:143-159`)、「直前ターンの取り消し」は構造上実装しやすい。目的に照らして最も欠けている機能。
 
-### H4. useLiveQuery のロード中と not found を区別していない
+### ~~H4. useLiveQuery のロード中と not found を区別していない~~(対応済み 2026-07-08)
 
-`useLiveQuery` はクエリ解決前に `undefined` を返すため、正当なkeyでも初回レンダーで必ず「〜というbattleは見つかりません」がフラッシュ表示される(`src/pages/v1/app.tsx:20,35`)。`undefined`(ロード中)と `null`(不在)を分岐すべき。`src/pages/list/app.tsx:33` は同じ状況を正しく扱えており、対応が非対称。
+~~`useLiveQuery` はクエリ解決前に `undefined` を返すため、正当なkeyでも初回レンダーで必ず「〜というbattleは見つかりません」がフラッシュ表示される(`src/pages/v1/app.tsx:20,35`)。`undefined`(ロード中)と `null`(不在)を分岐すべき。`src/pages/list/app.tsx:33` は同じ状況を正しく扱えており、対応が非対称。~~
+
+> 対応内容: `battle === undefined`(ロード中)でloading表示を返す分岐を追加し、not found判定を `battle === null` の厳密比較に変更(src/pages/v1/app.tsx)。build/lint/E2Eで確認済み。
 
 ---
 
@@ -145,7 +147,7 @@ strict TypeScript で全体の規律は良好。`any` は実質 `src/feature/act
 
 指摘:
 
-- 【高】useLiveQuery のロード中フラッシュ(→ H4)
+- 【高】~~useLiveQuery のロード中フラッシュ~~(→ H4、対応済み)
 - 【中】**ErrorBoundaryが一切ない**: レンダー中の例外・`useIO` のthrow・JSON.parse失敗はすべて真っ白な画面になる。各ページの createRoot 直下に最低1つ推奨。
 - 【中】**Exportボタンのキャンセルで未処理rejection**(`src/feature/action.tsx:282`): `showSaveFilePicker` のキャンセルは `AbortError` をthrowするが誰もcatchしない。また第2引数 `''` のため保存ファイル名が「.json」になる。
 - 【中】**リストのkeyにindexを使用**: 削除機能のある一覧で `key={battle-${index}}`(`src/pages/list/app.tsx:34`)はstate誤引き継ぎの典型。`battle.key` を使うべき。`src/feature/action.tsx:341` 付近もソート順変更でAccordion開閉stateが別ユニットに付け替わり得る。
@@ -229,7 +231,7 @@ strict TypeScript で全体の規律は良好。`any` は実質 `src/feature/act
 
 1. **すぐ直す(小さく実害または本番リスク)**
    - ~~H2: gh-pages.yml を check 成功にゲート~~(対応済み)
-   - H4: v1画面のロード中/not found分岐
+   - ~~H4: v1画面のロード中/not found分岐~~(対応済み)
    - H1: rangedSpread の reachLength(仕様確認の上)
    - chargeMelee の name/description 修正、substitute の reachRange 修正
    - markdown.tsx の urlTransform を defaultUrlTransform ラップに
