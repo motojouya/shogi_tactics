@@ -109,7 +109,9 @@
 - 【低】~~`effectHeal` のresolver欠損時サイレントno-op(`src/model/action.ts:72`)。他所の DataNotFoundError 方針と不一致。~~(対応済み 2026-07-08)
 
   > 対応内容: `Act` 関数の戻り値にはエラーチャネルがないため、エラーを返せる `doAct` 側で「全receiverのpieceがresolverで解決できること」を検証し、解決できない場合は `DataNotFoundError` を返すようにした(battle.ts)。effectHeal内の `?? unit.hp` フォールバックはsimulate(プレビュー)経路の防御として残置。テストのresolversフィクスチャを実pieceを返す形に更新し、ガードのテストを追加(計196件)。テスト・lint・build・E2Eで確認済み。
-- 【低】`simulate` は `clearActorStatuses` を通さないため、actor自身をreceiverにした場合プレビューと実行結果がズレ得る(`src/model/battle.ts:289-297`)。
+- 【低】~~`simulate` は `clearActorStatuses` を通さないため、actor自身をreceiverにした場合プレビューと実行結果がズレ得る(`src/model/battle.ts:289-297`)。~~(対応済み 2026-07-08)
+
+  > 対応内容: simulateを実行時(appendTurn)と同じ「clearActorStatuses→act」の順序に変更。`clearActorStatuses` が全unitをコピーして返すため従来の `map(copyUnit)` を置き換える形で非破壊性も維持。「actor自身(interception付き)を対象にしたプレビューがdoActの実行結果と一致する」回帰テストを追加(計197件)。テスト・lint・build・E2Eで確認済み。
 - 【低】error.ts のエラークラスが `Error` 非継承。stackが取れず、テストの判別方法(`"message" in result`)が脆い。
 - 【低】`Action.effectLength` はどこからも参照されない死にフィールド。値の狂いに気づけない温床。
 - 【低】プレイヤー名が空白のみでも通る(`validateBattleArgs` にtrimなし)。

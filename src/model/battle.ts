@@ -340,7 +340,7 @@ export type Simulate = (
   resolvers: Resolvers,
 ) => Simulated;
 export const simulate: Simulate = (action, actor, receiver, lastTurn, resolvers) => {
-  const acted = action.act(actor, [receiver], lastTurn.units.map(copyUnit), resolvers.getPiece);
+  const acted = action.act(actor, [receiver], clearActorStatuses(lastTurn.units, actor), resolvers.getPiece);
   const found = acted.find((unit) => sameUnit(toUnitReference(unit), receiver));
 
   return {

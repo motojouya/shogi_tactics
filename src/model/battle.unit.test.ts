@@ -506,4 +506,24 @@ describe("Battle#simulate", function () {
     expect(result.survive).toBe(false);
     expect(result.unit?.hp).toBe(0); // 2 - 2
   });
+
+  it("actor自身を対象にした見積りは実行結果と一致する(actorのstatusesクリア後にactされる)", function () {
+    const units = (): Unit[] => [
+      { side: "FIRST", piece: "king", hp: 3, steps: 0, statuses: ["interception"], leader: true },
+      { side: "SECOND", piece: "pawn", hp: 3, steps: 2, statuses: [], leader: true },
+    ];
+    const battle = makeBattle(units());
+
+    const simulated = simulate(attack, ref("FIRST", "king"), ref("FIRST", "king"), getLastTurn(battle), resolvers);
+    // interceptionは行動時に失効するため軽減されない(クリア前にactするとhp2に見積もるずれが出る)
+    expect(simulated.unit?.hp).toBe(1); // 3 - 2
+
+    const acted = doAct(battle, ref("FIRST", "king"), "atk", [ref("FIRST", "king")], resolvers, new Date());
+    if (acted instanceof Error || "message" in acted) {
+      expect.unreachable("doAct should succeed");
+      return;
+    }
+    const king = getLastTurn(acted).units.find((unit) => unit.piece === "king");
+    expect(king?.hp).toBe(simulated.unit?.hp); // プレビューと実行結果の一致
+  });
 });
