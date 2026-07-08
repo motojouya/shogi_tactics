@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import type { Unit, UnitReference } from "./unit";
+import type { Unit, UnitReference, Side } from "./unit";
 import type { Piece } from "./piece";
 import type { Battle } from "./battle";
 
@@ -17,6 +17,7 @@ import {
   format,
   formatNormal,
   addFormationUnit,
+  undoFormationUnit,
   simulate,
   battleSchema,
   GameOngoing,
@@ -394,31 +395,78 @@ describe("Battle#format / formatNormal", function () {
   });
 });
 
-describe("Battle#addFormationUnit", function () {
-  const emptyFormation = (): Battle =>
-    format(mustCreate("key", "first", "second", 2, 3, "v1"), [], new Date("2024-01-01T00:00:00"));
+describe("Battle#addFormationUnit / undoFormationUnit", function () {
+  const emptyFormation = (unitCount = 3): Battle =>
+    format(mustCreate("key", "first", "second", 2, unitCount, "v1"), [], new Date("2024-01-01T00:00:00"));
+
+  const mustAdd = (battle: Battle, side: Side, piece: Piece, isLeader: boolean): Battle => {
+    const result = addFormationUnit(battle, side, piece, isLeader);
+    if (result instanceof InvalidArgumentError) {
+      throw result;
+    }
+    return result;
+  };
 
   it("駒を編成turnに追加する(hp=MaxHP・leader反映、元battleは不変)", function () {
     const before = emptyFormation();
-    const battle = addFormationUnit(before, "FIRST", mkPiece("king", 2), true);
+    const battle = mustAdd(before, "FIRST", mkPiece("king", 2), true);
     const units = getFormationUnits(battle);
     expect(units.length).toBe(1);
     expect(units[0]).toMatchObject({ side: "FIRST", piece: "king", hp: 2, steps: 0, leader: true });
     expect(getFormationUnits(before).length).toBe(0); // 元battleは不変
   });
 
-  it("同一陣営に同じpieceは追加できず、同一battleを返す", function () {
-    const battle = addFormationUnit(emptyFormation(), "FIRST", mkPiece("king", 2), true);
-    const again = addFormationUnit(battle, "FIRST", mkPiece("king", 2), false);
-    expect(again).toBe(battle);
+  it("同一陣営に同じpieceは追加できない", function () {
+    const one = mustAdd(emptyFormation(), "FIRST", mkPiece("king", 2), true);
+    const two = mustAdd(one, "SECOND", mkPiece("king", 2), true);
+    const again = addFormationUnit(two, "FIRST", mkPiece("king", 2), false);
+    expect(again).toBeInstanceOf(InvalidArgumentError);
+    if (again instanceof InvalidArgumentError) {
+      expect(again.name).toBe("piece");
+    }
   });
 
   it("陣営に既にleaderが居ればisLeaderは無視する", function () {
-    const withLeader = addFormationUnit(emptyFormation(), "FIRST", mkPiece("king", 2), true);
-    const battle = addFormationUnit(withLeader, "FIRST", mkPiece("rook"), true);
+    const one = mustAdd(emptyFormation(), "FIRST", mkPiece("king", 2), true);
+    const two = mustAdd(one, "SECOND", mkPiece("king", 2), true);
+    const battle = mustAdd(two, "FIRST", mkPiece("rook"), true);
     const units = getFormationUnits(battle);
-    expect(units.length).toBe(2);
-    expect(units[1].leader).toBe(false); // 既にkingがleaderのため無視
+    expect(units.length).toBe(3);
+    expect(units[2].leader).toBe(false); // 既にkingがleaderのため無視
+  });
+
+  it("手番でないsideは追加できない(先手と後手が交互に追加する)", function () {
+    const result = addFormationUnit(emptyFormation(), "SECOND", mkPiece("king", 2), true);
+    expect(result).toBeInstanceOf(InvalidArgumentError);
+    if (result instanceof InvalidArgumentError) {
+      expect(result.name).toBe("side");
+    }
+  });
+
+  it("両陣営が上限に達したら(リーダー未指定で編成未完了でも)追加できない", function () {
+    const one = mustAdd(emptyFormation(1), "FIRST", mkPiece("king", 2), false);
+    const full = mustAdd(one, "SECOND", mkPiece("king", 2), false);
+    expect(addFormationUnit(full, "FIRST", mkPiece("rook"), false)).toBeInstanceOf(InvalidArgumentError);
+    expect(undoFormationUnit(full)).not.toBeInstanceOf(InvalidArgumentError); // 取り消しでリーダーを指定し直せる
+  });
+
+  it("編成完了後(対戦開始後)は追加も取り消しもできない", function () {
+    const one = mustAdd(emptyFormation(1), "FIRST", mkPiece("king", 2), true);
+    const complete = mustAdd(one, "SECOND", mkPiece("king", 2), true);
+    expect(addFormationUnit(complete, "FIRST", mkPiece("rook"), false)).toBeInstanceOf(InvalidArgumentError);
+    expect(undoFormationUnit(complete)).toBeInstanceOf(InvalidArgumentError);
+  });
+
+  it("undoFormationUnitは最後のunitを取り消し、空の編成では取り消せない", function () {
+    const one = mustAdd(emptyFormation(), "FIRST", mkPiece("king", 2), true);
+    const undone = undoFormationUnit(one);
+    if (undone instanceof InvalidArgumentError) {
+      expect.unreachable("undo should succeed");
+      return;
+    }
+    expect(getFormationUnits(undone).length).toBe(0);
+    expect(getFormationUnits(one).length).toBe(1); // 元battleは不変
+    expect(undoFormationUnit(undone)).toBeInstanceOf(InvalidArgumentError);
   });
 });
 

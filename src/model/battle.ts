@@ -22,6 +22,7 @@ import {
   isFormationComplete,
   canAddPiece,
   sideHasLeader,
+  nextFormationSide,
   clearActorStatuses,
   applyActorCost,
 } from "./unit";
@@ -163,11 +164,22 @@ export type FormatNormal = (battle: Battle, getPiece: GetPiece, datetime: Date) 
 export const formatNormal: FormatNormal = (battle, getPiece, datetime) =>
   format(battle, buildNormalUnits(getPiece), datetime);
 
-export type AddFormationUnit = (battle: Battle, side: Side, piece: Piece, isLeader: boolean) => Battle;
+export type AddFormationUnit = (
+  battle: Battle,
+  side: Side,
+  piece: Piece,
+  isLeader: boolean,
+) => Battle | InvalidArgumentError;
 export const addFormationUnit: AddFormationUnit = (battle, side, piece, isLeader) => {
+  if (!isFormation(battle)) {
+    return new InvalidArgumentError("battle", "編成中のみunitを追加できます");
+  }
   const units = getFormationUnits(battle);
+  if (nextFormationSide(units, battle.unitCount) !== side) {
+    return new InvalidArgumentError("side", "手番のsideのunitのみ追加できます");
+  }
   if (!canAddPiece(units, side, piece.key)) {
-    return battle;
+    return new InvalidArgumentError("piece", "同じ駒は既に配置されています");
   }
   const asLeader = isLeader && !sideHasLeader(units, side);
   const newBattle = copyBattle(battle);
@@ -182,8 +194,14 @@ export const addFormationUnit: AddFormationUnit = (battle, side, piece, isLeader
   return newBattle;
 };
 
-export type UndoFormationUnit = (battle: Battle) => Battle;
+export type UndoFormationUnit = (battle: Battle) => Battle | InvalidArgumentError;
 export const undoFormationUnit: UndoFormationUnit = (battle) => {
+  if (!isFormation(battle)) {
+    return new InvalidArgumentError("battle", "編成中のみunitを取り消しできます");
+  }
+  if (getFormationUnits(battle).length === 0) {
+    return new InvalidArgumentError("battle", "取り消すunitがありません");
+  }
   const newBattle = copyBattle(battle);
   newBattle.turns[0].units = newBattle.turns[0].units.slice(0, -1);
   return newBattle;

@@ -7,6 +7,7 @@ import { describe, it, expect } from "vitest";
 
 import { undoUnit } from "./undo_unit";
 import { createBattle, format } from "../model/battle";
+import { InvalidArgumentError } from "../model/error";
 
 const unit = (piece: string): Unit => ({
   side: "FIRST",
@@ -40,7 +41,19 @@ describe("undoUnit", () => {
     const saved: Battle[] = [];
     const result = await undoUnit(buildRepository(saved))(battleWith([unit("king"), unit("rook")]));
 
+    if (result instanceof InvalidArgumentError) {
+      expect.unreachable("undo should succeed");
+      return;
+    }
     expect(result.turns[0].units.map((u) => u.piece)).toEqual(["king"]);
     expect(saved.length).toBe(1);
+  });
+
+  it("空の編成では取り消せずエラーを返し保存しない", async () => {
+    const saved: Battle[] = [];
+    const result = await undoUnit(buildRepository(saved))(battleWith([]));
+
+    expect(result).toBeInstanceOf(InvalidArgumentError);
+    expect(saved.length).toBe(0);
   });
 });

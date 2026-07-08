@@ -116,7 +116,8 @@ test("docs/06 シナリオ: 通常モード(降参) / 戦乱モード(対戦し�
         await selectOption(page, receiverSelect(page), "先:将軍（王将）");
       }
       await page.getByRole("button", { name: "実行" }).click();
-      await page.waitForTimeout(300);
+      // 保存→liveQuery反映→再レンダリングを待つ。不足すると古いbattle表示のまま次の手を打つレースになる
+      await page.waitForTimeout(1000);
     }
 
     // 対戦中画面に後手の勝利が表示される。
