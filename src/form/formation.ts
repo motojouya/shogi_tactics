@@ -12,5 +12,5 @@ export type FormationForm = z.infer<typeof formationFormSchema>;
 export type PieceSelectOption = (piece: Piece) => SelectOption;
 export const pieceSelectOption: PieceSelectOption = (piece) => ({
   value: piece.key,
-  label: piece.name,
+  label: `${piece.name}（${piece.shogiName}）`,
 });

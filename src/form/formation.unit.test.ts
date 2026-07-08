@@ -15,7 +15,7 @@ describe("formFormation#formationFormSchema", function () {
 });
 
 describe("formFormation#pieceSelectOption", function () {
-  it("駒をvalue=key/label=nameの選択肢へ変換する", function () {
+  it("駒をvalue=key/label=name（shogiName）の選択肢へ変換する", function () {
     const option = pieceSelectOption({
       key: "king",
       name: "王",
@@ -25,6 +25,6 @@ describe("formFormation#pieceSelectOption", function () {
       move: 1,
       actions: [],
     });
-    expect(option).toEqual({ value: "king", label: "王" });
+    expect(option).toEqual({ value: "king", label: "王（王将）" });
   });
 });

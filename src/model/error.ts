@@ -66,3 +66,10 @@ export class EmptyParameter {
     this.message = message;
   }
 }
+
+export class ReceiverDuplicationError {
+  readonly message: string;
+  constructor(message: string) {
+    this.message = message;
+  }
+}

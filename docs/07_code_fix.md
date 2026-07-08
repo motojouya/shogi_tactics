@@ -82,7 +82,84 @@
 - [x] 文字列だけを出力するものは、label.tsに集めておきたい
 
 ## src/model/
-- 未レビュー
+- [x] src/feature/action.tsxのlastTurn,reload関数は不要な気がする。もともと最新turnを表示するか、現在ターンのままかをコントロールするためのものだったが、action実行したら、最新ターン表示になっているので、turnをstate管理する意味がない。
+- [x] action.ts
+  - [x] コメント削除
+  - [x] ReceiverDuplicationErrorはerror.tsに移動
+- [x] battle.ts
+  - [x] コメント削除
+  - [x] getFormationUnitsはturnに移動し、また判定としてOrderがformationのものを抽出。
+  - [x] sortedUnits, nextActorは、feature/action.tsxの修正ができたらturnに移動する。またbattleからそれらを呼び出す関数(引数battle)を用意し、feature/action.tsxからはそちらを呼び出す。
+  - [x] start関数はturn.tsに移動
+  - [x] formatNormal,format,addFormationUnitのテストがない
+- [x] error.ts
+  - [x] コメント削除
+- [x] piece.ts
+  - [x] コメント削除
+- [x] resolver.ts
+  - [x] コメント削除
+- [x] simulation.ts
+  - [x] コメント削除
+  - [x] 内容はbattle.tsに移動する
+- [x] status.ts
+  - [x] コメント削除
+- [x] turn.ts
+  - [x] コメント削除
+  - [x] 関数にはテストを記述する
+  - [x] applyActorCostでcopyUnit使ってない
+  - [x] applyActorCost,clearActorStatusesは、unit.tsに移動
+- [x] unit.ts
+  - [x] コメント削除
+
+### 調査: model配下(battle.ts除く)で定義した関数の、model外からの利用経路
+
+model改善の前提調査。各ファイルで定義した関数(値)について、model外モジュールから呼ばれている経路を関数ごとにまとめた。
+※`import type` のみ(型としての利用)は対象外。`piece.ts` / `resolver.ts` / `status.ts` は型・型エイリアスのみで関数定義なし。
+
+#### unit.ts
+| 関数 | model外の呼び出し元 | 用途/経路 |
+|---|---|---|
+| `toUnitReference` | feature/action.tsx | 選択unitからUnitReference生成(受信者・行動主参照) |
+| `nextFormationSide` | feature/formation.tsx | 次に駒を置くsideの決定 |
+| `sideHasLeader` | feature/formation.tsx | (model/battle.addFormationUnit内でも利用) リーダー重複判定 |
+| `canAddPiece` | feature/formation.tsx | (同上) 駒追加可否 |
+| `isFormationComplete` | feature/formation.tsx | (同上) 編成完了/リーダー未設定エラー判定 |
+| `FIRST`(定数) | form/action.ts | side既定値 |
+- model内(battle.ts)専用で外部利用なし: `copyUnit` / `sameUnit` / `buildNormalUnits`
+
+#### turn.ts
+| 関数 | model外の呼び出し元 | 用途/経路 |
+|---|---|---|
+| `ORDER_DO_NOTHING`(定数) | controller/act.ts, form/action.ts (test: controller/act.unit.test.ts) | 「何もしない」選択肢の識別子 |
+- model内(battle.ts)専用で外部利用なし: `copyOrder` / `copyTurn` / `clearActorStatuses` / `applyActorCost`
+
+#### action.ts
+| 関数 | model外の呼び出し元 | 用途/経路 |
+|---|---|---|
+| `buildAction` | data/action/*.ts (全Action定義) | Actionオブジェクト組み立て |
+| `effectBaseDamage` | data/action/ 攻撃系(meleeAttack, rangedAttack, rangedSpread, chargeMelee, kingsBlow, puppet, pushAttack, strongSpear, meleeSpread, barricade, piercingArrow, spearAttack, heavyMelee, strongRanged) | act生成 |
+| `effectGrantStatus` | data/action/{arrowDodgeStance, interceptionStance} | act生成(status付与) |
+| `effectHeal` | data/action/healing | act生成(回復) |
+| `effectOverHeal` | data/action/substitute | act生成(過剰回復) |
+| `filterActor` | data/action/{arrowDodgeStance, barricade, interceptionStance} | filter生成(自身のみ) |
+| `filterAlive` | data/action/ 攻撃・回復系の大半 | filter生成(生存unit) |
+| `ReceiverDuplicationError`(class) | controller/act.ts, feature/action.tsx | 受信者重複エラーのnew/判定 |
+- 経路補足: `buildAction`/`effect*`/`filter*` はdata/action層でActionを構築→repository→resolver経由でmodel/battle(`doAct`)・model/simulation(`simulate`)が実行、という循環。
+- model内(battle.ts)専用で外部利用なし: `validateReceivers`
+
+#### simulation.ts
+| 関数 | model外の呼び出し元 | 用途/経路 |
+|---|---|---|
+| `simulate` | feature/action.tsx | 行動プレビュー(受信者の生死シミュレート) |
+
+#### error.ts (classをnewで生成)
+| class | model外の生成元 | 用途/経路 |
+|---|---|---|
+| `JsonSchemaUnmatchError` | repository/battle.ts, repository/utility.ts, controller/list.ts, pages/v1/app.tsx | スキーマ不一致の生成/判定 |
+| `DataNotFoundError` | controller/act.ts, feature/action.tsx | (battle.ts内部でも生成) データ未存在 |
+| `UserCancel` | controller/act.ts, controller/surrender.ts, feature/action.tsx | 確認ダイアログのキャンセル |
+| `CopyFailError` | repository/battle.ts, repository/utility.ts | コピー失敗 |
+- 外部含め利用箇所なし(未使用の可能性): `DataExistError` / `EmptyParameter`
 
 ## その他
 - faviconの用意。将棋の駒だが、中は漢字ではなく十字になっているというものにするか。これなら簡単だ

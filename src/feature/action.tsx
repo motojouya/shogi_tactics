@@ -6,7 +6,7 @@ import type { Action } from '../model/action';
 import type { DoActionForm } from '../form/action';
 import type { SelectChangeEvent } from '@mui/material';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   useForm,
@@ -36,6 +36,7 @@ import {
   nextActor,
   sortedUnits,
   getLastTurn,
+  simulate,
 } from '../model/battle';
 import { toUnitReference } from '../model/unit';
 import {
@@ -44,12 +45,9 @@ import {
   selectUnit,
   actionSelectOptions,
 } from '../form/action';
-import { ReceiverDuplicationError } from '../model/action';
-import { DataNotFoundError } from '../model/error';
+import { ReceiverDuplicationError, DataNotFoundError, UserCancel } from '../model/error';
 import { act } from '../controller/act';
 import { surrender } from '../controller/surrender';
-import { simulate } from '../model/simulation';
-import { UserCancel } from '../model/error';
 import { useIO } from '../components/context';
 import { createResolvers } from '../repository';
 import { Container } from '../components/utility';
@@ -184,26 +182,11 @@ const ActionSelect: FC<{
 
 export const BattleAction: FC<{ battle: Battle }> = ({ battle }) => {
 
-  const [lastTurn, setLastTurn] = useState<Turn | null>(() => getLastTurn(battle));
-
-  const reload = useCallback((target: Battle) => {
-    setLastTurn(getLastTurn(target));
-  }, []);
-
-  return lastTurn
-    ? <BattleTurn battle={battle} lastTurn={lastTurn} reload={reload} />
-    : <Box>loading</Box>;
-};
-
-export const BattleTurn: FC<{
-  battle: Battle,
-  lastTurn: Turn,
-  reload: (battle: Battle) => void,
-}> = ({ battle, lastTurn, reload }) => {
-
   const io = useIO();
   const { battle: battleRepository, piece } = io;
   const resolvers = createResolvers(io);
+
+  const lastTurn = getLastTurn(battle);
 
   const {
     handleSubmit,
@@ -218,7 +201,7 @@ export const BattleTurn: FC<{
   const [selectedAction, setSelectedAction] = useState<Action | null>(null);
   const [simulated, setSimulated] = useState<(ReceiverPreview | null)[]>([]);
 
-  const actorUnit = nextActor(lastTurn);
+  const actorUnit = nextActor(battle);
   const actor = actorUnit ? toUnitReference(actorUnit) : null;
   const actorPiece = actorUnit ? piece.get(actorUnit.piece) : null;
   const actorActions = actorPiece ? actorPiece.actions : [];
@@ -259,7 +242,6 @@ export const BattleTurn: FC<{
     setSimulated([]);
     replace([]);
     reset();
-    reload(result);
   };
 
   const addReceiver = (index: number) => () => {
@@ -367,7 +349,7 @@ export const BattleTurn: FC<{
             <Box sx={{ borderTop: '1px solid royalblue', py: 1 }}>
               <Box><Typography variant='h5'>Action Orders</Typography></Box>
               <Stack sx={{ justifyContent: "flex-start", p: 1, width: '100%' }}>
-                {sortedUnits(lastTurn).map((unit, index) => (
+                {sortedUnits(battle).map((unit, index) => (
                   <ActionOrderEntry key={`unit-${unit.side}-${unit.piece}-${index}`} unit={unit} order={index} />
                 ))}
               </Stack>

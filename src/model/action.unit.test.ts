@@ -12,8 +12,8 @@ import {
   filterActor,
   filterAlive,
   validateReceivers,
-  ReceiverDuplicationError,
 } from "./action";
+import { ReceiverDuplicationError } from "./error";
 
 const noopAct: Act = (_actor, _receiver, units) => units;
 const noopFilter: Filter = (_actor, _units) => [];

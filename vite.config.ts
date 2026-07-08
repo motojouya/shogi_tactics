@@ -42,14 +42,18 @@ export default defineConfig({
         "guide/piece": resolve(__dirname, "src/pages/guide/piece/index.html"),
       },
       output: {
-        entryFileNames: `assets/[name]/bundle.js`,
+        // 各ファイル名にcontent hashを含める。ハッシュが無いとファイル名が毎回同一になり、
+        // Service Workerのprecacheがそれらを revision:null(=URLで一意な不変資産)として扱うため、
+        // デプロイして中身が変わってもキャッシュを更新せず古いJSを配信し続けてしまう。
+        // ハッシュを付けると各ビルドでURLが変わり、precacheが新資産として取得・cache-bustできる。
+        entryFileNames: `assets/[name]/bundle-[hash].js`,
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === ".css") {
-            return "assets/index.css";
+            return "assets/index-[hash].css";
           }
-          return `assets/[name].[ext]`;
+          return `assets/[name]-[hash].[ext]`;
         },
-        chunkFileNames: `assets/[name].js`,
+        chunkFileNames: `assets/[name]-[hash].js`,
       },
     },
   },

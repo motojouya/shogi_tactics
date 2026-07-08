@@ -12,6 +12,8 @@ import {
   sideHasLeader,
   canAddPiece,
   isFormationComplete,
+  clearActorStatuses,
+  applyActorCost,
 } from "./unit";
 
 const mkUnit = (side: Side, piece: string, leader = false): Unit => ({
@@ -196,5 +198,38 @@ describe("Unit#isFormationComplete", function () {
 
   it("unitCountに満たなければfalse", function () {
     expect(isFormationComplete([mkUnit("FIRST", "king", true), mkUnit("SECOND", "king", true)], 2)).toBe(false);
+  });
+});
+
+describe("Unit#clearActorStatuses", function () {
+  const units: Unit[] = [
+    { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: ["guard"], leader: true },
+    { side: "SECOND", piece: "pawn", hp: 3, steps: 0, statuses: ["guard"], leader: true },
+  ];
+
+  it("actorのstatusesのみ空にし、他はそのまま(全unitは複製)", function () {
+    const result = clearActorStatuses(units, { side: "FIRST", piece: "king" });
+    expect(result[0].statuses).toEqual([]);
+    expect(result[1].statuses).toEqual(["guard"]);
+    expect(result[0]).not.toBe(units[0]); // 複製されている
+    expect(result[1]).not.toBe(units[1]);
+    expect(units[0].statuses).toEqual(["guard"]); // 元は不変
+  });
+});
+
+describe("Unit#applyActorCost", function () {
+  const units: Unit[] = [
+    { side: "FIRST", piece: "king", hp: 2, steps: 1, statuses: ["guard"], leader: true },
+    { side: "SECOND", piece: "pawn", hp: 3, steps: 5, statuses: [], leader: true },
+  ];
+
+  it("actorのstepsにstepBase+costを加算し、他はそのまま(全unitは複製)", function () {
+    const result = applyActorCost(units, { side: "FIRST", piece: "king" }, 2, 3);
+    expect(result[0].steps).toBe(6); // 1 + 2 + 3
+    expect(result[1].steps).toBe(5); // 非actorは据え置き
+    expect(result[0]).not.toBe(units[0]); // copyUnitで複製されている
+    expect(result[1]).not.toBe(units[1]);
+    expect(result[0].statuses).not.toBe(units[0].statuses); // statuses配列も複製
+    expect(units[0].steps).toBe(1); // 元は不変
   });
 });
