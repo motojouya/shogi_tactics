@@ -45,7 +45,7 @@ import {
   selectUnit,
   actionSelectOptions,
 } from '../form/action';
-import { ReceiverDuplicationError, DataNotFoundError, UserCancel } from '../model/error';
+import { ReceiverDuplicationError, DataNotFoundError, UserCancel, InvalidArgumentError } from '../model/error';
 import { act } from '../controller/act';
 import { surrender } from '../controller/surrender';
 import { useIO } from '../components/context';
@@ -229,6 +229,10 @@ export const BattleAction: FC<{ battle: Battle }> = ({ battle }) => {
       return;
     }
     if (result instanceof ReceiverDuplicationError) {
+      setMessage(result.message);
+      return;
+    }
+    if (result instanceof InvalidArgumentError) {
       setMessage(result.message);
       return;
     }

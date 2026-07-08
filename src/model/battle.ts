@@ -222,12 +222,26 @@ export const surrender: ModelSurrender = (battle, actor, datetime) => {
   };
 };
 
-export type SurrenderBattle = (battle: Battle, actor: UnitReference, datetime: Date) => Battle;
+export type SurrenderBattle = (battle: Battle, actor: UnitReference, datetime: Date) => Battle | InvalidArgumentError;
 export const surrenderBattle: SurrenderBattle = (battle, actor, datetime) => {
+  if (battle.result !== GameOngoing) {
+    return new InvalidArgumentError("battle", "決着済みの対戦では降参できません");
+  }
   const newBattle = copyBattle(battle);
   newBattle.turns.push(surrender(newBattle, actor, datetime));
   newBattle.result = isSettlement(newBattle);
   return newBattle;
+};
+
+const validateTurnActor = (battle: Battle, actor: UnitReference): InvalidArgumentError | null => {
+  if (battle.result !== GameOngoing) {
+    return new InvalidArgumentError("battle", "決着済みの対戦では行動できません");
+  }
+  const expected = nextActor(battle);
+  if (!expected || !sameUnit(toUnitReference(expected), actor)) {
+    return new InvalidArgumentError("actor", "手番のunitのみ行動できます");
+  }
+  return null;
 };
 
 const appendTurn = (
@@ -250,9 +264,14 @@ const appendTurn = (
   return newBattle;
 };
 
-export type DoNothing = (battle: Battle, actor: UnitReference, datetime: Date) => Battle;
-export const doNothing: DoNothing = (battle, actor, datetime) =>
-  appendTurn(battle, actor, { type: "DO_NOTHING", actor }, 0, datetime, (units) => units);
+export type DoNothing = (battle: Battle, actor: UnitReference, datetime: Date) => Battle | InvalidArgumentError;
+export const doNothing: DoNothing = (battle, actor, datetime) => {
+  const invalid = validateTurnActor(battle, actor);
+  if (invalid) {
+    return invalid;
+  }
+  return appendTurn(battle, actor, { type: "DO_NOTHING", actor }, 0, datetime, (units) => units);
+};
 
 export type DoAct = (
   battle: Battle,
@@ -261,8 +280,12 @@ export type DoAct = (
   receivers: UnitReference[],
   resolvers: Resolvers,
   datetime: Date,
-) => Battle | DataNotFoundError | ReceiverDuplicationError;
+) => Battle | DataNotFoundError | ReceiverDuplicationError | InvalidArgumentError;
 export const doAct: DoAct = (battle, actor, actionKey, receivers, resolvers, datetime) => {
+  const invalid = validateTurnActor(battle, actor);
+  if (invalid) {
+    return invalid;
+  }
   const duplication = validateReceivers(receivers);
   if (duplication) {
     return duplication;
@@ -270,6 +293,13 @@ export const doAct: DoAct = (battle, actor, actionKey, receivers, resolvers, dat
   const action = resolvers.getAction(actionKey);
   if (!action) {
     return new DataNotFoundError(actionKey, "action", `${actionKey}というactionは存在しません`);
+  }
+  if (receivers.length > action.receiverCount) {
+    return new InvalidArgumentError("receivers", `この行動で選べる対象は${action.receiverCount}体までです`);
+  }
+  const candidates = action.filter(actor, getLastTurn(battle).units);
+  if (!receivers.every((receiver) => candidates.some((candidate) => sameUnit(candidate, receiver)))) {
+    return new InvalidArgumentError("receivers", "対象にできないunitが含まれています");
   }
   const order: Order = { type: "DO_ACTION", actionKey: action.key, actor, receivers };
   return appendTurn(battle, actor, order, action.cost, datetime, (units) =>

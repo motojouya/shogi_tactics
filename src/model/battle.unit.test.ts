@@ -9,6 +9,7 @@ import {
   doNothing,
   doAct,
   surrender,
+  surrenderBattle,
   isSettlement,
   sortedUnits,
   getLastTurn,
@@ -205,6 +206,79 @@ describe("Battle#doNothing", function () {
     const king = last.units.find((unit) => unit.piece === "king");
     expect(king?.statuses).toEqual([]); // 自分の行動で失効
     expect(king?.steps).toBe(2); // 0 + stepBase2 + cost0
+  });
+});
+
+// モデル層のゲームルール防御。UI側の制限(選択肢の絞り込み等)を素通りした呼び出しを弾く
+describe("Battle#doAct/doNothing/surrenderBattle 検証", function () {
+  const aliveUnits = (): Unit[] => [
+    { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+    { side: "SECOND", piece: "pawn", hp: 3, steps: 2, statuses: [], leader: true },
+  ];
+
+  it("決着済みの対戦ではdoActできない", function () {
+    const battle = makeBattle(aliveUnits());
+    battle.result = GameFirst;
+    const result = doAct(battle, ref("FIRST", "king"), "atk", [ref("SECOND", "pawn")], resolvers, new Date());
+    expect(result).toBeInstanceOf(InvalidArgumentError);
+    if (result instanceof InvalidArgumentError) {
+      expect(result.name).toBe("battle");
+    }
+  });
+
+  it("手番でないunitはdoActできない(steps最小のunitが手番)", function () {
+    const battle = makeBattle(aliveUnits()); // king steps0 < pawn steps2 なので手番はking
+    const result = doAct(battle, ref("SECOND", "pawn"), "atk", [ref("FIRST", "king")], resolvers, new Date());
+    expect(result).toBeInstanceOf(InvalidArgumentError);
+    if (result instanceof InvalidArgumentError) {
+      expect(result.name).toBe("actor");
+    }
+  });
+
+  it("receiverCountを超える対象は選べない", function () {
+    const battle = makeBattle(aliveUnits());
+    // attackのreceiverCountは1
+    const result = doAct(
+      battle,
+      ref("FIRST", "king"),
+      "atk",
+      [ref("SECOND", "pawn"), ref("FIRST", "king")],
+      resolvers,
+      new Date(),
+    );
+    expect(result).toBeInstanceOf(InvalidArgumentError);
+    if (result instanceof InvalidArgumentError) {
+      expect(result.name).toBe("receivers");
+    }
+  });
+
+  it("action.filterに含まれないunitは対象にできない(死亡unitへのheal蘇生防止)", function () {
+    const battle = makeBattle([
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "SECOND", piece: "pawn", hp: 0, steps: 2, statuses: [], leader: false },
+      { side: "SECOND", piece: "gold", hp: 3, steps: 4, statuses: [], leader: true },
+    ]);
+    // attackのfilterはfilterAlive。hp0のpawnは候補に含まれない
+    const result = doAct(battle, ref("FIRST", "king"), "atk", [ref("SECOND", "pawn")], resolvers, new Date());
+    expect(result).toBeInstanceOf(InvalidArgumentError);
+    if (result instanceof InvalidArgumentError) {
+      expect(result.name).toBe("receivers");
+    }
+  });
+
+  it("決着済み/手番でないunitはdoNothingできない", function () {
+    const settled = makeBattle(aliveUnits());
+    settled.result = GameFirst;
+    expect(doNothing(settled, ref("FIRST", "king"), new Date())).toBeInstanceOf(InvalidArgumentError);
+
+    const battle = makeBattle(aliveUnits());
+    expect(doNothing(battle, ref("SECOND", "pawn"), new Date())).toBeInstanceOf(InvalidArgumentError);
+  });
+
+  it("決着済みの対戦ではsurrenderBattleできない", function () {
+    const battle = makeBattle(aliveUnits());
+    battle.result = GameFirst;
+    expect(surrenderBattle(battle, ref("FIRST", "king"), new Date())).toBeInstanceOf(InvalidArgumentError);
   });
 });
 

@@ -92,11 +92,13 @@
 指摘:
 
 - 【高】~~arrowDodge×rangedSpread の不整合~~(→ H1、対応済み)
-- 【中】**doAct がゲームルールをほとんど検証しない**(`src/model/battle.ts:265-278`): 検証は receiver重複と actionKey存在のみ。以下はUIだけが防波堤。
-  - receiverCount超過(meleeAttackに5体渡すと5体にダメージ)
-  - `action.filter` 未適用 — **hp=0の死亡ユニットをheal対象に渡すと蘇生する**(`src/model/action.ts:69-76` はhpを見ずに `Math.max(unit.hp, maxHp)`)
-  - 決着後でも doAct/doNothing/surrender がターンを追加できる(状態遷移図の「決着済み」防御がモデルにない)
-  - actor が nextActor か・生存しているかを見ない
+- 【中】~~**doAct がゲームルールをほとんど検証しない**(`src/model/battle.ts:265-278`): 検証は receiver重複と actionKey存在のみ。以下はUIだけが防波堤。~~(対応済み 2026-07-08)
+  - ~~receiverCount超過(meleeAttackに5体渡すと5体にダメージ)~~
+  - ~~`action.filter` 未適用 — **hp=0の死亡ユニットをheal対象に渡すと蘇生する**(`src/model/action.ts:69-76` はhpを見ずに `Math.max(unit.hp, maxHp)`)~~
+  - ~~決着後でも doAct/doNothing/surrender がターンを追加できる(状態遷移図の「決着済み」防御がモデルにない)~~
+  - ~~actor が nextActor か・生存しているかを見ない~~
+
+  > 対応内容: battle.ts に検証を追加し `InvalidArgumentError` を値で返す既存規約で防御。doAct/doNothing は「決着済み」「actorが手番(nextActor)のunitか」を検証(nextActorは生存unitのみから算出されるため死亡actorも弾かれる)。doAct はさらに「receiverCountの上限」「全receiverが action.filter の候補に含まれるか」を検証(死亡unitの蘇生防止)。surrenderBattle は「決着済み」を検証。controller(act.ts/surrender.ts)とUI(action.tsx)にエラー伝搬の分岐を追加し、ガード6件の単体テストを新設(計189件)。テスト・lint・build・E2Eで確認済み。なお編成系API(addFormationUnit等)のガードは指摘7として別途。
 - 【中】**chargeMelee の name/description が heavyMelee と完全重複**【検証済み】(`src/data/action/chargeMelee.ts:7-8`): 違いはkeyとcost(7 vs 2)のみ。UIでは「近接強撃(コスト7)」と「近接強撃(コスト2)」が同名で並ぶ。桂馬用の技名のコピペ漏れの可能性が高い。
 - 【中】**substitute の reachLength:0 と reachRange の不整合**(`src/data/action/substitute.ts:13,19-27`): 他の自己対象アクション(arrowDodgeStance等)は中心のみだが、substituteだけ隣接4マスにも到達可の行列。healing.tsからのコピペ疑い。reachRangeはアクション表として表示されるためどちらかが誤り。
 - 【中/要仕様確認】**spearAttack/strongSpear の receiverCount:2 と説明文の不整合**: 説明「2マス先まで届く攻撃」に対し受け手2体選択可・2体ともダメージ。effectLength=1 とも食い違う。貫通仕様なら piercingArrow と表現を揃えるべき。
