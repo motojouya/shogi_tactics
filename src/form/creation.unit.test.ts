@@ -25,6 +25,17 @@ describe("formCreation#creationFormSchema(通常モード)", function () {
     expect(result.success).toBe(false);
   });
 
+  it("player名が空白のみ(半角/全角)ならエラー", function () {
+    const result = creationFormSchema.safeParse({
+      mode: "normal",
+      first_player_name: " 　 ",
+      second_player_name: "闇",
+      stepBase: 14,
+      unitCount: 7,
+    });
+    expect(result.success).toBe(false);
+  });
+
   it("player名が30文字ちょうどならparseできる", function () {
     const result = creationFormSchema.safeParse({
       mode: "normal",

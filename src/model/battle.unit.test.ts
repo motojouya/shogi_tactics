@@ -142,6 +142,15 @@ describe("Battle#validateBattleArgs", function () {
     expect(error?.name).toBe("second_player_name");
   });
 
+  it("プレイヤー名が空白のみ(半角/全角)ならエラー", function () {
+    expect(validateBattleArgs("   ", "second", 4, 2)?.name).toBe("first_player_name");
+    expect(validateBattleArgs("first", "　　", 4, 2)?.name).toBe("second_player_name");
+  });
+
+  it("前後に空白があっても空白以外の文字があれば通る", function () {
+    expect(validateBattleArgs(" 光 ", "second", 4, 2)).toBeNull();
+  });
+
   it("stepBaseが非整数ならstepBaseのエラー", function () {
     const error = validateBattleArgs("first", "second", 1.5, 2);
     expect(error?.name).toBe("stepBase");

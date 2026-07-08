@@ -57,16 +57,16 @@ export type ValidateBattleArgs = (
   unitCount: number,
 ) => InvalidArgumentError | null;
 export const validateBattleArgs: ValidateBattleArgs = (firstPlayerName, secondPlayerName, stepBase, unitCount) => {
-  if (charLength(firstPlayerName) < 1 || charLength(firstPlayerName) > MAX_PLAYER_NAME_LENGTH) {
+  if (charLength(firstPlayerName.trim()) < 1 || charLength(firstPlayerName) > MAX_PLAYER_NAME_LENGTH) {
     return new InvalidArgumentError(
       "first_player_name",
-      `先手のプレイヤー名は1文字以上${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`,
+      `先手のプレイヤー名は空白以外の1文字以上${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`,
     );
   }
-  if (charLength(secondPlayerName) < 1 || charLength(secondPlayerName) > MAX_PLAYER_NAME_LENGTH) {
+  if (charLength(secondPlayerName.trim()) < 1 || charLength(secondPlayerName) > MAX_PLAYER_NAME_LENGTH) {
     return new InvalidArgumentError(
       "second_player_name",
-      `後手のプレイヤー名は1文字以上${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`,
+      `後手のプレイヤー名は空白以外の1文字以上${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`,
     );
   }
   if (!Number.isInteger(stepBase) || stepBase < MIN_STEP_BASE || stepBase > MAX_STEP_BASE) {

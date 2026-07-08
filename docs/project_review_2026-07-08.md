@@ -112,9 +112,11 @@
 - 【低】~~`simulate` は `clearActorStatuses` を通さないため、actor自身をreceiverにした場合プレビューと実行結果がズレ得る(`src/model/battle.ts:289-297`)。~~(対応済み 2026-07-08)
 
   > 対応内容: simulateを実行時(appendTurn)と同じ「clearActorStatuses→act」の順序に変更。`clearActorStatuses` が全unitをコピーして返すため従来の `map(copyUnit)` を置き換える形で非破壊性も維持。「actor自身(interception付き)を対象にしたプレビューがdoActの実行結果と一致する」回帰テストを追加(計197件)。テスト・lint・build・E2Eで確認済み。
-- 【低】error.ts のエラークラスが `Error` 非継承。stackが取れず、テストの判別方法(`"message" in result`)が脆い。
-- 【低】`Action.effectLength` はどこからも参照されない死にフィールド。値の狂いに気づけない温床。
-- 【低】プレイヤー名が空白のみでも通る(`validateBattleArgs` にtrimなし)。
+- 【低】error.ts のエラークラスが `Error` 非継承。stackが取れず、テストの判別方法(`"message" in result`)が脆い。(2026-07-08 オーナー判断: 対応しない)
+- 【低】`Action.effectLength` はどこからも参照されない死にフィールド。値の狂いに気づけない温床。(2026-07-08 H1対応で槍の「届く距離」の意味を持つデータとなった。ロジックからの参照は引き続きなし)
+- 【低】~~プレイヤー名が空白のみでも通る(`validateBattleArgs` にtrimなし)。~~(対応済み 2026-07-08)
+
+  > 対応内容: `validateBattleArgs` の下限チェックをtrim後の文字数で判定するよう変更(空白のみ=半角/全角とも拒否。前後に空白があっても実文字があれば許容し、保存値は変更しない)。フォーム側(`form/creation.ts`)のzodスキーマにも同条件のrefineを追加し、モデルと同じ日本語メッセージで早期フィードバックできるようにした。境界テストをmodel/formの両方に追加(計200件)。テスト・lint・build・E2Eで確認済み。
 - 【低】**単体テストのコードが型検査されていない**【検証済み】: `tsconfig.app.json:28` が `src/**/*.unit.test.ts` を exclude しており、テスト内のUnitリテラルに必須の `leader` がない等が露見しない。tsconfigにテスト用プロジェクトを足すか、vitestのtypecheck機能の導入を推奨。
 
 要仕様確認(バグと断定できないが意図の明文化を推奨):
