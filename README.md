@@ -44,6 +44,8 @@ https://motojouya.github.io/shogi_tactics/
       featureに定義した画面を、query stringや状態によって出し分けて表示する。こちらはpath単位で定義されている。  
     - guide/  
       アプリケーションの使い方やゲームの遊び方を説明するドキュメントでHTMLに変換される文章  
+    - public/  
+      主に画像などの静的ファイルの配置  
   - test/  
     統合テスト  
   - package.json  
