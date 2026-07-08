@@ -36,7 +36,7 @@
 | # | 観点 | 指摘 | 根拠 |
 |---|---|---|---|
 | H1 | ロジック | `arrowDodge`(矢かわし)が軽弓の「遠隔範囲」に効かない | `src/model/action.ts:38,45` / `src/data/action/rangedSpread.ts:13` |
-| H2 | 運用 | デプロイが check.yml の成否と無関係に実行される | `.github/workflows/gh-pages.yml` |
+| H2 | 運用 | ~~デプロイが check.yml の成否と無関係に実行される~~(対応済み 2026-07-08) | `.github/workflows/gh-pages.yml` |
 | H3 | 機能デザイン | 対戦中の誤入力を訂正する手段がない | `src/model/battle.ts:185-190` / `src/controller/act.ts:22` |
 | H4 | UI | ロード中に「〜というbattleは見つかりません」が一瞬表示される | `src/pages/v1/app.tsx:20,35` |
 
@@ -50,9 +50,11 @@
 
 **対応案**: rangedSpread の `reachLength` を3にする、またはしきい値/判定方法の見直し。あわせて槍の扱いを仕様として明文化。
 
-### H2. デプロイがCIチェックにゲートされていない
+### ~~H2. デプロイがCIチェックにゲートされていない~~(対応済み 2026-07-08)
 
-main への push で `check.yml`(format/lint/test/build/e2e)と `gh-pages.yml`(デプロイ)が**並列に独立起動**するため、テストが失敗していても本番デプロイは進行する。`gh-pages.yml` に `workflow_run`(check成功後に起動)か、デプロイジョブ内へのテストステップ追加を推奨。
+~~main への push で `check.yml`(format/lint/test/build/e2e)と `gh-pages.yml`(デプロイ)が**並列に独立起動**するため、テストが失敗していても本番デプロイは進行する。`gh-pages.yml` に `workflow_run`(check成功後に起動)か、デプロイジョブ内へのテストステップ追加を推奨。~~
+
+> 対応内容: `gh-pages.yml` のトリガーを `push` から `workflow_run`(Check完了時)に変更し、`if` でCheck成功(push起因)のみ実行するよう条件付け。checkoutは検証済みコミット(`workflow_run.head_sha`)を使用。`workflow_dispatch` による手動デプロイは従来どおり可能。
 
 ### H3. 対戦中の誤入力を訂正できない
 
@@ -179,7 +181,7 @@ strict TypeScript で全体の規律は良好。`any` は実質 `src/feature/act
 
 指摘:
 
-- 【高】デプロイがCIにゲートされていない(→ H2)
+- 【高】~~デプロイがCIにゲートされていない~~(→ H2、対応済み)
 - 【中】**E2Eがdevサーバ相手で本番構成を検証しない**(`playwright.config.ts:22` の webServer が `npm run dev`): 本番ビルド・Service Worker・base path(`VITE_URL_PREFIX`)がどのテストでも一度も実行されない。過去の本番バグ2件(SWキャッシュ、末尾スラッシュ)はまさにこの構成差分で発生しており、現構成では再発を捕捉できない。`vite preview` + `VITE_URL_PREFIX` で本番相当を叩くジョブを推奨。
 - 【中】**PWAオフライン・リロード跨ぎ永続化のE2Eがない**: `context.setOffline(true)` や `page.reload()` で検証可能。SWキャッシュは再発リスクが最も高い領域。
 - 【中】**E2E失敗時の証跡が残らない**: `trace: "on-first-retry"` × retries未設定(=0)でトレースは永遠に取られず、CIへのアーティファクト保存もない。`retries: process.env.CI ? 1 : 0` + `actions/upload-artifact` を推奨。
@@ -226,7 +228,7 @@ strict TypeScript で全体の規律は良好。`any` は実質 `src/feature/act
 ## 5. 推奨対応順
 
 1. **すぐ直す(小さく実害または本番リスク)**
-   - H2: gh-pages.yml を check 成功にゲート
+   - ~~H2: gh-pages.yml を check 成功にゲート~~(対応済み)
    - H4: v1画面のロード中/not found分岐
    - H1: rangedSpread の reachLength(仕様確認の上)
    - chargeMelee の name/description 修正、substitute の reachRange 修正
