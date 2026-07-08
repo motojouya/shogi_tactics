@@ -42,7 +42,7 @@ export const effectBaseDamage: EffectBaseDamage = (self) => (_actor, receiver, u
   units.map((unit) => {
     if (receiver.some((reference) => sameUnit(reference, toUnitReference(unit)))) {
       let damage = self.baseDamage;
-      if (self.reachLength > RANGED_REACH_THRESHOLD && unit.statuses.includes("arrowDodge")) {
+      if (self.reachLength >= RANGED_REACH_THRESHOLD && unit.statuses.includes("arrowDodge")) {
         damage = 0;
       }
       if (unit.statuses.includes("interception")) {

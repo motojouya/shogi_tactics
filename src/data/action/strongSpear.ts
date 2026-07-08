@@ -9,8 +9,8 @@ export const strongSpear: Action = buildAction(
     baseDamage: 2,
     receiverCount: 2,
     cost: 7,
-    effectLength: 1,
-    reachLength: 2,
+    effectLength: 2,
+    reachLength: 1,
     effectRange: [
       [0, 0, 0],
       [0, 1, 0],

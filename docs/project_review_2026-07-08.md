@@ -35,20 +35,20 @@
 
 | # | 観点 | 指摘 | 根拠 |
 |---|---|---|---|
-| H1 | ロジック | `arrowDodge`(矢かわし)が軽弓の「遠隔範囲」に効かない | `src/model/action.ts:38,45` / `src/data/action/rangedSpread.ts:13` |
+| H1 | ロジック | ~~`arrowDodge`(矢かわし)が軽弓の「遠隔範囲」に効かない~~(対応済み 2026-07-08) | `src/model/action.ts:38,45` / `src/data/action/rangedSpread.ts:13` |
 | H2 | 運用 | ~~デプロイが check.yml の成否と無関係に実行される~~(対応済み 2026-07-08) | `.github/workflows/gh-pages.yml` |
 | H3 | 機能デザイン | 対戦中の誤入力を訂正する手段がない | `src/model/battle.ts:185-190` / `src/controller/act.ts:22` |
 | H4 | UI | ~~ロード中に「〜というbattleは見つかりません」が一瞬表示される~~(対応済み 2026-07-08) | `src/pages/v1/app.tsx:20,35` |
 
-### H1. arrowDodge が rangedSpread に効かない(データ不整合)【検証済み】
+### ~~H1. arrowDodge が rangedSpread に効かない(データ不整合)~~【検証済み】(対応済み 2026-07-08)
 
-矢かわしの無効化判定は `reachLength > 2` で行われるが(`src/model/action.ts:38,45`)、`rangedSpread`(軽弓の遠隔範囲)は `reachLength: 2`。rangedSpreadは「2マス先を中心とした範囲」で実際には最大3マス先に届く弓攻撃なのに、矢かわし状態のユニットに通常ダメージが入る。
+~~矢かわしの無効化判定は `reachLength > 2` で行われるが(`src/model/action.ts:38,45`)、`rangedSpread`(軽弓の遠隔範囲)は `reachLength: 2`。rangedSpreadは「2マス先を中心とした範囲」で実際には最大3マス先に届く弓攻撃なのに、矢かわし状態のユニットに通常ダメージが入る。~~
 
-- ステータス定義(`src/data/status/arrowDodge.ts`)「近接マス以外からの攻撃が無効」、チュートリアル(`src/guide/tutorial.md:114`)「遠隔攻撃が無効になります」の両記述と矛盾。
-- 同カテゴリの rangedAttack(3)・strongRanged(3)・piercingArrow(5)は正しく無効化される。rangedSpreadだけが例外。
-- spearAttack/strongSpear(reachLength=2)も無効化されない。「槍は矢ではないのでかわせない」意図なら妥当だが、その場合はステータス説明文の修正が必要。
+~~- ステータス定義(`src/data/status/arrowDodge.ts`)「近接マス以外からの攻撃が無効」、チュートリアル(`src/guide/tutorial.md:114`)「遠隔攻撃が無効になります」の両記述と矛盾。~~
+~~- 同カテゴリの rangedAttack(3)・strongRanged(3)・piercingArrow(5)は正しく無効化される。rangedSpreadだけが例外。~~
+~~- spearAttack/strongSpear(reachLength=2)も無効化されない。「槍は矢ではないのでかわせない」意図なら妥当だが、その場合はステータス説明文の修正が必要。~~
 
-**対応案**: rangedSpread の `reachLength` を3にする、またはしきい値/判定方法の見直し。あわせて槍の扱いを仕様として明文化。
+> 対応内容(仕様確定): 矢かわしの対象は「弓による攻撃」とし、判定を `reachLength >= 2` に変更(model/action.ts)。槍2種(spearAttack/strongSpear)は弓ではないため `reachLength: 1` に再分類し、「2マス先まで届く」性質は `effectLength: 2` で表現(effectRange/reachRangeは変更なし)。これによりrangedSpread(reachLength=2)は矢かわし対象になり、宝蔵院⇔野伏のバランスは不変。説明文を「弓による攻撃が無効になる」に統一(arrowDodge.ts / arrowDodgeStance.ts / tutorial.md)。境界値テストの更新と、弓分類の全数回帰テスト(data/action/index.unit.test.ts)を追加。テスト183件・lint・buildで確認済み。
 
 ### ~~H2. デプロイがCIチェックにゲートされていない~~(対応済み 2026-07-08)
 
@@ -91,7 +91,7 @@
 
 指摘:
 
-- 【高】arrowDodge×rangedSpread の不整合(→ H1)
+- 【高】~~arrowDodge×rangedSpread の不整合~~(→ H1、対応済み)
 - 【中】**doAct がゲームルールをほとんど検証しない**(`src/model/battle.ts:265-278`): 検証は receiver重複と actionKey存在のみ。以下はUIだけが防波堤。
   - receiverCount超過(meleeAttackに5体渡すと5体にダメージ)
   - `action.filter` 未適用 — **hp=0の死亡ユニットをheal対象に渡すと蘇生する**(`src/model/action.ts:69-76` はhpを見ずに `Math.max(unit.hp, maxHp)`)
@@ -232,7 +232,7 @@ strict TypeScript で全体の規律は良好。`any` は実質 `src/feature/act
 1. **すぐ直す(小さく実害または本番リスク)**
    - ~~H2: gh-pages.yml を check 成功にゲート~~(対応済み)
    - ~~H4: v1画面のロード中/not found分岐~~(対応済み)
-   - H1: rangedSpread の reachLength(仕様確認の上)
+   - ~~H1: rangedSpread の reachLength(仕様確認の上)~~(対応済み: しきい値>=2化+槍の再分類)
    - chargeMelee の name/description 修正、substitute の reachRange 修正
    - markdown.tsx の urlTransform を defaultUrlTransform ラップに
 2. **次に(機能の完成度)**

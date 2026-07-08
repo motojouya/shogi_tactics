@@ -31,3 +31,13 @@ describe("data/action effectRange/reachRange", function () {
     expect(actorCells).toHaveLength(1);
   });
 });
+
+describe("data/action 弓(arrowDodge対象)の分類", function () {
+  // reachLength>=2は弓による攻撃としてarrowDodge(矢かわし)で無効化される(model/action.tsのRANGED_REACH_THRESHOLD)。
+  // 槍(spearAttack/strongSpear)は2マス先まで届くが弓ではないためreachLength=1(届く距離はeffectLengthで表現)。
+  const bowKeys = ["rangedAttack", "rangedSpread", "strongRanged", "piercingArrow"];
+
+  it.each(allActions)("$key が矢かわし対象(reachLength>=2)なのは弓アクションのみ", function (action) {
+    expect(action.reachLength >= 2).toBe(bowKeys.includes(action.key));
+  });
+});
