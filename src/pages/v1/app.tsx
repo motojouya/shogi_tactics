@@ -44,7 +44,7 @@ const BattleRoot: FC<{ version: string }> = ({ version }) => {
   if (battle === null) {
     return (
       <Container backLink="/list/">
-        <Typography>{`${key}というbattleは見つかりません`}</Typography>
+        <Typography>{`${key}という対戦は見つかりません`}</Typography>
       </Container>
     );
   }
@@ -52,7 +52,7 @@ const BattleRoot: FC<{ version: string }> = ({ version }) => {
   if (battle.version !== version) {
     return (
       <Container backLink="/list/">
-        <Typography>{`このbattleはversion ${battle.version} のため、${version} の画面では表示できません`}</Typography>
+        <Typography>{`この対戦はversion ${battle.version} のため、${version} の画面では表示できません`}</Typography>
       </Container>
     );
   }

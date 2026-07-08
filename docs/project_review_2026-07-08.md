@@ -82,7 +82,14 @@
 - 【中】**Export/Importが非対称で引き継ぎ手段が実質未完成**: `importJson` はリポジトリ層に実装済み(`src/repository/battle.ts:50-53`)だがUIから呼ぶ箇所がゼロ(デッドコード)。Exportも決着後のみ表示(`src/feature/action.tsx:281-284`)。端末変更・ブラウザデータ消去への備えがなく、対戦中のバックアップも取れない。
 - 【中】**Export/ImportがFile System Access API依存**(`src/repository/utility.ts:29-44`): `showSaveFilePicker` はSafari(iOS含む)・Firefox未対応のため、卓上でスマホ/タブレットを使うシーンで動作しない環境が多い。Blobダウンロード方式への変更を推奨。
 - 【中】**PWAマニフェストに icons がない**(`vite.config.ts` のmanifest定義)【検証済み】: Chromeのインストール要件(192px/512px)を満たさず、「ホーム画面に追加して卓上で使う」というPWAの目的を損なう。
-- 【中】**チュートリアルとUI文言の齟齬**: tutorial.md「バトルの管理」⇔実画面「対戦の管理」(`src/pages/app.tsx:19`)、「バトルをスタート」⇔「戦闘開始」(`src/feature/creation.tsx:133`)、turbulent.md「駒数」⇔「ユニット数」(`creation.tsx:121`)。用語も「対戦/バトル/戦闘」「駒/ユニット」が混在し、フォームラベルは「Mode」「action」「receiver」と英語。
+- 【中】~~**チュートリアルとUI文言の齟齬**: tutorial.md「バトルの管理」⇔実画面「対戦の管理」(`src/pages/app.tsx:19`)、「バトルをスタート」⇔「戦闘開始」(`src/feature/creation.tsx:133`)、turbulent.md「駒数」⇔「ユニット数」(`creation.tsx:121`)。用語も「対戦/バトル/戦闘」「駒/ユニット」が混在し、フォームラベルは「Mode」「action」「receiver」と英語。~~(対応済み 2026-07-08)
+
+  > 対応内容(オーナー決定の統一方針: 呼称は「対戦」、駒の呼称は「駒」、開始ボタンは「対戦開始」、日本語化はフォームラベルのみ):
+  > - **対戦に統一**: 「バトル一覧」→「対戦一覧」(list)、「このバトルを削除しますか」→「この対戦を削除しますか」(remove.ts)、v1画面の「〜というbattleは見つかりません」「このbattleは…」→「対戦」、turbulent.mdの「バトル」3カ所→「対戦」
+  > - **駒に統一**: 「ユニット数」→「駒数」(turbulent.mdと一致)、戦乱モードボタン「ユニット選択」→「駒の選択」
+  > - **対戦開始に統一**: 作成ボタン・対戦画面見出し・編成最終ボタン「この駒を選んで戦闘開始」の「戦闘開始」→「対戦開始」。tutorial.mdの手順4は「バトルをスタート」を廃し「入力→`対戦開始`をクリック」の実際の操作順に書き換え。手順2「バトルの管理」→「対戦の管理」
+  > - **フォームラベルの日本語化**: Mode→モード、action→行動、receiver→対象(既存の説明文「対象は選ばなくても実行できます」と一致)。「先手/後手の名前」→「先手/後手のプレイヤー名」(エラーメッセージ・ガイドと一致)
+  > - E2Eのラベル参照(モード/行動/対象/対戦開始/駒の選択)も更新。テスト206件・lint・build・E2Eで確認済み。なお `Export`・`loading...` 等の技術寄り文言はオーナー判断で現状維持(3.4の日英混在指摘として残る)。
 - 【低】バトル一覧の並び順が未定義(uuid列挙順)。日時を表示しているのに日時順でない(`src/controller/list.ts:7-13`)。
 - 【低】ガイドMarkdown内リンクが `/shogi_tactics/` プレフィックス直書き(`src/guide/rule.md:13,31` ほか)。base が `/` のローカル開発時はリンク切れ。→ 3.4 の対応案参照。
 - 【低】README:26 の「docs/ ドキュメント」は空ディレクトリ(本レポートで解消)。対戦画面見出しが決着後も「戦闘開始」のまま(`src/feature/action.tsx:279`)。「2人が1台の端末を共有する」前提が明文化されていない。
@@ -167,7 +174,7 @@ strict TypeScript で全体の規律は良好。`any` は実質 `src/feature/act
 - 【中】**`getReceiverError` の過剰実装**(`src/feature/action.tsx:60-78`): `errors.receivers?.[index]?.value` で型安全に到達でき、asキャスト2回+any2回+eslint-disable 3行の20行が丸ごと不要。
 - 【中】**simulated state の手動インデックス同期**(`src/feature/action.tsx:202,247-270`): フォーム値から導出できる情報を別stateに複製し添字で暗黙同期。`useWatch`+`useMemo` での導出が壊れにくい。関数名 `addReceiver` も実態(プレビュー計算)と乖離。
 - 【中】**doActionFormSchema のエラーが英語のまま表示**(`src/form/action.ts:11-14`): zodデフォルトメッセージがFormHelperTextに出る。creation.ts は日本語メッセージ付きで不統一。receiver重複もフォーム側でsuperRefineすれば confirm 前に弾ける。
-- 【中】**文言の日英混在**: `loading...`(battle_io.tsx:19)、`actor not found`(action.tsx:221)、`Cancelされました`(act.ts:23)、ボタン `Export`、ラベル `action`/`receiver`。
+- 【中】**文言の日英混在**: `loading...`(battle_io.tsx:19)、`actor not found`(action.tsx:221)、`Cancelされました`(act.ts:23)、ボタン `Export`、~~ラベル `action`/`receiver`~~(2026-07-08 ラベルは行動/対象に日本語化済み。残りはオーナー判断で現状維持)。
 - 【中】**urlPrefix前置ロジックが3箇所に重複**(`src/components/utility.tsx:17-20,32-35`, `src/repository/local.ts:19-22`): `withPrefix` 関数への集約を推奨。集約すれば markdown.tsx の `a` コンポーネントで内部リンクにprefixを適用でき、3.1のガイド内リンクのハードコード問題(md側は `/guide/...` と書く)も同時に解消できる。
 - 【中】**戻る矢印リンクにアクセシブルネームなし**(`src/components/utility.tsx:60-63`): `aria-label="戻る"` を付与すべき。
 - 【低】デッドコード: `local.notice`(型と実装も不一致)、`importJson`(UI未配線)、`CopyFailError`(常にnullを返し一度も生成されない)。
@@ -255,7 +262,7 @@ strict TypeScript で全体の規律は良好。`any` は実質 `src/feature/act
    - E2Eの本番相当構成(preview + VITE_URL_PREFIX)ジョブ追加、trace/retries設定
    - tsconfigのテストコード型検査、prettier対象に .tsx 追加
    - SelectOption の置き場所移動(form→repository依存の解消)、レイヤ規約のlint強制
-   - 文言の統一(日英混在・用語揺れ・チュートリアルとの一致)
+   - ~~文言の統一(日英混在・用語揺れ・チュートリアルとの一致)~~(対応済み: 用語揺れ・チュートリアル一致・フォームラベル。Export/loading等は現状維持)
 4. **仕様の明文化(コードでなくdocsへ)**
    - 槍・puppet・barricade・heavyMelee の意図
    - マイグレーション方針(Dexie version / zod default / battle.version の使い分け)

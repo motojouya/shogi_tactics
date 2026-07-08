@@ -8,9 +8,9 @@ const selectOption = async (page: Page, combo: Locator, optionName: string): Pro
   await page.getByRole("option", { name: optionName, exact: true }).click();
 };
 
-const modeSelect = (page: Page): Locator => page.getByRole("combobox", { name: "Mode" });
-const actionSelect = (page: Page): Locator => page.getByRole("combobox", { name: "action" });
-const receiverSelect = (page: Page): Locator => page.getByRole("combobox", { name: "receiver" });
+const modeSelect = (page: Page): Locator => page.getByRole("combobox", { name: "モード" });
+const actionSelect = (page: Page): Locator => page.getByRole("combobox", { name: "行動" });
+const receiverSelect = (page: Page): Locator => page.getByRole("combobox", { name: "対象" });
 
 test("docs/06 シナリオ: 通常モード(降参) / 戦乱モード(対戦して勝敗) / 削除", async ({ page }) => {
   // 降参・実行・削除の確認ダイアログはすべて承認する。
@@ -20,11 +20,11 @@ test("docs/06 シナリオ: 通常モード(降参) / 戦乱モード(対戦し�
     await page.goto("/");
     await page.getByRole("link", { name: "対戦を作る" }).click();
 
-    // 作成画面(通常モードが既定)。プレイヤー名を入力して戦闘開始。
+    // 作成画面(通常モードが既定)。プレイヤー名を入力して対戦開始。
     await expect(modeSelect(page)).toBeVisible();
     await page.locator("#first_player_name").fill(NORMAL.first);
     await page.locator("#second_player_name").fill(NORMAL.second);
-    await page.getByRole("button", { name: "戦闘開始" }).click();
+    await page.getByRole("button", { name: "対戦開始" }).click();
 
     // 対戦画面に遷移。先手のターンから先手が降参する。
     await expect(page.getByTestId("actor-side")).toHaveText("先手");
@@ -42,14 +42,14 @@ test("docs/06 シナリオ: 通常モード(降参) / 戦乱モード(対戦し�
     // リスト画面から新しく作る。
     await page.getByRole("link", { name: "新しく作る" }).click();
 
-    // 戦乱モードでユニット数3・基礎コスト7を入力。
+    // 戦乱モードで駒数3・基礎コスト7を入力。
     await expect(modeSelect(page)).toBeVisible();
     await selectOption(page, modeSelect(page), "戦乱モード(駒数自由)");
     await page.locator("#first_player_name").fill(WAR.first);
     await page.locator("#second_player_name").fill(WAR.second);
     await page.locator("#unitCount").fill("3");
     await page.locator("#stepBase").fill("7");
-    await page.getByRole("button", { name: "ユニット選択" }).click();
+    await page.getByRole("button", { name: "駒の選択" }).click();
 
     // 編成画面が表示される。
     await expect(page.getByText(/の編成/)).toBeVisible();
@@ -66,7 +66,7 @@ test("docs/06 シナリオ: 通常モード(降参) / 戦乱モード(対戦し�
     // 編成を完了させる(先手3駒・後手3駒、各リーダー1体)。
     // 追加は先手→後手の交互。後手の軽弓/薬師は攻撃手として後で先手の将軍を倒す。
     const pieceSelect = page.getByRole("combobox"); // 編成フォームのcomboboxは1つ
-    // 追加ボタンは通常「この駒を追加」、最後の1枠だけ「この駒を選んで戦闘開始」になるため部分一致で拾う。
+    // 追加ボタンは通常「この駒を追加」、最後の1枠だけ「この駒を選んで対戦開始」になるため部分一致で拾う。
     const addUnit = async (pieceName: string, asLeader: boolean) => {
       await selectOption(page, pieceSelect, pieceName);
       if (asLeader) {

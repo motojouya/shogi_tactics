@@ -109,11 +109,11 @@ const ReceiverSelect: FC<{
       control={control}
       render={({ field }) => (
         <FormControl error={!!error}>
-          <InputLabel id={`receiver_label_${index}`}>receiver</InputLabel>
+          <InputLabel id={`receiver_label_${index}`}>対象</InputLabel>
           <Select
             id={`receiver_select_${index}`}
             labelId={`receiver_label_${index}`}
-            label='receiver'
+            label='対象'
             {...field}
             value={field.value ?? ''}
             onChange={onChange(field.onChange)}
@@ -159,11 +159,11 @@ const ActionSelect: FC<{
       control={control}
       render={({ field }) => (
         <FormControl error={!!errors.actionKey}>
-          <InputLabel id="action_label">action</InputLabel>
+          <InputLabel id="action_label">行動</InputLabel>
           <Select
             id='action_select'
             labelId='action_label'
-            label='action'
+            label='行動'
             {...field}
             value={field.value ?? ''}
             onChange={onChange(field.onChange)}
@@ -294,7 +294,7 @@ export const BattleAction: FC<{ battle: Battle }> = ({ battle }) => {
       <Stack>
         <Stack sx={{ pb: 1 }}>
           <Stack direction="row" sx={{ justifyContent: "space-between", width: '100%', pb: 1 }}>
-            <Stack sx={{ flex: "0 0 70px", justifyContent: "center" }}><Typography>戦闘開始</Typography></Stack>
+            <Stack sx={{ flex: "0 0 70px", justifyContent: "center" }}><Typography>対戦開始</Typography></Stack>
             <Box sx={{ flex: "1 1 auto" }}>
               {battle.result !== GameOngoing && (
                 <Stack direction="row" sx={{ columnGap: 1 }}>
