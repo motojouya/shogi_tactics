@@ -8,6 +8,7 @@ import { describe, it, expect } from "vitest";
 import { createBattle } from "./create";
 import { pieceRepository } from "../repository/piece";
 import { GameOngoing, NORMAL_STEP_BASE, NORMAL_UNIT_COUNT } from "../model/battle";
+import { InvalidArgumentError } from "../model/error";
 
 const battleRepository: BattleRepository = {
   save: async () => {},
@@ -40,6 +41,9 @@ describe("createBattle", () => {
       unitCount: 4,
     };
     const battle = await createBattle(repository)(form, "v1");
+    if (battle instanceof InvalidArgumentError) {
+      throw battle;
+    }
 
     expect(battle.key).toBe("0191e000-0000-7000-8000-000000000000");
     expect(battle.first_player_name).toBe("first");
@@ -62,11 +66,40 @@ describe("createBattle", () => {
       unitCount: NORMAL_UNIT_COUNT,
     };
     const battle = await createBattle(repository)(form, "v1");
+    if (battle instanceof InvalidArgumentError) {
+      throw battle;
+    }
 
     expect(battle.stepBase).toBe(NORMAL_STEP_BASE);
     expect(battle.unitCount).toBe(NORMAL_UNIT_COUNT);
     // 通常モードは編成まで済ませるので先頭Turnが積まれ、両陣営7駒(=14 unit)が並ぶ。
     expect(battle.turns.length).toBe(1);
     expect(battle.turns[0].units.length).toBe(NORMAL_UNIT_COUNT * 2);
+  });
+
+  it("戦乱モードでmodelバリデーションに反する値ならInvalidArgumentErrorを返し保存しない", async () => {
+    let saved = false;
+    const guardedBattleRepository: BattleRepository = {
+      ...battleRepository,
+      save: async () => {
+        saved = true;
+      },
+    };
+    const guarded = { battle: guardedBattleRepository, local, piece: pieceRepository } as unknown as Repository;
+
+    const form: CreationForm = {
+      mode: "war",
+      first_player_name: "first",
+      second_player_name: "second",
+      stepBase: 1000, // 上限999を超える
+      unitCount: 4,
+    };
+    const result = await createBattle(guarded)(form, "v1");
+
+    expect(result).toBeInstanceOf(InvalidArgumentError);
+    if (result instanceof InvalidArgumentError) {
+      expect(result.name).toBe("stepBase");
+    }
+    expect(saved).toBe(false);
   });
 });

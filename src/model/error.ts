@@ -73,3 +73,12 @@ export class ReceiverDuplicationError {
     this.message = message;
   }
 }
+
+export class InvalidArgumentError {
+  readonly name: string;
+  readonly message: string;
+  constructor(name: string, message: string) {
+    this.name = name;
+    this.message = message;
+  }
+}

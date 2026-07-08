@@ -26,7 +26,7 @@ import {
   applyActorCost,
 } from "./unit";
 import { validateReceivers } from "./action";
-import { DataNotFoundError, ReceiverDuplicationError } from "./error";
+import { DataNotFoundError, ReceiverDuplicationError, InvalidArgumentError } from "./error";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
 
@@ -39,6 +39,49 @@ export const GameDraw: GameResult = "DRAW";
 
 export const NORMAL_UNIT_COUNT = 7;
 export const NORMAL_STEP_BASE = 14;
+
+export const MAX_PLAYER_NAME_LENGTH = 30;
+export const MIN_STEP_BASE = 1;
+export const MAX_STEP_BASE = 999;
+export const MIN_UNIT_COUNT = 1;
+export const MAX_UNIT_COUNT = 14;
+
+// 文字列の文字数(コードポイント数)。サロゲートペアも1文字として数え、バイト数では数えない。
+const charLength = (value: string): number => [...value].length;
+
+export type ValidateBattleArgs = (
+  firstPlayerName: string,
+  secondPlayerName: string,
+  stepBase: number,
+  unitCount: number,
+) => InvalidArgumentError | null;
+export const validateBattleArgs: ValidateBattleArgs = (firstPlayerName, secondPlayerName, stepBase, unitCount) => {
+  if (charLength(firstPlayerName) < 1 || charLength(firstPlayerName) > MAX_PLAYER_NAME_LENGTH) {
+    return new InvalidArgumentError(
+      "first_player_name",
+      `先手のプレイヤー名は1文字以上${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`,
+    );
+  }
+  if (charLength(secondPlayerName) < 1 || charLength(secondPlayerName) > MAX_PLAYER_NAME_LENGTH) {
+    return new InvalidArgumentError(
+      "second_player_name",
+      `後手のプレイヤー名は1文字以上${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`,
+    );
+  }
+  if (!Number.isInteger(stepBase) || stepBase < MIN_STEP_BASE || stepBase > MAX_STEP_BASE) {
+    return new InvalidArgumentError(
+      "stepBase",
+      `stepBaseは${MIN_STEP_BASE}から${MAX_STEP_BASE}の整数で入力してください`,
+    );
+  }
+  if (!Number.isInteger(unitCount) || unitCount < MIN_UNIT_COUNT || unitCount > MAX_UNIT_COUNT) {
+    return new InvalidArgumentError(
+      "unitCount",
+      `unitCountは${MIN_UNIT_COUNT}から${MAX_UNIT_COUNT}の整数で入力してください`,
+    );
+  }
+  return null;
+};
 
 export const modeSchema = z.enum(["normal", "war"]);
 export type Mode = z.infer<typeof modeSchema>;
@@ -91,17 +134,23 @@ export type CreateBattle = (
   stepBase: number,
   unitCount: number,
   version: string,
-) => Battle;
-export const createBattle: CreateBattle = (key, firstPlayerName, secondPlayerName, stepBase, unitCount, version) => ({
-  turns: [],
-  result: GameOngoing,
-  key,
-  first_player_name: firstPlayerName,
-  second_player_name: secondPlayerName,
-  stepBase: stepBase >= 1 ? stepBase : Math.max(unitCount * 2, 1),
-  unitCount,
-  version,
-});
+) => Battle | InvalidArgumentError;
+export const createBattle: CreateBattle = (key, firstPlayerName, secondPlayerName, stepBase, unitCount, version) => {
+  const invalid = validateBattleArgs(firstPlayerName, secondPlayerName, stepBase, unitCount);
+  if (invalid) {
+    return invalid;
+  }
+  return {
+    turns: [],
+    result: GameOngoing,
+    key,
+    first_player_name: firstPlayerName,
+    second_player_name: secondPlayerName,
+    stepBase,
+    unitCount,
+    version,
+  };
+};
 
 export type Format = (battle: Battle, units: Unit[], datetime: Date) => Battle;
 export const format: Format = (battle, units, datetime) => {
