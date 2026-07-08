@@ -22,6 +22,7 @@ import {
   isFormationComplete,
   canAddPiece,
   sideHasLeader,
+  nextFormationSide,
   clearActorStatuses,
   applyActorCost,
 } from "./unit";
@@ -56,16 +57,16 @@ export type ValidateBattleArgs = (
   unitCount: number,
 ) => InvalidArgumentError | null;
 export const validateBattleArgs: ValidateBattleArgs = (firstPlayerName, secondPlayerName, stepBase, unitCount) => {
-  if (charLength(firstPlayerName) < 1 || charLength(firstPlayerName) > MAX_PLAYER_NAME_LENGTH) {
+  if (charLength(firstPlayerName.trim()) < 1 || charLength(firstPlayerName) > MAX_PLAYER_NAME_LENGTH) {
     return new InvalidArgumentError(
       "first_player_name",
-      `先手のプレイヤー名は1文字以上${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`,
+      `先手のプレイヤー名は空白以外の1文字以上${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`,
     );
   }
-  if (charLength(secondPlayerName) < 1 || charLength(secondPlayerName) > MAX_PLAYER_NAME_LENGTH) {
+  if (charLength(secondPlayerName.trim()) < 1 || charLength(secondPlayerName) > MAX_PLAYER_NAME_LENGTH) {
     return new InvalidArgumentError(
       "second_player_name",
-      `後手のプレイヤー名は1文字以上${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`,
+      `後手のプレイヤー名は空白以外の1文字以上${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`,
     );
   }
   if (!Number.isInteger(stepBase) || stepBase < MIN_STEP_BASE || stepBase > MAX_STEP_BASE) {
@@ -163,11 +164,22 @@ export type FormatNormal = (battle: Battle, getPiece: GetPiece, datetime: Date) 
 export const formatNormal: FormatNormal = (battle, getPiece, datetime) =>
   format(battle, buildNormalUnits(getPiece), datetime);
 
-export type AddFormationUnit = (battle: Battle, side: Side, piece: Piece, isLeader: boolean) => Battle;
+export type AddFormationUnit = (
+  battle: Battle,
+  side: Side,
+  piece: Piece,
+  isLeader: boolean,
+) => Battle | InvalidArgumentError;
 export const addFormationUnit: AddFormationUnit = (battle, side, piece, isLeader) => {
+  if (!isFormation(battle)) {
+    return new InvalidArgumentError("battle", "編成中のみunitを追加できます");
+  }
   const units = getFormationUnits(battle);
+  if (nextFormationSide(units, battle.unitCount) !== side) {
+    return new InvalidArgumentError("side", "手番のsideのunitのみ追加できます");
+  }
   if (!canAddPiece(units, side, piece.key)) {
-    return battle;
+    return new InvalidArgumentError("piece", "同じ駒は既に配置されています");
   }
   const asLeader = isLeader && !sideHasLeader(units, side);
   const newBattle = copyBattle(battle);
@@ -182,8 +194,14 @@ export const addFormationUnit: AddFormationUnit = (battle, side, piece, isLeader
   return newBattle;
 };
 
-export type UndoFormationUnit = (battle: Battle) => Battle;
+export type UndoFormationUnit = (battle: Battle) => Battle | InvalidArgumentError;
 export const undoFormationUnit: UndoFormationUnit = (battle) => {
+  if (!isFormation(battle)) {
+    return new InvalidArgumentError("battle", "編成中のみunitを取り消しできます");
+  }
+  if (getFormationUnits(battle).length === 0) {
+    return new InvalidArgumentError("battle", "取り消すunitがありません");
+  }
   const newBattle = copyBattle(battle);
   newBattle.turns[0].units = newBattle.turns[0].units.slice(0, -1);
   return newBattle;
@@ -222,12 +240,26 @@ export const surrender: ModelSurrender = (battle, actor, datetime) => {
   };
 };
 
-export type SurrenderBattle = (battle: Battle, actor: UnitReference, datetime: Date) => Battle;
+export type SurrenderBattle = (battle: Battle, actor: UnitReference, datetime: Date) => Battle | InvalidArgumentError;
 export const surrenderBattle: SurrenderBattle = (battle, actor, datetime) => {
+  if (battle.result !== GameOngoing) {
+    return new InvalidArgumentError("battle", "決着済みの対戦では降参できません");
+  }
   const newBattle = copyBattle(battle);
   newBattle.turns.push(surrender(newBattle, actor, datetime));
   newBattle.result = isSettlement(newBattle);
   return newBattle;
+};
+
+const validateTurnActor = (battle: Battle, actor: UnitReference): InvalidArgumentError | null => {
+  if (battle.result !== GameOngoing) {
+    return new InvalidArgumentError("battle", "決着済みの対戦では行動できません");
+  }
+  const expected = nextActor(battle);
+  if (!expected || !sameUnit(toUnitReference(expected), actor)) {
+    return new InvalidArgumentError("actor", "手番のunitのみ行動できます");
+  }
+  return null;
 };
 
 const appendTurn = (
@@ -250,9 +282,14 @@ const appendTurn = (
   return newBattle;
 };
 
-export type DoNothing = (battle: Battle, actor: UnitReference, datetime: Date) => Battle;
-export const doNothing: DoNothing = (battle, actor, datetime) =>
-  appendTurn(battle, actor, { type: "DO_NOTHING", actor }, 0, datetime, (units) => units);
+export type DoNothing = (battle: Battle, actor: UnitReference, datetime: Date) => Battle | InvalidArgumentError;
+export const doNothing: DoNothing = (battle, actor, datetime) => {
+  const invalid = validateTurnActor(battle, actor);
+  if (invalid) {
+    return invalid;
+  }
+  return appendTurn(battle, actor, { type: "DO_NOTHING", actor }, 0, datetime, (units) => units);
+};
 
 export type DoAct = (
   battle: Battle,
@@ -261,8 +298,12 @@ export type DoAct = (
   receivers: UnitReference[],
   resolvers: Resolvers,
   datetime: Date,
-) => Battle | DataNotFoundError | ReceiverDuplicationError;
+) => Battle | DataNotFoundError | ReceiverDuplicationError | InvalidArgumentError;
 export const doAct: DoAct = (battle, actor, actionKey, receivers, resolvers, datetime) => {
+  const invalid = validateTurnActor(battle, actor);
+  if (invalid) {
+    return invalid;
+  }
   const duplication = validateReceivers(receivers);
   if (duplication) {
     return duplication;
@@ -271,10 +312,33 @@ export const doAct: DoAct = (battle, actor, actionKey, receivers, resolvers, dat
   if (!action) {
     return new DataNotFoundError(actionKey, "action", `${actionKey}というactionは存在しません`);
   }
+  if (receivers.length > action.receiverCount) {
+    return new InvalidArgumentError("receivers", `この行動で選べる対象は${action.receiverCount}体までです`);
+  }
+  const candidates = action.filter(actor, getLastTurn(battle).units);
+  if (!receivers.every((receiver) => candidates.some((candidate) => sameUnit(candidate, receiver)))) {
+    return new InvalidArgumentError("receivers", "対象にできないunitが含まれています");
+  }
+  for (const receiver of receivers) {
+    if (!resolvers.getPiece(receiver.piece)) {
+      return new DataNotFoundError(receiver.piece, "piece", `${receiver.piece}というpieceは存在しません`);
+    }
+  }
   const order: Order = { type: "DO_ACTION", actionKey: action.key, actor, receivers };
   return appendTurn(battle, actor, order, action.cost, datetime, (units) =>
     action.act(actor, receivers, units, resolvers.getPiece),
   );
+};
+
+export type UndoTurn = (battle: Battle) => Battle | InvalidArgumentError;
+export const undoTurn: UndoTurn = (battle) => {
+  if (battle.turns.length < 2) {
+    return new InvalidArgumentError("battle", "取り消せる行動がありません");
+  }
+  const newBattle = copyBattle(battle);
+  newBattle.turns = newBattle.turns.slice(0, -1);
+  newBattle.result = isSettlement(newBattle);
+  return newBattle;
 };
 
 export type Simulated = { survive: boolean; unit: Unit | null };
@@ -287,7 +351,7 @@ export type Simulate = (
   resolvers: Resolvers,
 ) => Simulated;
 export const simulate: Simulate = (action, actor, receiver, lastTurn, resolvers) => {
-  const acted = action.act(actor, [receiver], lastTurn.units.map(copyUnit), resolvers.getPiece);
+  const acted = action.act(actor, [receiver], clearActorStatuses(lastTurn.units, actor), resolvers.getPiece);
   const found = acted.find((unit) => sameUnit(toUnitReference(unit), receiver));
 
   return {

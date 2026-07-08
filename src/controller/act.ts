@@ -7,7 +7,7 @@ import { doNothing, doAct } from "../model/battle";
 import { ORDER_DO_NOTHING } from "../model/turn";
 import { toReceivers } from "../form/action";
 import { createResolvers } from "../repository";
-import { DataNotFoundError, UserCancel, ReceiverDuplicationError } from "../model/error";
+import { DataNotFoundError, UserCancel, ReceiverDuplicationError, InvalidArgumentError } from "../model/error";
 
 export type Act = (
   repository: Repository,
@@ -15,7 +15,7 @@ export type Act = (
   battle: Battle,
   actor: UnitReference,
   doActionForm: DoActionForm,
-) => Promise<Battle | DataNotFoundError | ReceiverDuplicationError | UserCancel>;
+) => Promise<Battle | DataNotFoundError | ReceiverDuplicationError | InvalidArgumentError | UserCancel>;
 export const act: Act = (repository) => async (battle, actor, doActionForm) => {
   const { battle: battleRepository, local } = repository;
 
@@ -25,13 +25,20 @@ export const act: Act = (repository) => async (battle, actor, doActionForm) => {
 
   if (doActionForm.actionKey === ORDER_DO_NOTHING) {
     const newBattle = doNothing(battle, actor, local.now());
+    if (newBattle instanceof InvalidArgumentError) {
+      return newBattle;
+    }
     await battleRepository.save(newBattle);
     return newBattle;
   }
 
   const receivers = toReceivers(doActionForm.receivers);
   const result = doAct(battle, actor, doActionForm.actionKey, receivers, createResolvers(repository), local.now());
-  if (result instanceof DataNotFoundError || result instanceof ReceiverDuplicationError) {
+  if (
+    result instanceof DataNotFoundError ||
+    result instanceof ReceiverDuplicationError ||
+    result instanceof InvalidArgumentError
+  ) {
     return result;
   }
 

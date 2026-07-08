@@ -121,8 +121,9 @@ describe("Action#effectBaseDamage", function () {
     expect(result[0].hp).toBe(3); // 1 - 1 = 0ダメージ
   });
 
-  it("arrowDodgeを持つreceiverは遠隔攻撃(reachLength>2)のダメージが0になる", function () {
-    const ranged: Action = { ...baseAction, reachLength: 3 };
+  it("arrowDodgeを持つreceiverは弓攻撃(reachLength>=2)のダメージが0になる", function () {
+    // 境界値: reachLength=2は弓扱い(旧実装の>2判定でrangedSpreadが漏れたバグの回帰)
+    const ranged: Action = { ...baseAction, reachLength: 2 };
     const units = buildUnits([{ side: "SECOND", piece: "gold", hp: 3, steps: 0, statuses: ["arrowDodge"] }]);
 
     const result = effectBaseDamage(ranged)(
@@ -134,8 +135,8 @@ describe("Action#effectBaseDamage", function () {
     expect(result[0].hp).toBe(3); // 無効化
   });
 
-  it("arrowDodgeを持っていても近接攻撃(reachLength<=2)は通常通りダメージを受ける", function () {
-    const melee: Action = { ...baseAction, reachLength: 2 };
+  it("arrowDodgeを持っていても近接攻撃(reachLength<2)は通常通りダメージを受ける", function () {
+    const melee: Action = { ...baseAction, reachLength: 1 };
     const units = buildUnits([{ side: "SECOND", piece: "gold", hp: 3, steps: 0, statuses: ["arrowDodge"] }]);
 
     const result = effectBaseDamage(melee)(

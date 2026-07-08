@@ -47,7 +47,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
   const currentSide: Side | null = nextFormationSide(units, unitCount);
   const currentSideHasLeader = currentSide ? sideHasLeader(units, currentSide) : false;
   const canAddSelected = currentSide ? canAddPiece(units, currentSide, selectedPiece) : false;
-  // 後手の最後の1枠(先手満杯・後手が残り1)。ここで追加するとrosterが揃い、そのまま戦闘開始になる。
+  // 後手の最後の1枠(先手満杯・後手が残り1)。ここで追加するとrosterが揃い、そのまま対戦開始になる。
   const isLastUnit = currentSide === 'SECOND' && firstCount === unitCount && secondCount === unitCount - 1;
 
   const playerName = (side: Side): string =>
@@ -98,7 +98,7 @@ export const BattleFormation: FC<{ battle: Battle }> = ({ battle }) => {
               />
               <Box sx={{ pl: 1 }}>
                 <Button variant="contained" type="submit" disabled={!canAddSelected}>
-                  {isLastUnit ? 'この駒を選んで戦闘開始' : 'この駒を追加'}
+                  {isLastUnit ? 'この駒を選んで対戦開始' : 'この駒を追加'}
                 </Button>
               </Box>
             </Stack>

@@ -18,7 +18,7 @@ https://motojouya.github.io/shogi_tactics/
 
 - /
   - .github/
-    - workflow/
+    - workflows/
       - check.yml  
         開発時のチェックがある。通らないとmerge不可  
       - gh-pages.yml  

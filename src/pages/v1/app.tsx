@@ -24,6 +24,15 @@ const BattleRoot: FC<{ version: string }> = ({ version }) => {
     return (<BattleCreation version={version} />);
   }
 
+  // useLiveQueryはクエリ解決前にundefinedを返すため、not found(null)と区別する
+  if (battle === undefined) {
+    return (
+      <Container backLink="/list/">
+        <Typography>loading...</Typography>
+      </Container>
+    );
+  }
+
   if (battle instanceof JsonSchemaUnmatchError) {
     return (
       <Container backLink="/list/">
@@ -32,10 +41,10 @@ const BattleRoot: FC<{ version: string }> = ({ version }) => {
     );
   }
 
-  if (!battle) {
+  if (battle === null) {
     return (
       <Container backLink="/list/">
-        <Typography>{`${key}というbattleは見つかりません`}</Typography>
+        <Typography>{`${key}という対戦は見つかりません`}</Typography>
       </Container>
     );
   }
@@ -43,7 +52,7 @@ const BattleRoot: FC<{ version: string }> = ({ version }) => {
   if (battle.version !== version) {
     return (
       <Container backLink="/list/">
-        <Typography>{`このbattleはversion ${battle.version} のため、${version} の画面では表示できません`}</Typography>
+        <Typography>{`この対戦はversion ${battle.version} のため、${version} の画面では表示できません`}</Typography>
       </Container>
     );
   }

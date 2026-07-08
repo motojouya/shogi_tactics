@@ -4,8 +4,11 @@ import type { FormationForm } from "../form/formation";
 import type { Repository } from "../repository";
 
 import { addFormationUnit } from "../model/battle";
+import { InvalidArgumentError } from "../model/error";
 
-export type AddUnit = (repository: Repository) => (battle: Battle, side: Side, form: FormationForm) => Promise<Battle>;
+export type AddUnit = (
+  repository: Repository,
+) => (battle: Battle, side: Side, form: FormationForm) => Promise<Battle | InvalidArgumentError>;
 export const addUnit: AddUnit = (repository) => async (battle, side, form) => {
   const { battle: battleRepository, piece: pieceRepository } = repository;
   const piece = pieceRepository.get(form.piece);
@@ -14,8 +17,8 @@ export const addUnit: AddUnit = (repository) => async (battle, side, form) => {
   }
 
   const newBattle = addFormationUnit(battle, side, piece, form.leader);
-  if (newBattle === battle) {
-    return battle;
+  if (newBattle instanceof InvalidArgumentError) {
+    return newBattle;
   }
 
   await battleRepository.save(newBattle);

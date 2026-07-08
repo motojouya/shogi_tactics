@@ -65,7 +65,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
                 <TextField
                   select
                   id="mode"
-                  label="Mode"
+                  label="モード"
                   value={field.value}
                   onChange={field.onChange}
                   sx={{ width: '100%' }}
@@ -80,7 +80,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
             <TextField
               id="first_player_name"
               error={!!errors.first_player_name}
-              label="先手の名前"
+              label="先手のプレイヤー名"
               variant="outlined"
               {...register('first_player_name')}
               helperText={errors.first_player_name && errors.first_player_name.message}
@@ -91,7 +91,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
             <TextField
               id="second_player_name"
               error={!!errors.second_player_name}
-              label="後手の名前"
+              label="後手のプレイヤー名"
               variant="outlined"
               {...register('second_player_name')}
               helperText={errors.second_player_name && errors.second_player_name.message}
@@ -118,7 +118,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
                   id="unitCount"
                   type="number"
                   error={!!errors.unitCount}
-                  label="ユニット数"
+                  label="駒数"
                   placeholder="1〜14"
                   variant="outlined"
                   {...register('unitCount', { valueAsNumber: true })}
@@ -130,7 +130,7 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
           )}
           <Box sx={{ p: 1 }}>
             <Button variant="contained" type="submit">
-              {mode === 'normal' ? '戦闘開始' : 'ユニット選択'}
+              {mode === 'normal' ? '対戦開始' : '駒の選択'}
             </Button>
           </Box>
         </Stack>

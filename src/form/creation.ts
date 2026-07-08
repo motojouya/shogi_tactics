@@ -19,11 +19,13 @@ export const creationFormSchema = z
     first_player_name: z
       .string()
       .min(1, "先手のプレイヤー名を入力してください")
-      .max(MAX_PLAYER_NAME_LENGTH, `先手のプレイヤー名は${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`),
+      .max(MAX_PLAYER_NAME_LENGTH, `先手のプレイヤー名は${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`)
+      .refine((value) => value.trim().length >= 1, "先手のプレイヤー名を入力してください"),
     second_player_name: z
       .string()
       .min(1, "後手のプレイヤー名を入力してください")
-      .max(MAX_PLAYER_NAME_LENGTH, `後手のプレイヤー名は${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`),
+      .max(MAX_PLAYER_NAME_LENGTH, `後手のプレイヤー名は${MAX_PLAYER_NAME_LENGTH}文字以下で入力してください`)
+      .refine((value) => value.trim().length >= 1, "後手のプレイヤー名を入力してください"),
     stepBase: z.number({ error: `stepBaseは${MIN_STEP_BASE}から${MAX_STEP_BASE}の数値を入力してください` }),
     unitCount: z.number({ error: `unitCountは${MIN_UNIT_COUNT}から${MAX_UNIT_COUNT}の数値を入力してください` }),
   })

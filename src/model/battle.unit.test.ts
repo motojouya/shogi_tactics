@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import type { Unit, UnitReference } from "./unit";
+import type { Unit, UnitReference, Side } from "./unit";
 import type { Piece } from "./piece";
 import type { Battle } from "./battle";
 
@@ -8,7 +8,9 @@ import {
   createBattle,
   doNothing,
   doAct,
+  undoTurn,
   surrender,
+  surrenderBattle,
   isSettlement,
   sortedUnits,
   getLastTurn,
@@ -16,6 +18,7 @@ import {
   format,
   formatNormal,
   addFormationUnit,
+  undoFormationUnit,
   simulate,
   battleSchema,
   GameOngoing,
@@ -28,7 +31,7 @@ import {
 } from "./battle";
 import { start } from "./turn";
 import { buildAction, effectBaseDamage, filterAlive } from "./action";
-import { InvalidArgumentError } from "./error";
+import { InvalidArgumentError, DataNotFoundError } from "./error";
 
 // createBattleはBattle | InvalidArgumentErrorを返す。正常入力を前提とするテスト向けにBattleへ絞り込む。
 const mustCreate = (
@@ -78,10 +81,20 @@ const makeBattle = (units: Unit[], stepBase = 2): Battle => {
 
 const ref = (side: "FIRST" | "SECOND", piece: string): UnitReference => ({ side, piece });
 
-// doActはresolvers.getActionでactionを解決する。テスト用Action(key="atk")を返す。getPieceは未使用(null固定)。
+const mkPiece = (key: string, maxHP = 3): Piece => ({
+  key,
+  name: key,
+  shogiName: key,
+  description: "",
+  MaxHP: maxHP,
+  move: 3,
+  actions: [],
+});
+
+// doActはresolvers.getActionでactionを解決し、getPieceでreceiverのpieceの存在を検証する。
 const resolvers = {
   getAction: (key: string) => (key === "atk" ? attack : null),
-  getPiece: () => null,
+  getPiece: (key: string) => mkPiece(key),
   getStatus: () => null,
 };
 
@@ -128,6 +141,15 @@ describe("Battle#validateBattleArgs", function () {
   it("後手名が31文字ならsecond_player_nameのエラー", function () {
     const error = validateBattleArgs("first", "い".repeat(31), 4, 2);
     expect(error?.name).toBe("second_player_name");
+  });
+
+  it("プレイヤー名が空白のみ(半角/全角)ならエラー", function () {
+    expect(validateBattleArgs("   ", "second", 4, 2)?.name).toBe("first_player_name");
+    expect(validateBattleArgs("first", "　　", 4, 2)?.name).toBe("second_player_name");
+  });
+
+  it("前後に空白があっても空白以外の文字があれば通る", function () {
+    expect(validateBattleArgs(" 光 ", "second", 4, 2)).toBeNull();
   });
 
   it("stepBaseが非整数ならstepBaseのエラー", function () {
@@ -205,6 +227,139 @@ describe("Battle#doNothing", function () {
     const king = last.units.find((unit) => unit.piece === "king");
     expect(king?.statuses).toEqual([]); // 自分の行動で失効
     expect(king?.steps).toBe(2); // 0 + stepBase2 + cost0
+  });
+});
+
+describe("Battle#undoTurn", function () {
+  const units = (): Unit[] => [
+    { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+    { side: "SECOND", piece: "pawn", hp: 2, steps: 2, statuses: [], leader: true },
+  ];
+
+  it("直前の行動を取り消して1手前の状態に戻す(元battleは不変)", function () {
+    const battle = makeBattle(units());
+    const acted = doNothing(battle, ref("FIRST", "king"), new Date());
+    if (acted instanceof InvalidArgumentError) {
+      expect.unreachable("doNothing should succeed");
+      return;
+    }
+    expect(acted.turns.length).toBe(2);
+
+    const undone = undoTurn(acted);
+    if (undone instanceof InvalidArgumentError) {
+      expect.unreachable("undoTurn should succeed");
+      return;
+    }
+    expect(undone.turns.length).toBe(1);
+    expect(getLastTurn(undone).units).toEqual(getLastTurn(battle).units); // steps加算前に戻る
+    expect(acted.turns.length).toBe(2); // 元battleは不変
+  });
+
+  it("決着した最後の一手を取り消すとONGOINGに戻る(誤入力での決着から復帰できる)", function () {
+    const battle = makeBattle(units());
+    const acted = doAct(battle, ref("FIRST", "king"), "atk", [ref("SECOND", "pawn")], resolvers, new Date());
+    if (acted instanceof Error || "message" in acted) {
+      expect.unreachable("doAct should succeed");
+      return;
+    }
+    expect(acted.result).toBe(GameFirst); // pawn(hp2)がbaseDamage2で死亡し決着
+
+    const undone = undoTurn(acted);
+    if (undone instanceof InvalidArgumentError) {
+      expect.unreachable("undoTurn should succeed");
+      return;
+    }
+    expect(undone.result).toBe(GameOngoing);
+    const pawn = getLastTurn(undone).units.find((unit) => unit.piece === "pawn");
+    expect(pawn?.hp).toBe(2);
+  });
+
+  it("編成turnしかない場合は取り消せない", function () {
+    const battle = makeBattle(units());
+    expect(undoTurn(battle)).toBeInstanceOf(InvalidArgumentError);
+  });
+});
+
+// モデル層のゲームルール防御。UI側の制限(選択肢の絞り込み等)を素通りした呼び出しを弾く
+describe("Battle#doAct/doNothing/surrenderBattle 検証", function () {
+  const aliveUnits = (): Unit[] => [
+    { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+    { side: "SECOND", piece: "pawn", hp: 3, steps: 2, statuses: [], leader: true },
+  ];
+
+  it("決着済みの対戦ではdoActできない", function () {
+    const battle = makeBattle(aliveUnits());
+    battle.result = GameFirst;
+    const result = doAct(battle, ref("FIRST", "king"), "atk", [ref("SECOND", "pawn")], resolvers, new Date());
+    expect(result).toBeInstanceOf(InvalidArgumentError);
+    if (result instanceof InvalidArgumentError) {
+      expect(result.name).toBe("battle");
+    }
+  });
+
+  it("手番でないunitはdoActできない(steps最小のunitが手番)", function () {
+    const battle = makeBattle(aliveUnits()); // king steps0 < pawn steps2 なので手番はking
+    const result = doAct(battle, ref("SECOND", "pawn"), "atk", [ref("FIRST", "king")], resolvers, new Date());
+    expect(result).toBeInstanceOf(InvalidArgumentError);
+    if (result instanceof InvalidArgumentError) {
+      expect(result.name).toBe("actor");
+    }
+  });
+
+  it("receiverCountを超える対象は選べない", function () {
+    const battle = makeBattle(aliveUnits());
+    // attackのreceiverCountは1
+    const result = doAct(
+      battle,
+      ref("FIRST", "king"),
+      "atk",
+      [ref("SECOND", "pawn"), ref("FIRST", "king")],
+      resolvers,
+      new Date(),
+    );
+    expect(result).toBeInstanceOf(InvalidArgumentError);
+    if (result instanceof InvalidArgumentError) {
+      expect(result.name).toBe("receivers");
+    }
+  });
+
+  it("action.filterに含まれないunitは対象にできない(死亡unitへのheal蘇生防止)", function () {
+    const battle = makeBattle([
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "SECOND", piece: "pawn", hp: 0, steps: 2, statuses: [], leader: false },
+      { side: "SECOND", piece: "gold", hp: 3, steps: 4, statuses: [], leader: true },
+    ]);
+    // attackのfilterはfilterAlive。hp0のpawnは候補に含まれない
+    const result = doAct(battle, ref("FIRST", "king"), "atk", [ref("SECOND", "pawn")], resolvers, new Date());
+    expect(result).toBeInstanceOf(InvalidArgumentError);
+    if (result instanceof InvalidArgumentError) {
+      expect(result.name).toBe("receivers");
+    }
+  });
+
+  it("pieceが解決できないreceiverはDataNotFoundErrorを返す(healの回復量0でのサイレント成功を防ぐ)", function () {
+    const battle = makeBattle(aliveUnits());
+    const noPiece = { ...resolvers, getPiece: () => null };
+    const result = doAct(battle, ref("FIRST", "king"), "atk", [ref("SECOND", "pawn")], noPiece, new Date());
+    expect(result).toBeInstanceOf(DataNotFoundError);
+    if (result instanceof DataNotFoundError) {
+      expect(result.type).toBe("piece");
+    }
+  });
+
+  it("決着済み/手番でないunitはdoNothingできない", function () {
+    const settled = makeBattle(aliveUnits());
+    settled.result = GameFirst;
+    expect(doNothing(settled, ref("FIRST", "king"), new Date())).toBeInstanceOf(InvalidArgumentError);
+
+    const battle = makeBattle(aliveUnits());
+    expect(doNothing(battle, ref("SECOND", "pawn"), new Date())).toBeInstanceOf(InvalidArgumentError);
+  });
+
+  it("決着済みの対戦ではsurrenderBattleできない", function () {
+    const battle = makeBattle(aliveUnits());
+    battle.result = GameFirst;
+    expect(surrenderBattle(battle, ref("FIRST", "king"), new Date())).toBeInstanceOf(InvalidArgumentError);
   });
 });
 
@@ -289,16 +444,6 @@ describe("Battle#通常モード定数", function () {
   });
 });
 
-const mkPiece = (key: string, maxHP = 3): Piece => ({
-  key,
-  name: key,
-  shogiName: key,
-  description: "",
-  MaxHP: maxHP,
-  move: 3,
-  actions: [],
-});
-
 describe("Battle#format / formatNormal", function () {
   it("formatは先頭にFORMATION turnを追加する(元battleは不変)", function () {
     const skeleton = mustCreate("key", "first", "second", 2, 3, "v1");
@@ -320,31 +465,78 @@ describe("Battle#format / formatNormal", function () {
   });
 });
 
-describe("Battle#addFormationUnit", function () {
-  const emptyFormation = (): Battle =>
-    format(mustCreate("key", "first", "second", 2, 3, "v1"), [], new Date("2024-01-01T00:00:00"));
+describe("Battle#addFormationUnit / undoFormationUnit", function () {
+  const emptyFormation = (unitCount = 3): Battle =>
+    format(mustCreate("key", "first", "second", 2, unitCount, "v1"), [], new Date("2024-01-01T00:00:00"));
+
+  const mustAdd = (battle: Battle, side: Side, piece: Piece, isLeader: boolean): Battle => {
+    const result = addFormationUnit(battle, side, piece, isLeader);
+    if (result instanceof InvalidArgumentError) {
+      throw result;
+    }
+    return result;
+  };
 
   it("駒を編成turnに追加する(hp=MaxHP・leader反映、元battleは不変)", function () {
     const before = emptyFormation();
-    const battle = addFormationUnit(before, "FIRST", mkPiece("king", 2), true);
+    const battle = mustAdd(before, "FIRST", mkPiece("king", 2), true);
     const units = getFormationUnits(battle);
     expect(units.length).toBe(1);
     expect(units[0]).toMatchObject({ side: "FIRST", piece: "king", hp: 2, steps: 0, leader: true });
     expect(getFormationUnits(before).length).toBe(0); // 元battleは不変
   });
 
-  it("同一陣営に同じpieceは追加できず、同一battleを返す", function () {
-    const battle = addFormationUnit(emptyFormation(), "FIRST", mkPiece("king", 2), true);
-    const again = addFormationUnit(battle, "FIRST", mkPiece("king", 2), false);
-    expect(again).toBe(battle);
+  it("同一陣営に同じpieceは追加できない", function () {
+    const one = mustAdd(emptyFormation(), "FIRST", mkPiece("king", 2), true);
+    const two = mustAdd(one, "SECOND", mkPiece("king", 2), true);
+    const again = addFormationUnit(two, "FIRST", mkPiece("king", 2), false);
+    expect(again).toBeInstanceOf(InvalidArgumentError);
+    if (again instanceof InvalidArgumentError) {
+      expect(again.name).toBe("piece");
+    }
   });
 
   it("陣営に既にleaderが居ればisLeaderは無視する", function () {
-    const withLeader = addFormationUnit(emptyFormation(), "FIRST", mkPiece("king", 2), true);
-    const battle = addFormationUnit(withLeader, "FIRST", mkPiece("rook"), true);
+    const one = mustAdd(emptyFormation(), "FIRST", mkPiece("king", 2), true);
+    const two = mustAdd(one, "SECOND", mkPiece("king", 2), true);
+    const battle = mustAdd(two, "FIRST", mkPiece("rook"), true);
     const units = getFormationUnits(battle);
-    expect(units.length).toBe(2);
-    expect(units[1].leader).toBe(false); // 既にkingがleaderのため無視
+    expect(units.length).toBe(3);
+    expect(units[2].leader).toBe(false); // 既にkingがleaderのため無視
+  });
+
+  it("手番でないsideは追加できない(先手と後手が交互に追加する)", function () {
+    const result = addFormationUnit(emptyFormation(), "SECOND", mkPiece("king", 2), true);
+    expect(result).toBeInstanceOf(InvalidArgumentError);
+    if (result instanceof InvalidArgumentError) {
+      expect(result.name).toBe("side");
+    }
+  });
+
+  it("両陣営が上限に達したら(リーダー未指定で編成未完了でも)追加できない", function () {
+    const one = mustAdd(emptyFormation(1), "FIRST", mkPiece("king", 2), false);
+    const full = mustAdd(one, "SECOND", mkPiece("king", 2), false);
+    expect(addFormationUnit(full, "FIRST", mkPiece("rook"), false)).toBeInstanceOf(InvalidArgumentError);
+    expect(undoFormationUnit(full)).not.toBeInstanceOf(InvalidArgumentError); // 取り消しでリーダーを指定し直せる
+  });
+
+  it("編成完了後(対戦開始後)は追加も取り消しもできない", function () {
+    const one = mustAdd(emptyFormation(1), "FIRST", mkPiece("king", 2), true);
+    const complete = mustAdd(one, "SECOND", mkPiece("king", 2), true);
+    expect(addFormationUnit(complete, "FIRST", mkPiece("rook"), false)).toBeInstanceOf(InvalidArgumentError);
+    expect(undoFormationUnit(complete)).toBeInstanceOf(InvalidArgumentError);
+  });
+
+  it("undoFormationUnitは最後のunitを取り消し、空の編成では取り消せない", function () {
+    const one = mustAdd(emptyFormation(), "FIRST", mkPiece("king", 2), true);
+    const undone = undoFormationUnit(one);
+    if (undone instanceof InvalidArgumentError) {
+      expect.unreachable("undo should succeed");
+      return;
+    }
+    expect(getFormationUnits(undone).length).toBe(0);
+    expect(getFormationUnits(one).length).toBe(1); // 元battleは不変
+    expect(undoFormationUnit(undone)).toBeInstanceOf(InvalidArgumentError);
   });
 });
 
@@ -373,5 +565,25 @@ describe("Battle#simulate", function () {
     const result = simulate(attack, ref("FIRST", "king"), ref("SECOND", "pawn"), turn, resolvers);
     expect(result.survive).toBe(false);
     expect(result.unit?.hp).toBe(0); // 2 - 2
+  });
+
+  it("actor自身を対象にした見積りは実行結果と一致する(actorのstatusesクリア後にactされる)", function () {
+    const units = (): Unit[] => [
+      { side: "FIRST", piece: "king", hp: 3, steps: 0, statuses: ["interception"], leader: true },
+      { side: "SECOND", piece: "pawn", hp: 3, steps: 2, statuses: [], leader: true },
+    ];
+    const battle = makeBattle(units());
+
+    const simulated = simulate(attack, ref("FIRST", "king"), ref("FIRST", "king"), getLastTurn(battle), resolvers);
+    // interceptionは行動時に失効するため軽減されない(クリア前にactするとhp2に見積もるずれが出る)
+    expect(simulated.unit?.hp).toBe(1); // 3 - 2
+
+    const acted = doAct(battle, ref("FIRST", "king"), "atk", [ref("FIRST", "king")], resolvers, new Date());
+    if (acted instanceof Error || "message" in acted) {
+      expect.unreachable("doAct should succeed");
+      return;
+    }
+    const king = getLastTurn(acted).units.find((unit) => unit.piece === "king");
+    expect(king?.hp).toBe(simulated.unit?.hp); // プレビューと実行結果の一致
   });
 });

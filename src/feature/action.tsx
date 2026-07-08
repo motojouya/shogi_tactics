@@ -45,8 +45,9 @@ import {
   selectUnit,
   actionSelectOptions,
 } from '../form/action';
-import { ReceiverDuplicationError, DataNotFoundError, UserCancel } from '../model/error';
+import { ReceiverDuplicationError, DataNotFoundError, UserCancel, InvalidArgumentError } from '../model/error';
 import { act } from '../controller/act';
+import { undoAct } from '../controller/undo_act';
 import { surrender } from '../controller/surrender';
 import { useIO } from '../components/context';
 import { createResolvers } from '../repository';
@@ -108,11 +109,11 @@ const ReceiverSelect: FC<{
       control={control}
       render={({ field }) => (
         <FormControl error={!!error}>
-          <InputLabel id={`receiver_label_${index}`}>receiver</InputLabel>
+          <InputLabel id={`receiver_label_${index}`}>対象</InputLabel>
           <Select
             id={`receiver_select_${index}`}
             labelId={`receiver_label_${index}`}
-            label='receiver'
+            label='対象'
             {...field}
             value={field.value ?? ''}
             onChange={onChange(field.onChange)}
@@ -158,11 +159,11 @@ const ActionSelect: FC<{
       control={control}
       render={({ field }) => (
         <FormControl error={!!errors.actionKey}>
-          <InputLabel id="action_label">action</InputLabel>
+          <InputLabel id="action_label">行動</InputLabel>
           <Select
             id='action_select'
             labelId='action_label'
-            label='action'
+            label='行動'
             {...field}
             value={field.value ?? ''}
             onChange={onChange(field.onChange)}
@@ -232,11 +233,28 @@ export const BattleAction: FC<{ battle: Battle }> = ({ battle }) => {
       setMessage(result.message);
       return;
     }
+    if (result instanceof InvalidArgumentError) {
+      setMessage(result.message);
+      return;
+    }
     if (result instanceof UserCancel) {
       setMessage(result.message);
       return;
     }
 
+    setMessage('');
+    setSelectedAction(null);
+    setSimulated([]);
+    replace([]);
+    reset();
+  };
+
+  const doUndoTurn = async () => {
+    const result = await undoAct(io)(battle);
+    if (result instanceof InvalidArgumentError || result instanceof UserCancel) {
+      setMessage(result.message);
+      return;
+    }
     setMessage('');
     setSelectedAction(null);
     setSimulated([]);
@@ -276,10 +294,15 @@ export const BattleAction: FC<{ battle: Battle }> = ({ battle }) => {
       <Stack>
         <Stack sx={{ pb: 1 }}>
           <Stack direction="row" sx={{ justifyContent: "space-between", width: '100%', pb: 1 }}>
-            <Stack sx={{ flex: "0 0 70px", justifyContent: "center" }}><Typography>戦闘開始</Typography></Stack>
+            <Stack sx={{ flex: "0 0 70px", justifyContent: "center" }}><Typography>対戦開始</Typography></Stack>
             <Box sx={{ flex: "1 1 auto" }}>
               {battle.result !== GameOngoing && (
-                <Button type="button" variant='outlined' onClick={() => battleRepository.exportJson(battle, '')}>Export</Button>
+                <Stack direction="row" sx={{ columnGap: 1 }}>
+                  {battle.turns.length >= 2 && (
+                    <Button type="button" variant='outlined' onClick={doUndoTurn}>1手戻す</Button>
+                  )}
+                  <Button type="button" variant='outlined' onClick={() => battleRepository.exportJson(battle, '')}>Export</Button>
+                </Stack>
               )}
             </Box>
           </Stack>
@@ -341,6 +364,11 @@ export const BattleAction: FC<{ battle: Battle }> = ({ battle }) => {
                 <Box sx={{ px: 1 }}>
                   <Button type="submit" variant='outlined' sx={{ px: 1 }}>実行</Button>
                 </Box>
+                {battle.turns.length >= 2 && (
+                  <Box sx={{ px: 1 }}>
+                    <Button type="button" variant='outlined' onClick={doUndoTurn}>1手戻す</Button>
+                  </Box>
+                )}
                 <Box sx={{ px: 1 }}>
                   <SurrenderButton battle={battle} actor={actor} />
                 </Box>
