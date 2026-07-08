@@ -1,8 +1,8 @@
-import type { Unit, UnitReference } from "./unit";
+import type { Unit } from "./unit";
 
 import { z } from "zod";
 
-import { copyUnit, sameUnit, unitSchema, unitReferenceSchema } from "./unit";
+import { copyUnit, unitSchema, unitReferenceSchema } from "./unit";
 
 export const ORDER_DO_NOTHING = "DO_NOTHING";
 
@@ -82,10 +82,29 @@ export const copyTurn: CopyTurn = (turn) => ({
   units: turn.units.map(copyUnit),
 });
 
-export type ClearActorStatuses = (units: Unit[], actor: UnitReference) => Unit[];
-export const clearActorStatuses: ClearActorStatuses = (units, actor) =>
-  units.map((unit) => (sameUnit(unit, actor) ? { ...copyUnit(unit), statuses: [] } : copyUnit(unit)));
+export type Start = (units: Unit[], datetime: Date) => Turn;
+export const start: Start = (units, datetime) => ({
+  datetime,
+  previous: 0,
+  order: { type: "FORMATION" },
+  units: units.map(copyUnit),
+});
 
-export type ApplyActorCost = (units: Unit[], actor: UnitReference, stepBase: number, cost: number) => Unit[];
-export const applyActorCost: ApplyActorCost = (units, actor, stepBase, cost) =>
-  units.map((unit) => (sameUnit(unit, actor) ? { ...unit, steps: unit.steps + stepBase + cost } : unit));
+export type GetFormationUnits = (turns: Turn[]) => Unit[];
+export const getFormationUnits: GetFormationUnits = (turns) => {
+  const formationTurn = turns.find((turn) => turn.order.type === "FORMATION");
+  return formationTurn ? formationTurn.units : [];
+};
+
+export type SortedUnits = (turn: Turn) => Unit[];
+export const sortedUnits: SortedUnits = (turn) =>
+  turn.units
+    .filter((unit) => unit.hp >= 1)
+    .slice()
+    .sort((left, right) => left.steps - right.steps);
+
+export type NextActor = (turn: Turn) => Unit | null;
+export const nextActor: NextActor = (turn) => {
+  const alive = sortedUnits(turn);
+  return alive.length > 0 ? alive[0] : null;
+};

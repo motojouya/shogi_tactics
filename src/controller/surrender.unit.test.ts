@@ -5,7 +5,8 @@ import type { Local } from "../repository/local";
 import type { Repository } from "../repository";
 import type { Battle } from "../model/battle";
 
-import { createBattle, start, GameFirst, GameSecond } from "../model/battle";
+import { createBattle, GameFirst, GameSecond } from "../model/battle";
+import { start } from "../model/turn";
 import { surrender } from "./surrender";
 import { UserCancel } from "../model/error";
 

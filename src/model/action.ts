@@ -2,6 +2,7 @@ import type { Unit, UnitReference } from "./unit";
 import type { GetPiece } from "./piece";
 
 import { sameUnit, toUnitReference } from "./unit";
+import { ReceiverDuplicationError } from "./error";
 
 export type Act = (actor: UnitReference, receiver: UnitReference[], units: Unit[], getPiece: GetPiece) => Unit[];
 export type Filter = (actor: UnitReference, units: Unit[]) => UnitReference[];
@@ -24,13 +25,6 @@ export type Action = {
 };
 
 export type GetAction = (key: string) => Action | null;
-
-export class ReceiverDuplicationError {
-  readonly message: string;
-  constructor(message: string) {
-    this.message = message;
-  }
-}
 
 export type ValidateReceivers = (receivers: UnitReference[]) => ReceiverDuplicationError | null;
 export const validateReceivers: ValidateReceivers = (receivers) => {

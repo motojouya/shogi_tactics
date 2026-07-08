@@ -82,33 +82,33 @@
 - [x] 文字列だけを出力するものは、label.tsに集めておきたい
 
 ## src/model/
-- [ ] src/feature/action.tsxのlastTurn,reload関数は不要な気がする。もともと最新turnを表示するか、現在ターンのままかをコントロールするためのものだったが、action実行したら、最新ターン表示になっているので、turnをstate管理する意味がない。
-- [ ] action.ts
+- [x] src/feature/action.tsxのlastTurn,reload関数は不要な気がする。もともと最新turnを表示するか、現在ターンのままかをコントロールするためのものだったが、action実行したら、最新ターン表示になっているので、turnをstate管理する意味がない。
+- [x] action.ts
   - [x] コメント削除
-  - [ ] ReceiverDuplicationErrorはerror.tsに移動
-- [ ] battle.ts
+  - [x] ReceiverDuplicationErrorはerror.tsに移動
+- [x] battle.ts
   - [x] コメント削除
-  - [ ] getFormationUnitsはturnに移動し、また判定としてOrderがformationのものを抽出。
-  - [ ] sortedUnits, nextActorは、feature/action.tsxの修正ができたらturnに移動する。またbattleからそれらを呼び出す関数(引数battle)を用意し、feature/action.tsxからはそちらを呼び出す。
-  - [ ] start関数はturn.tsに移動
-  - [ ] formatNormal,format,addFormationUnitのテストがない
+  - [x] getFormationUnitsはturnに移動し、また判定としてOrderがformationのものを抽出。
+  - [x] sortedUnits, nextActorは、feature/action.tsxの修正ができたらturnに移動する。またbattleからそれらを呼び出す関数(引数battle)を用意し、feature/action.tsxからはそちらを呼び出す。
+  - [x] start関数はturn.tsに移動
+  - [x] formatNormal,format,addFormationUnitのテストがない
 - [x] error.ts
   - [x] コメント削除
 - [x] piece.ts
   - [x] コメント削除
 - [x] resolver.ts
   - [x] コメント削除
-- [ ] simulation.ts
+- [x] simulation.ts
   - [x] コメント削除
-  - [ ] 内容はbattle.tsに移動する
+  - [x] 内容はbattle.tsに移動する
 - [x] status.ts
   - [x] コメント削除
-- [ ] turn.ts
+- [x] turn.ts
   - [x] コメント削除
-  - [ ] 関数にはテストを記述する
-  - [ ] applyActorCostでcopyUnit使ってない
-  - [ ] applyActorCost,clearActorStatusesは、unit.tsに移動
-- [ ] unit.ts
+  - [x] 関数にはテストを記述する
+  - [x] applyActorCostでcopyUnit使ってない
+  - [x] applyActorCost,clearActorStatusesは、unit.tsに移動
+- [x] unit.ts
   - [x] コメント削除
 
 ### 調査: model配下(battle.ts除く)で定義した関数の、model外からの利用経路

@@ -87,3 +87,14 @@ export const isFormationComplete: IsFormationComplete = (units, unitCount) => {
     second.filter((unit) => unit.leader).length === 1
   );
 };
+
+export type ClearActorStatuses = (units: Unit[], actor: UnitReference) => Unit[];
+export const clearActorStatuses: ClearActorStatuses = (units, actor) =>
+  units.map((unit) => (sameUnit(unit, actor) ? { ...copyUnit(unit), statuses: [] } : copyUnit(unit)));
+
+export type ApplyActorCost = (units: Unit[], actor: UnitReference, stepBase: number, cost: number) => Unit[];
+export const applyActorCost: ApplyActorCost = (units, actor, stepBase, cost) =>
+  units.map((unit) => {
+    const copied = copyUnit(unit);
+    return sameUnit(unit, actor) ? { ...copied, steps: copied.steps + stepBase + cost } : copied;
+  });

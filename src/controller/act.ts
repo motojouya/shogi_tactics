@@ -5,10 +5,9 @@ import type { Repository } from "../repository";
 
 import { doNothing, doAct } from "../model/battle";
 import { ORDER_DO_NOTHING } from "../model/turn";
-import { ReceiverDuplicationError } from "../model/action";
 import { toReceivers } from "../form/action";
 import { createResolvers } from "../repository";
-import { DataNotFoundError, UserCancel } from "../model/error";
+import { DataNotFoundError, UserCancel, ReceiverDuplicationError } from "../model/error";
 
 export type Act = (
   repository: Repository,

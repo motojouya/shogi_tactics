@@ -6,8 +6,8 @@ import type { Repository } from "../repository";
 import type { Battle } from "../model/battle";
 import type { DoActionForm } from "../form/action";
 
-import { createBattle, start, getLastTurn } from "../model/battle";
-import { ORDER_DO_NOTHING } from "../model/turn";
+import { createBattle, getLastTurn } from "../model/battle";
+import { start, ORDER_DO_NOTHING } from "../model/turn";
 import { act } from "./act";
 import { actionRepository } from "../repository/action";
 import { pieceRepository } from "../repository/piece";

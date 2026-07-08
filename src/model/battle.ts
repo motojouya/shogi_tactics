@@ -1,14 +1,32 @@
 import type { Turn, Order } from "./turn";
 import type { Unit, UnitReference, Side } from "./unit";
 import type { GetPiece, Piece } from "./piece";
+import type { Action } from "./action";
 import type { Resolvers } from "./resolver";
 
 import { z } from "zod";
 
-import { copyTurn, turnSchema, clearActorStatuses, applyActorCost } from "./turn";
-import { copyUnit, buildNormalUnits, isFormationComplete, canAddPiece, sideHasLeader } from "./unit";
-import { validateReceivers, ReceiverDuplicationError } from "./action";
-import { DataNotFoundError } from "./error";
+import {
+  copyTurn,
+  turnSchema,
+  start,
+  getFormationUnits as getFormationTurnUnits,
+  sortedUnits as sortedTurnUnits,
+  nextActor as nextTurnActor,
+} from "./turn";
+import {
+  copyUnit,
+  sameUnit,
+  toUnitReference,
+  buildNormalUnits,
+  isFormationComplete,
+  canAddPiece,
+  sideHasLeader,
+  clearActorStatuses,
+  applyActorCost,
+} from "./unit";
+import { validateReceivers } from "./action";
+import { DataNotFoundError, ReceiverDuplicationError } from "./error";
 
 const arrayLast = <T>(ary: Array<T>): T => ary.slice(-1)[0];
 
@@ -55,23 +73,16 @@ export type GetLastTurn = (battle: Battle) => Turn;
 export const getLastTurn: GetLastTurn = (battle) => arrayLast(battle.turns);
 
 export type GetFormationUnits = (battle: Battle) => Unit[];
-export const getFormationUnits: GetFormationUnits = (battle) => (battle.turns[0] ? battle.turns[0].units : []);
+export const getFormationUnits: GetFormationUnits = (battle) => getFormationTurnUnits(battle.turns);
 
 export type IsFormation = (battle: Battle) => boolean;
 export const isFormation: IsFormation = (battle) => !isFormationComplete(getFormationUnits(battle), battle.unitCount);
 
-export type SortedUnits = (turn: Turn) => Unit[];
-export const sortedUnits: SortedUnits = (turn) =>
-  turn.units
-    .filter((unit) => unit.hp >= 1)
-    .slice()
-    .sort((left, right) => left.steps - right.steps);
+export type SortedUnits = (battle: Battle) => Unit[];
+export const sortedUnits: SortedUnits = (battle) => sortedTurnUnits(getLastTurn(battle));
 
-export type NextActor = (turn: Turn) => Unit | null;
-export const nextActor: NextActor = (turn) => {
-  const alive = sortedUnits(turn);
-  return alive.length > 0 ? alive[0] : null;
-};
+export type NextActor = (battle: Battle) => Unit | null;
+export const nextActor: NextActor = (battle) => nextTurnActor(getLastTurn(battle));
 
 export type CreateBattle = (
   key: string,
@@ -90,14 +101,6 @@ export const createBattle: CreateBattle = (key, firstPlayerName, secondPlayerNam
   stepBase: stepBase >= 1 ? stepBase : Math.max(unitCount * 2, 1),
   unitCount,
   version,
-});
-
-export type Start = (units: Unit[], datetime: Date) => Turn;
-export const start: Start = (units, datetime) => ({
-  datetime,
-  previous: 0,
-  order: { type: "FORMATION" },
-  units: units.map(copyUnit),
 });
 
 export type Format = (battle: Battle, units: Unit[], datetime: Date) => Battle;
@@ -223,4 +226,23 @@ export const doAct: DoAct = (battle, actor, actionKey, receivers, resolvers, dat
   return appendTurn(battle, actor, order, action.cost, datetime, (units) =>
     action.act(actor, receivers, units, resolvers.getPiece),
   );
+};
+
+export type Simulated = { survive: boolean; unit: Unit | null };
+
+export type Simulate = (
+  action: Action,
+  actor: UnitReference,
+  receiver: UnitReference,
+  lastTurn: Turn,
+  resolvers: Resolvers,
+) => Simulated;
+export const simulate: Simulate = (action, actor, receiver, lastTurn, resolvers) => {
+  const acted = action.act(actor, [receiver], lastTurn.units.map(copyUnit), resolvers.getPiece);
+  const found = acted.find((unit) => sameUnit(toUnitReference(unit), receiver));
+
+  return {
+    survive: !!found && found.hp >= 1,
+    unit: found ?? null,
+  };
 };
