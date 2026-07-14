@@ -389,6 +389,35 @@ describe("Battle#surrender / isSettlement", function () {
     ]);
     expect(isSettlement(battle)).toBe(GameDraw);
   });
+
+  it("リーダが生存でもリーダ以外の駒が全滅したら負ける(リーダが最後の1駒)", function () {
+    const battle = makeBattle([
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "FIRST", piece: "pawn", hp: 0, steps: 0, statuses: [], leader: false },
+      { side: "SECOND", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "SECOND", piece: "gold", hp: 3, steps: 0, statuses: [], leader: false },
+    ]);
+    expect(isSettlement(battle)).toBe(GameSecond);
+  });
+
+  it("両側ともリーダ以外が全滅ならDRAW", function () {
+    const battle = makeBattle([
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "FIRST", piece: "pawn", hp: 0, steps: 0, statuses: [], leader: false },
+      { side: "SECOND", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "SECOND", piece: "gold", hp: 0, steps: 0, statuses: [], leader: false },
+    ]);
+    expect(isSettlement(battle)).toBe(GameDraw);
+  });
+
+  it("リーダのみの編成はリーダ生存中は決着しない(最後の1駒扱いにしない)", function () {
+    const battle = makeBattle([
+      { side: "FIRST", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "SECOND", piece: "king", hp: 2, steps: 0, statuses: [], leader: true },
+      { side: "SECOND", piece: "gold", hp: 3, steps: 0, statuses: [], leader: false },
+    ]);
+    expect(isSettlement(battle)).toBe(GameOngoing);
+  });
 });
 
 // 保存型(=model)をそのまま検証/復元する。datetime文字列はz.coerce.date()でDate化される。

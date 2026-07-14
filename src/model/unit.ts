@@ -72,6 +72,14 @@ export const nextFormationSide: NextFormationSide = (units, unitCount) => {
 export type SideHasLeader = (units: Unit[], side: Side) => boolean;
 export const sideHasLeader: SideHasLeader = (units, side) => units.some((unit) => unit.side === side && unit.leader);
 
+export type SideAlive = (units: Unit[], side: Side) => boolean;
+export const sideAlive: SideAlive = (units, side) => {
+  const sideUnits = units.filter((unit) => unit.side === side);
+  const leaderAlive = sideUnits.some((unit) => unit.leader && unit.hp >= 1);
+  const nonLeaders = sideUnits.filter((unit) => !unit.leader);
+  return leaderAlive && (nonLeaders.length === 0 || nonLeaders.some((unit) => unit.hp >= 1));
+};
+
 export type CanAddPiece = (units: Unit[], side: Side, piece: string) => boolean;
 export const canAddPiece: CanAddPiece = (units, side, piece) =>
   !units.some((unit) => unit.side === side && unit.piece === piece);
