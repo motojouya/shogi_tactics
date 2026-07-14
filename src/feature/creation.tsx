@@ -27,6 +27,8 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
     handleSubmit,
     register,
     control,
+    getValues,
+    setValue,
     formState: { errors },
   } = useForm<CreationForm>({
     resolver: zodResolver(creationFormSchema),
@@ -34,6 +36,15 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
   });
 
   const mode = useWatch({ control, name: 'mode' });
+
+  const unitCountField = register('unitCount', { valueAsNumber: true });
+  const completeStepBase = (event: React.FocusEvent<HTMLInputElement>) => {
+    unitCountField.onBlur(event);
+    const unitCount = getValues('unitCount');
+    if (Number.isNaN(getValues('stepBase')) && !Number.isNaN(unitCount)) {
+      setValue('stepBase', unitCount * 2, { shouldValidate: true });
+    }
+  };
 
   const [message, setMessage] = useState('');
 
@@ -121,7 +132,8 @@ export const BattleCreation: FC<{ version: string }> = ({ version }) => {
                   label="駒数"
                   placeholder="1〜14"
                   variant="outlined"
-                  {...register('unitCount', { valueAsNumber: true })}
+                  {...unitCountField}
+                  onBlur={completeStepBase}
                   helperText={errors.unitCount && errors.unitCount.message}
                   sx={{ width: '100%' }}
                 />
