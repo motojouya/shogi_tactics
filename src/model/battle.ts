@@ -22,6 +22,7 @@ import {
   isFormationComplete,
   canAddPiece,
   sideHasLeader,
+  sideAlive,
   nextFormationSide,
   clearActorStatuses,
   applyActorCost,
@@ -214,16 +215,16 @@ export const isSettlement: IsSettlement = (battle) => {
     return lastTurn.order.actor.side === "FIRST" ? GameSecond : GameFirst;
   }
 
-  const firstLeaderAlive = lastTurn.units.some((unit) => unit.side === "FIRST" && unit.leader && unit.hp >= 1);
-  const secondLeaderAlive = lastTurn.units.some((unit) => unit.side === "SECOND" && unit.leader && unit.hp >= 1);
+  const firstAlive = sideAlive(lastTurn.units, "FIRST");
+  const secondAlive = sideAlive(lastTurn.units, "SECOND");
 
-  if (!firstLeaderAlive && !secondLeaderAlive) {
+  if (!firstAlive && !secondAlive) {
     return GameDraw;
   }
-  if (!firstLeaderAlive) {
+  if (!firstAlive) {
     return GameSecond;
   }
-  if (!secondLeaderAlive) {
+  if (!secondAlive) {
     return GameFirst;
   }
   return GameOngoing;
