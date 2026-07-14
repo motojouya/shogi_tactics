@@ -24,7 +24,7 @@ https://motojouya.github.io/shogi_tactics/
       - gh-pages.yml  
         github pagesの機能を使っているのでそのbuildを行う  
   - docs/  
-    ドキュメント  
+    ドキュメントだが、一時的なものを配置する。  
   - src/
     - model/  
       データモデル、メインロジック  
